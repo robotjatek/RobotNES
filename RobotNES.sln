@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NESCore", "NESCore\NESCore.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NESCoreTests", "NESCoreTests\NESCoreTests.csproj", "{2DCABF03-14BE-4C15-B44D-F4CB355A501B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotNES", "RobotNES\RobotNES.csproj", "{5A23317A-E499-44D4-BB8F-26083474A049}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobotNES", "RobotNES\RobotNES.csproj", "{5A23317A-E499-44D4-BB8F-26083474A049}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF116D47-D468-4F54-812D-8EBF7B2343D9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
