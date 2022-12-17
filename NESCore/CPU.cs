@@ -50,7 +50,7 @@
 
         public byte STATUS { get; set; } = 0;
 
-        public byte SP { get; set; } = 0;
+        public byte SP { get; set; } = 0xFF;
 
         public void SetCarryFlag(bool flag)
         {
@@ -138,13 +138,12 @@
     public class CPU : ICPU
     {
         private readonly IBUS _bus;
-        private readonly IRegisters _registers;
+        private readonly IRegisters _registers = new Registers();
         private readonly Func<IBUS, IRegisters, byte>[] _instructions;
 
-        public CPU(IBUS bus, IRegisters registers, Func<IBUS, IRegisters, byte>[] instuctions)
+        public CPU(IBUS bus, Func<IBUS, IRegisters, byte>[] instuctions)
         {
             _bus = bus;
-            _registers = registers;
             _instructions = instuctions;
             //_registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc)); // Reset vector //TODO: uncomment this after instructionset implementation
             _registers.PC = 0xc000; //nestest.nes start //TODO: delete this after instructionset implementation
@@ -162,7 +161,7 @@
 
             if(instruction == null)
             {
-                throw new NotImplementedException($"{instructionCode:X}");
+                throw new NotImplementedException($"0x{instructionCode:X}");
             }
 
             var elapsedCycles = instruction(_bus, _registers);
