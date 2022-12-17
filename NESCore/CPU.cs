@@ -171,7 +171,7 @@
 
         private byte Fetch()
         {
-            return _bus.Read(_registers.PC);
+            return _bus.Read(_registers.PC++);
         }
     }
 }
