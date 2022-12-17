@@ -9,6 +9,7 @@
         public const int NOP = 0xEA;
         public const int SEC = 0x38;
         public const int BCS = 0xB0;
+        public const int CLC = 0x18;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -30,6 +31,13 @@
             InstructionSet[Opcodes.NOP] = NOP;
             InstructionSet[Opcodes.SEC] = SEC;
             InstructionSet[Opcodes.BCS] = BCS;
+            InstructionSet[Opcodes.CLC] = CLC;
+        }
+
+        private byte CLC(IBUS bus, IRegisters registers)
+        {
+            registers.SetCarryFlag(false);
+            return 2;
         }
 
         private byte BCS(IBUS bus, IRegisters registers)
