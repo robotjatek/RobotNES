@@ -10,6 +10,7 @@
         public const int SEC = 0x38;
         public const int BCS = 0xB0;
         public const int CLC = 0x18;
+        public const int BCC = 0x90;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -32,6 +33,25 @@
             InstructionSet[Opcodes.SEC] = SEC;
             InstructionSet[Opcodes.BCS] = BCS;
             InstructionSet[Opcodes.CLC] = CLC;
+            InstructionSet[Opcodes.BCC] = BCC;
+        }
+
+        private byte BCC(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 2;
+            sbyte offset = (sbyte)Fetch(bus, registers);
+            if (registers.GetCarryFlag() == false)
+            {
+                var oldAddress = registers.PC;
+                registers.PC = (ushort)(registers.PC + offset);
+                cycles++;
+                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
+                {
+                    cycles++;
+                }
+            }
+
+            return cycles;
         }
 
         private byte CLC(IBUS bus, IRegisters registers)

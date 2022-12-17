@@ -198,7 +198,7 @@
 
             if(instruction == null)
             {
-                throw new NotImplementedException($"0x{instructionCode:X}@{_registers.PC-1:X}");
+                throw new NotImplementedException($"0x{instructionCode:X}@0x{_registers.PC-1:X}");
             }
 
             var elapsedCycles = instruction(_bus, _registers);
