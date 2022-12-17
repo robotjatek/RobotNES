@@ -6,6 +6,7 @@
         public const int LDX_IMM = 0xA2;
         public const int STX_ZERO = 0x86;
         public const int JSR_ABS = 0x20;
+        public const int NOP = 0xEA;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -23,6 +24,7 @@
             InstructionSet[Opcodes.LDX_IMM] = LDX_IMM;
             InstructionSet[Opcodes.STX_ZERO] = STX_ZERO;
             InstructionSet[Opcodes.JSR_ABS] = JSR_ABS;
+            InstructionSet[Opcodes.NOP] = NOP;
         }
 
         private readonly Func<IBUS, IRegisters, byte> JMP_ABS = (bus, registers) =>
@@ -58,6 +60,11 @@
 
             return 6;
         };
+
+        private byte NOP(IBUS bus, IRegisters registers)
+        {
+            return 2;
+        }
 
         private static UInt16 Fetch16(IBUS bus, IRegisters registers)
         {

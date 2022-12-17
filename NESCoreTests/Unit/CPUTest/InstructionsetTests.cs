@@ -123,5 +123,17 @@ namespace NESCoreTests.Unit.CPUTest
             registers.STATUS.Should().Be(0);
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void NOP()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Registers();
+            var nop = new CPUInstructions().InstructionSet[Opcodes.NOP];
+            var cycles = nop(bus.Object, registers);
+
+            registers.STATUS.Should().Be(0);
+            cycles.Should().Be(2);
+        }
     }
 }
