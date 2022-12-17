@@ -26,6 +26,13 @@
         void SetDecimalFlag(bool flag);
         void SetOverflowFlag(bool flag);
         void SetNegativeFlag(bool flag);
+
+        bool GetCarryFlag();
+        bool GetZeroFlag();
+        bool GetInterruptDisableFlag();
+        bool GetDecimalFlag();
+        bool GetOverflowFlag();
+        bool GetNegativeFlag();
     }
 
     public class FlagPositions
@@ -132,6 +139,36 @@
         private void DisableFlag(byte mask)
         {
             STATUS &= (byte)~mask;
+        }
+
+        public bool GetCarryFlag()
+        {
+            return (STATUS & FlagPositions.CARRY) > 0;
+        }
+
+        public bool GetZeroFlag()
+        {
+            return (STATUS & FlagPositions.ZERO) > 0;
+        }
+
+        public bool GetInterruptDisableFlag()
+        {
+            return (STATUS & FlagPositions.INTERRUPT_DISABLE) > 0;
+        }
+
+        public bool GetDecimalFlag()
+        {
+            return (STATUS & FlagPositions.DECIMAL) > 0;
+        }
+
+        public bool GetOverflowFlag()
+        {
+            return (STATUS & FlagPositions.OVERFLOW) > 0;
+        }
+
+        public bool GetNegativeFlag()
+        {
+            return (STATUS & FlagPositions.NEGATIVE) > 0;
         }
     }
 

@@ -8,6 +8,7 @@
         public const int JSR_ABS = 0x20;
         public const int NOP = 0xEA;
         public const int SEC = 0x38;
+        public const int BCS = 0xA5;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -15,6 +16,7 @@
     public class CPUInstructions
     {
         //Instructions for the CPU. All instructions return with the elapsed cycles.
+        //NOTE: inside the methods the PC points to the first parameter
         public Func<IBUS, IRegisters, byte>[] InstructionSet { get; private set; }
 
         public CPUInstructions()
@@ -27,6 +29,25 @@
             InstructionSet[Opcodes.JSR_ABS] = JSR_ABS;
             InstructionSet[Opcodes.NOP] = NOP;
             InstructionSet[Opcodes.SEC] = SEC;
+            InstructionSet[Opcodes.BCS] = BCS;
+        }
+
+        private byte BCS(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 2;
+            sbyte offset = (sbyte)Fetch(bus, registers);
+            if(registers.GetCarryFlag())
+            {
+                var oldAddress = registers.PC;
+                registers.PC = (ushort)(registers.PC + offset);
+                cycles++;
+                if((oldAddress&0xff00) != (registers.PC&0xff00))
+                {
+                    cycles++;
+                }
+            }
+
+            return cycles;
         }
 
         private byte SEC(IBUS bus, IRegisters registers)
