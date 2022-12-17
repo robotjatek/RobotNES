@@ -24,6 +24,52 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void LDA_IMM()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x10);
+
+            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var cycles = lda_imm(bus.Object, registers.Object);
+            registers.VerifySet(r => r.A = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            cycles.Should().Be(2);
+
+        }
+
+        [Fact]
+        public void LDA_IMM_sets_zero_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0);
+
+            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var cycles = lda_imm(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.A = 0);
+            registers.Verify(r => r.SetZeroFlag(true));
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void LDA_IMM_sets_negative_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(unchecked((byte)-1));
+
+            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var cycles = lda_imm(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.A = unchecked((byte)-1));
+            registers.Verify(r => r.SetNegativeFlag(true));
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void LDX_IMM()
         {
             var registers = new Mock<IRegisters>();
