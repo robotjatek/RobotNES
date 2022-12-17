@@ -11,6 +11,7 @@
         public const int BCS = 0xB0;
         public const int CLC = 0x18;
         public const int BCC = 0x90;
+        public const int LDA_IMM = 0xA9;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -34,6 +35,7 @@
             InstructionSet[Opcodes.BCS] = BCS;
             InstructionSet[Opcodes.CLC] = CLC;
             InstructionSet[Opcodes.BCC] = BCC;
+            InstructionSet[Opcodes.LDA_IMM] = LDA_IMM;
         }
 
         private byte BCC(IBUS bus, IRegisters registers)
@@ -92,6 +94,15 @@
             return 3;
         }
 
+        private static byte LDA_IMM(IBUS bus, IRegisters registers)
+        {
+            var immediateValue = Fetch(bus, registers);
+            registers.A = immediateValue;
+            registers.SetZeroFlag(immediateValue == 0);
+            registers.SetNegativeFlag((sbyte)immediateValue < 0);
+            return 2;
+        }
+        
         private static byte LDX_IMM(IBUS bus, IRegisters registers)
         {
             var immediateValue = Fetch(bus, registers);
