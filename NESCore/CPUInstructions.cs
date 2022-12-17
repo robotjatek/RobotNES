@@ -27,31 +27,31 @@
             InstructionSet[Opcodes.NOP] = NOP;
         }
 
-        private readonly Func<IBUS, IRegisters, byte> JMP_ABS = (bus, registers) =>
+        private static byte JMP_ABS(IBUS bus, IRegisters registers)
         {
             var address = Fetch16(bus, registers);
             registers.PC = address;
 
             return 3;
-        };
+        }
 
-        private readonly Func<IBUS, IRegisters, byte> LDX_IMM = (bus, registers) =>
+        private static byte LDX_IMM(IBUS bus, IRegisters registers)
         {
             var immediateValue = Fetch(bus, registers);
             registers.X = immediateValue;
             registers.SetZeroFlag(immediateValue == 0);
             registers.SetNegativeFlag((sbyte)immediateValue < 0);
             return 2;
-        };
+        }
 
-        private readonly Func<IBUS, IRegisters, byte> STX_ZERO = (bus, registers) =>
+        private static byte STX_ZERO(IBUS bus, IRegisters registers)
         {
             var address = Fetch(bus, registers);
             bus.Write(address, registers.X);
             return 3; //1(opcode fetch) + 1 (1byte fetch from memory) + 1 (1byte write to memory)
-        };
+        }
 
-        private readonly Func<IBUS, IRegisters, byte> JSR_ABS = (bus, registers) =>
+        private static byte JSR_ABS(IBUS bus, IRegisters registers)
         {
             var address = Fetch16(bus, registers);
 
@@ -59,9 +59,9 @@
             registers.PC = address;
 
             return 6;
-        };
+        }
 
-        private byte NOP(IBUS bus, IRegisters registers)
+        private static byte NOP(IBUS bus, IRegisters registers)
         {
             return 2;
         }
