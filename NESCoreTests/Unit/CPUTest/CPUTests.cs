@@ -13,9 +13,9 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffd))).Returns(0xde);
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffc))).Returns(0xad);
 
-            var registers = new Mock<IRegisters>();
-            var sut = new CPU(bus.Object, registers.Object, _instructions);
-            registers.VerifySet(r => r.PC = 0xdead);
+            var sut = new CPU(bus.Object, _instructions);
+            bus.Verify(b => b.Read(0xfffd));
+            bus.Verify(b => b.Read(0xfffc));
         }
 
         [Fact]
@@ -25,9 +25,14 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffd))).Returns(0xde);
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffc))).Returns(0xad);
 
-            var registers = new Registers();
-            var sut = new CPU(bus.Object, registers, _instructions);
-            sut.RunInstruction();
+            var sut = new CPU(bus.Object, _instructions);
+            try
+            {
+                sut.RunInstruction();
+            }
+            catch { 
+                // intentionally ignored exception
+            }
 
             bus.Verify(b => b.Read(It.Is<ushort>(a => a == 0xdead)));
         }

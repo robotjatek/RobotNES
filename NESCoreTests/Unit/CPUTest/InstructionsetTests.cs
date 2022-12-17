@@ -70,7 +70,7 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void STX_zero()
+        public void STX_ZERO()
         {
             var registers = new Mock<IRegisters>();
             registers.Setup(r => r.X).Returns(10);
@@ -97,6 +97,31 @@ namespace NESCoreTests.Unit.CPUTest
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
 
             cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void JSR_ABS()
+        {
+            var registersMock = new Mock<IRegisters>();
+
+            var registers = new Registers
+            {
+                PC = 0xd000,
+                STATUS = 0,
+            };
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+
+            var jsr_abs = new CPUInstructions().InstructionSet[Opcodes.JSR_ABS];
+            var cycles = jsr_abs(bus.Object, registers);
+
+            bus.Verify(b => b.Write(0x100 | 0xff, 0x01));
+            bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
+
+            registers.PC.Should().Be((UInt16)0xdead);
+            registers.STATUS.Should().Be(0);
+            cycles.Should().Be(6);
         }
     }
 }
