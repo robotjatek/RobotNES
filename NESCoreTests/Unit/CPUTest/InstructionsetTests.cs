@@ -68,5 +68,35 @@ namespace NESCoreTests.Unit.CPUTest
             registers.Verify(r => r.SetNegativeFlag(true));
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void STX_zero()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.X).Returns(10);
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+
+            var stx_zero = new CPUInstructions().InstructionSet[Opcodes.STX_ZERO];
+            var cycles = stx_zero(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(0xaa, 10));
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(3);
+        }
     }
 }
