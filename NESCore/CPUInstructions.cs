@@ -8,7 +8,7 @@
         public const int JSR_ABS = 0x20;
         public const int NOP = 0xEA;
         public const int SEC = 0x38;
-        public const int BCS = 0xA5;
+        public const int BCS = 0xB0;
     }
 
     //TODO: extract cpu addressing modes to their own methods
