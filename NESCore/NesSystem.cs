@@ -28,9 +28,8 @@ namespace NESCore
             _bus = new Bus(_cartridge, _memory, _logger);
 
             //TODO: Move this CPU creation block to a factory
-            var registers = new Registers();
             var instructions = new CPUInstructions().InstructionSet;
-            _cpu = new CPU(_bus, registers, instructions);
+            _cpu = new CPU(_bus, instructions);
         }
 
         public void Run()
