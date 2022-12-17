@@ -7,6 +7,7 @@
         public const int STX_ZERO = 0x86;
         public const int JSR_ABS = 0x20;
         public const int NOP = 0xEA;
+        public const int SEC = 0x38;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -25,6 +26,13 @@
             InstructionSet[Opcodes.STX_ZERO] = STX_ZERO;
             InstructionSet[Opcodes.JSR_ABS] = JSR_ABS;
             InstructionSet[Opcodes.NOP] = NOP;
+            InstructionSet[Opcodes.SEC] = SEC;
+        }
+
+        private byte SEC(IBUS bus, IRegisters registers)
+        {
+            registers.SetCarryFlag(true);
+            return 2;
         }
 
         private static byte JMP_ABS(IBUS bus, IRegisters registers)
