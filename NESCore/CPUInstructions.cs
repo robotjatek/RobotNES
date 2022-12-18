@@ -45,81 +45,40 @@
 
         private byte BCC(IBUS bus, IRegisters registers)
         {
-            byte cycles = 2;
-            sbyte offset = (sbyte)Fetch(bus, registers);
-            if (registers.GetCarryFlag() == false)
+            return BranchInstruction(bus, registers, (r) =>
             {
-                var oldAddress = registers.PC;
-                registers.PC = (ushort)(registers.PC + offset);
-                cycles++;
-                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
-                {
-                    cycles++;
-                }
-            }
-
-            return cycles;
+                return r.GetCarryFlag() == false;
+            });
         }
 
         private byte BEQ(IBUS bus, IRegisters registers)
         {
-            byte cycles = 2;
-            sbyte offset = (sbyte)Fetch(bus, registers);
-            if (registers.GetZeroFlag() == true)
+            return BranchInstruction(bus, registers, (r) =>
             {
-                var oldAddress = registers.PC;
-                registers.PC = (ushort)(registers.PC + offset);
-                cycles++;
-                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
-                {
-                    cycles++;
-                }
-            }
-
-            return cycles;
+                return r.GetZeroFlag() == true;
+            });
         }
 
         private byte BNE(IBUS bus, IRegisters registers)
         {
-            byte cycles = 2;
-            sbyte offset = (sbyte)Fetch(bus, registers);
-            if (registers.GetZeroFlag() == false)
+            return BranchInstruction(bus, registers, (r) =>
             {
-                var oldAddress = registers.PC;
-                registers.PC = (ushort)(registers.PC + offset);
-                cycles++;
-                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
-                {
-                    cycles++;
-                }
-            }
-
-            return cycles;
+                return r.GetZeroFlag() == false;
+            });
         }
 
+        private byte BCS(IBUS bus, IRegisters registers)
+        {
+            return BranchInstruction(bus, registers, (r) =>
+            {
+                return r.GetCarryFlag() == true;
+            });
+        }
 
         private byte CLC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(false);
             return 2;
-        }
-
-        private byte BCS(IBUS bus, IRegisters registers)
-        {
-            byte cycles = 2;
-            sbyte offset = (sbyte)Fetch(bus, registers);
-            if(registers.GetCarryFlag())
-            {
-                var oldAddress = registers.PC;
-                registers.PC = (ushort)(registers.PC + offset);
-                cycles++;
-                if((oldAddress&0xff00) != (registers.PC&0xff00))
-                {
-                    cycles++;
-                }
-            }
-
-            return cycles;
         }
 
         private byte SEC(IBUS bus, IRegisters registers)
@@ -200,6 +159,24 @@
         private static void Push8(IBUS bus, IRegisters registers, byte value)
         {
             bus.Write((UInt16)(0x100 | registers.SP--), value);
+        }
+
+        private byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
+        {
+            byte cycles = 2;
+            sbyte offset = (sbyte)Fetch(bus, registers);
+            if (condition(registers))
+            {
+                var oldAddress = registers.PC;
+                registers.PC = (ushort)(registers.PC + offset);
+                cycles++;
+                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
+                {
+                    cycles++;
+                }
+            }
+
+            return cycles;
         }
     }
 }
