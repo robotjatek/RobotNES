@@ -13,6 +13,7 @@
         public const int BCC = 0x90;
         public const int LDA_IMM = 0xA9;
         public const int BEQ = 0xF0;
+        public const int BNE = 0xD0;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -39,6 +40,7 @@
             InstructionSet[Opcodes.BCC] = BCC;
             InstructionSet[Opcodes.LDA_IMM] = LDA_IMM;
             InstructionSet[Opcodes.BEQ] = BEQ;
+            InstructionSet[Opcodes.BNE] = BNE;
         }
 
         private byte BCC(IBUS bus, IRegisters registers)
@@ -64,6 +66,24 @@
             byte cycles = 2;
             sbyte offset = (sbyte)Fetch(bus, registers);
             if (registers.GetZeroFlag() == true)
+            {
+                var oldAddress = registers.PC;
+                registers.PC = (ushort)(registers.PC + offset);
+                cycles++;
+                if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
+                {
+                    cycles++;
+                }
+            }
+
+            return cycles;
+        }
+
+        private byte BNE(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 2;
+            sbyte offset = (sbyte)Fetch(bus, registers);
+            if (registers.GetZeroFlag() == false)
             {
                 var oldAddress = registers.PC;
                 registers.PC = (ushort)(registers.PC + offset);
