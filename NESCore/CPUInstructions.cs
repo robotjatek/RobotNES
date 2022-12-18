@@ -43,7 +43,7 @@
             InstructionSet[Opcodes.BNE] = BNE;
         }
 
-        private byte BCC(IBUS bus, IRegisters registers)
+        private static byte BCC(IBUS bus, IRegisters registers)
         {
             return BranchInstruction(bus, registers, (r) =>
             {
@@ -51,7 +51,7 @@
             });
         }
 
-        private byte BEQ(IBUS bus, IRegisters registers)
+        private static byte BEQ(IBUS bus, IRegisters registers)
         {
             return BranchInstruction(bus, registers, (r) =>
             {
@@ -59,7 +59,7 @@
             });
         }
 
-        private byte BNE(IBUS bus, IRegisters registers)
+        private static byte BNE(IBUS bus, IRegisters registers)
         {
             return BranchInstruction(bus, registers, (r) =>
             {
@@ -67,7 +67,7 @@
             });
         }
 
-        private byte BCS(IBUS bus, IRegisters registers)
+        private static byte BCS(IBUS bus, IRegisters registers)
         {
             return BranchInstruction(bus, registers, (r) =>
             {
@@ -75,13 +75,13 @@
             });
         }
 
-        private byte CLC(IBUS bus, IRegisters registers)
+        private static byte CLC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(false);
             return 2;
         }
 
-        private byte SEC(IBUS bus, IRegisters registers)
+        private static byte SEC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(true);
             return 2;
@@ -161,7 +161,7 @@
             bus.Write((UInt16)(0x100 | registers.SP--), value);
         }
 
-        private byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
+        private static byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
         {
             byte cycles = 2;
             sbyte offset = (sbyte)Fetch(bus, registers);
