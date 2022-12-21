@@ -14,10 +14,10 @@
         public const int LDA_IMM = 0xA9;
         public const int BEQ = 0xF0;
         public const int BNE = 0xD0;
+        public const int STA_ZERO = 0x85;
     }
 
     //TODO: extract cpu addressing modes to their own methods
-    //TODO: branch instructions seem to be the same with the exception of the branching condition. Maybe it would be better to stcick to one implementetion and inject the branching condition check as a lambda
 
     public class CPUInstructions
     {
@@ -41,6 +41,7 @@
             InstructionSet[Opcodes.LDA_IMM] = LDA_IMM;
             InstructionSet[Opcodes.BEQ] = BEQ;
             InstructionSet[Opcodes.BNE] = BNE;
+            InstructionSet[Opcodes.STA_ZERO] = STA_ZERO;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -111,6 +112,13 @@
             registers.SetZeroFlag(immediateValue == 0);
             registers.SetNegativeFlag((sbyte)immediateValue < 0);
             return 2;
+        }
+
+        private static byte STA_ZERO(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch(bus, registers);
+            bus.Write(address, registers.A);
+            return 3;
         }
 
         private static byte STX_ZERO(IBUS bus, IRegisters registers)
