@@ -189,11 +189,31 @@ namespace NESCoreTests.Unit.CPUTest
             var jsr_abs = new CPUInstructions().InstructionSet[Opcodes.JSR_ABS];
             var cycles = jsr_abs(bus.Object, registers.Object);
 
-            bus.Verify(b => b.Write(0x100 | 0xff, 0x01));
-            bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
+            bus.Verify(b => b.Write(0x100 | 0xff, 0xd0));
+            bus.Verify(b => b.Write(0x100 | 0xfe, 0x01));
 
             registers.Object.PC.Should().Be((UInt16)0xdead);
             registers.Object.STATUS.Should().Be(0);
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RTS()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.SP = 0xFF - 2;
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(0x100 | 0xff)).Returns(0xde);
+            bus.Setup(b => b.Read(0x100 | 0xff - 1)).Returns(0xad);
+
+            var sut = new CPUInstructions().InstructionSet[Opcodes.RTS];
+            var cycles = sut(bus.Object, registers.Object);
+
+            registers.Object.PC.Should().Be((UInt16)(0xdead + 1));
+            registers.Object.SP.Should().Be(0xFF);
+
             cycles.Should().Be(6);
         }
 

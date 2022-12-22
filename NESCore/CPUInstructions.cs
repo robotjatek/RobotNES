@@ -19,6 +19,7 @@
         public const int BVS = 0x70;
         public const int BVC = 0x50;
         public const int BPL = 0x10;
+        public const int RTS = 0x60;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -50,6 +51,7 @@
             InstructionSet[Opcodes.BVS] = BVS;
             InstructionSet[Opcodes.BVC] = BVC;
             InstructionSet[Opcodes.BPL] = BPL;
+            InstructionSet[Opcodes.RTS] = RTS;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -187,6 +189,14 @@
             return 6;
         }
 
+        private static byte RTS(IBUS bus, IRegisters registers)
+        {
+            var address = (UInt16)(Pop16(bus, registers) + 1);
+            registers.PC = address;
+
+            return 6;
+        }
+
         private static byte NOP(IBUS bus, IRegisters registers)
         {
             return 2;
@@ -209,13 +219,29 @@
             var pcLow = (byte)(value & 0xff);
             var pcHigh = (byte)((value & 0xff00) >> 8);
 
-            Push8(bus, registers, pcLow);
             Push8(bus, registers, pcHigh);
+            Push8(bus, registers, pcLow);
         }
 
         private static void Push8(IBUS bus, IRegisters registers, byte value)
         {
             bus.Write((UInt16)(0x100 | registers.SP--), value);
+        }
+
+        private static UInt16 Pop16(IBUS bus, IRegisters registers)
+        {
+            var low = Pop8(bus, registers);
+            var high = Pop8(bus, registers);
+
+            var address = (UInt16)(high << 8 | low);
+            return address;
+        }
+
+        private static byte Pop8(IBUS bus, IRegisters registers)
+        {
+            var sp = registers.SP + 1;
+            registers.SP++;
+            return bus.Read((UInt16)(0x100 | sp));
         }
 
         private static byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
