@@ -16,6 +16,7 @@
         public const int BNE = 0xD0;
         public const int STA_ZERO = 0x85;
         public const int BIT_ZERO = 0x24;
+        public const int BVS = 0x70;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -44,6 +45,7 @@
             InstructionSet[Opcodes.BNE] = BNE;
             InstructionSet[Opcodes.STA_ZERO] = STA_ZERO;
             InstructionSet[Opcodes.BIT_ZERO] = BIT_ZERO;
+            InstructionSet[Opcodes.BVS] = BVS;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -75,6 +77,14 @@
             return BranchInstruction(bus, registers, (r) =>
             {
                 return r.GetCarryFlag() == true;
+            });
+        }
+
+        private static byte BVS(IBUS bus, IRegisters registers)
+        {
+            return BranchInstruction(bus, registers, (r) =>
+            {
+                return r.GetOverflowFlag() == true;
             });
         }
 
