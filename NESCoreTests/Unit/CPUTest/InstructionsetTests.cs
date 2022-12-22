@@ -884,5 +884,164 @@ namespace NESCoreTests.Unit.CPUTest
 
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void BIT_ZERO_sets_negative_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0x80); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_overflow_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0x40); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetOverflowFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_both_negative_and_overflow_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0xC0); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+            registers.Verify(r => r.SetOverflowFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_neither_negative_and_overflow_flag()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0x0); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetOverflowFlag(false));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_zero_flag_when_A_is_zero()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.A).Returns(0);
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0xFF); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+            registers.Verify(r => r.SetOverflowFlag(true));
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_zero_flag_when_value_is_zero()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.A).Returns(0xFF);
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_zero_flag_to_false_when_A_is_not_zero()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.A).Returns(0xFF);
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0xFF); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetZeroFlag(false));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_zero_flag_to_true_when_bit_patterns_do_not_match()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.A).Returns(0xAA);
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0x55); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BIT_ZERO_sets_zero_flag_to_false_when_bit_patterns_match()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.A).Returns(0xAA);
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0xAA); //0x0010 address on zero page, then the value
+            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var cycles = sut(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetZeroFlag(false));
+
+            cycles.Should().Be(3);
+        }
     }
 }

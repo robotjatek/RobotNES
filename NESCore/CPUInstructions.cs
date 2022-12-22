@@ -15,6 +15,7 @@
         public const int BEQ = 0xF0;
         public const int BNE = 0xD0;
         public const int STA_ZERO = 0x85;
+        public const int BIT_ZERO = 0x24;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -42,6 +43,7 @@
             InstructionSet[Opcodes.BEQ] = BEQ;
             InstructionSet[Opcodes.BNE] = BNE;
             InstructionSet[Opcodes.STA_ZERO] = STA_ZERO;
+            InstructionSet[Opcodes.BIT_ZERO] = BIT_ZERO;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -126,6 +128,23 @@
             var address = Fetch(bus, registers);
             bus.Write(address, registers.X);
             return 3; //1(opcode fetch) + 1 (1byte fetch from memory) + 1 (1byte write to memory)
+        }
+
+        private static byte BIT_ZERO(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch(bus, registers);
+            var value = bus.Read(address);
+
+            var isNegative = (value & 0x80) == 0x80;
+            registers.SetNegativeFlag(isNegative);
+
+            var overflow = (value & 0x40) == 0x40;
+            registers.SetOverflowFlag(overflow);
+
+            var isZero = (value & registers.A) == 0;
+            registers.SetZeroFlag(isZero);
+
+            return 3;
         }
 
         private static byte JSR_ABS(IBUS bus, IRegisters registers)
