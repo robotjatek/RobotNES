@@ -399,6 +399,160 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void BVC_doesNotTakeTheBranch()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.PC = 0;
+            registers.Setup(r => r.GetOverflowFlag()).Returns(true);
+
+            var bcc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var cycles = bcc(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.PC = 1);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void BVC_TakesTheBranchForwardSamePage()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.PC = 10;
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+
+            var bcc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var cycles = bcc(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.PC = 11);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BVC_TakesTheBranchBackwardsSamePage()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(unchecked((byte)-9));
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.PC = 10;
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+
+            var bcc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var cycles = bcc(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.PC = 2);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void BVC_TakesTheBranchForwardOtherPage()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.PC = 0xfe;
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+
+            var bcc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var cycles = bcc(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.PC = 265);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void BVC_TakesTheBranchBackwardOtherPage()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(unchecked((byte)-13));
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.PC = 0x100;
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+
+            var bcc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var cycles = bcc(bus.Object, registers.Object);
+
+            registers.VerifySet(r => r.PC = 0xf4);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void BVS_doesNotTakeTheBranch()
         {
             var bus = new Mock<IBUS>();
