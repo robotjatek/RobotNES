@@ -12,3 +12,6 @@ Project skeleton only with partially implemented bus and memory systems. The bas
 - CPU emulation architecture
 
 Currently working on the instruction set implementation.
+
+18 opcodes are implemented out of 151:
+![](https://geps.dev/progress/12)
