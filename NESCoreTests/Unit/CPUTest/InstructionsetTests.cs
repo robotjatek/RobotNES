@@ -1600,6 +1600,24 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void PHA()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.SP = 0xff;
+            registers.Object.A = 0xde;
+
+            var bus = new Mock<IBUS>();
+            var pha = new CPUInstructions().InstructionSet[Opcodes.PHA];
+            var cycles = pha(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(0x1ff, 0xde));
+            registers.Object.SP.Should().Be(0xfe);
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void PHP()
         {
             var registers = new Mock<IRegisters>();
