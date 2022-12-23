@@ -21,6 +21,7 @@
         public const int BPL = 0x10;
         public const int RTS = 0x60;
         public const int SEI = 0x78;
+        public const int SED = 0xF8;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -54,6 +55,7 @@
             InstructionSet[Opcodes.BPL] = BPL;
             InstructionSet[Opcodes.RTS] = RTS;
             InstructionSet[Opcodes.SEI] = SEI;
+            InstructionSet[Opcodes.SED] = SED;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -127,6 +129,12 @@
         private static byte SEI(IBUS bus, IRegisters registers)
         {
             registers.SetInterruptDisableFlag(true);
+            return 2;
+        }
+
+        private static byte SED(IBUS bus, IRegisters registers)
+        {
+            registers.SetDecimalFlag(true);
             return 2;
         }
 
