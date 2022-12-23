@@ -29,6 +29,7 @@
         public const int CLD = 0xD8;
         public const int PHA = 0x48;
         public const int PLP = 0x28;
+        public const int BMI = 0x30;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -70,6 +71,7 @@
             InstructionSet[Opcodes.AND_IMM] = AND_IMM;
             InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
             InstructionSet[Opcodes.PHA] = PHA;
+            InstructionSet[Opcodes.BMI] = BMI;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -125,6 +127,14 @@
             return BranchInstruction(bus, registers, (r) =>
             {
                 return r.GetNegativeFlag() == false;
+            });
+        }
+
+        private static byte BMI(IBUS bus, IRegisters registers)
+        {
+            return BranchInstruction(bus, registers, (r) =>
+            {
+                return r.GetNegativeFlag() == true;
             });
         }
 
