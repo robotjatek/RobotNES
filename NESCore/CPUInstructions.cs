@@ -27,6 +27,7 @@
         public const int AND_IMM = 0x29;
         public const int CMP_IMM = 0xC9;
         public const int CLD = 0xD8;
+        public const int PHA = 0x48;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -66,6 +67,7 @@
             InstructionSet[Opcodes.PLA] = PLA;
             InstructionSet[Opcodes.AND_IMM] = AND_IMM;
             InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
+            InstructionSet[Opcodes.PHA] = PHA;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -249,6 +251,12 @@
             registers.PC = address;
 
             return 6;
+        }
+
+        private static byte PHA(IBUS bus, IRegisters registers)
+        {
+            Push8(bus, registers, registers.A);
+            return 3;
         }
 
         private static byte PHP(IBUS bus, IRegisters registers)
