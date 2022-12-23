@@ -1741,6 +1741,27 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void PLP()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.SP = 0xfe;
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(0x1ff)).Returns(unchecked((byte)-34));
+
+            var plp = new CPUInstructions().InstructionSet[Opcodes.PLP];
+            var cycles = plp(bus.Object, registers.Object);
+
+            registers.Object.STATUS.Should().Be(unchecked((byte)-34));
+            registers.Object.SP.Should().Be(0xff);
+
+            //All flags are set from the value of the stack
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void AND_IMM_does_not_change_A_when_bitmask_is_FF()
         {
             var registers = new Mock<IRegisters>();
