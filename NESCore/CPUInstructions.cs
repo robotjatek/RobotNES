@@ -20,6 +20,7 @@
         public const int BVC = 0x50;
         public const int BPL = 0x10;
         public const int RTS = 0x60;
+        public const int SEI = 0x78;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -52,6 +53,7 @@
             InstructionSet[Opcodes.BVC] = BVC;
             InstructionSet[Opcodes.BPL] = BPL;
             InstructionSet[Opcodes.RTS] = RTS;
+            InstructionSet[Opcodes.SEI] = SEI;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -119,6 +121,12 @@
         private static byte SEC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(true);
+            return 2;
+        }
+
+        private static byte SEI(IBUS bus, IRegisters registers)
+        {
+            registers.SetInterruptDisableFlag(true);
             return 2;
         }
 
