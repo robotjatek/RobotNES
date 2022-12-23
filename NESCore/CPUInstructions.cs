@@ -28,6 +28,7 @@
         public const int CMP_IMM = 0xC9;
         public const int CLD = 0xD8;
         public const int PHA = 0x48;
+        public const int PLP = 0x28;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -65,6 +66,7 @@
             InstructionSet[Opcodes.SED] = SED;
             InstructionSet[Opcodes.PHP] = PHP;
             InstructionSet[Opcodes.PLA] = PLA;
+            InstructionSet[Opcodes.PLP] = PLP;
             InstructionSet[Opcodes.AND_IMM] = AND_IMM;
             InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
             InstructionSet[Opcodes.PHA] = PHA;
@@ -271,6 +273,13 @@
             registers.A = value;
             registers.SetNegativeFlag(((sbyte)value) < 0);
             registers.SetZeroFlag(value == 0);
+            return 4;
+        }
+
+        private static byte PLP(IBUS bus, IRegisters registers)
+        {
+            var value = Pop8(bus, registers);
+            registers.STATUS = value;
             return 4;
         }
 
