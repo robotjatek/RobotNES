@@ -22,6 +22,7 @@
         public const int RTS = 0x60;
         public const int SEI = 0x78;
         public const int SED = 0xF8;
+        public const int PHP = 0x08;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -56,6 +57,7 @@
             InstructionSet[Opcodes.RTS] = RTS;
             InstructionSet[Opcodes.SEI] = SEI;
             InstructionSet[Opcodes.SED] = SED;
+            InstructionSet[Opcodes.PHP] = PHP;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -211,6 +213,12 @@
             registers.PC = address;
 
             return 6;
+        }
+
+        private static byte PHP(IBUS bus, IRegisters registers)
+        {
+            Push8(bus, registers, registers.STATUS);
+            return 3;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

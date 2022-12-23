@@ -274,7 +274,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sei = new CPUInstructions().InstructionSet[Opcodes.SEI];
             var cycles = sei(bus.Object, registers.Object);
 
-            registers.Verify(r => r.SetCarryFlag(true), Times.Never);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
             registers.Verify(r => r.SetZeroFlag(true), Times.Never());
             registers.Verify(r => r.SetZeroFlag(false), Times.Never());
             registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
@@ -298,7 +298,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sed = new CPUInstructions().InstructionSet[Opcodes.SED];
             var cycles = sed(bus.Object, registers.Object);
 
-            registers.Verify(r => r.SetCarryFlag(true), Times.Never);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
             registers.Verify(r => r.SetZeroFlag(true), Times.Never());
             registers.Verify(r => r.SetZeroFlag(false), Times.Never());
             registers.Verify(r => r.SetDecimalFlag(true), Times.Once());
@@ -1569,6 +1569,24 @@ namespace NESCoreTests.Unit.CPUTest
 
             bus.Verify(b => b.Read(10));
             registers.Verify(r => r.SetZeroFlag(false));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void PHP()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.SP = 0xff;
+            registers.Object.STATUS = 0xAA;
+
+            var bus = new Mock<IBUS>();
+            var php = new CPUInstructions().InstructionSet[Opcodes.PHP];
+            var cycles = php(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(0x1ff, 0xAA));
+            registers.Object.SP.Should().Be(0xfe);
 
             cycles.Should().Be(3);
         }
