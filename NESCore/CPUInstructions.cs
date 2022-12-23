@@ -26,6 +26,7 @@
         public const int PLA = 0x68;
         public const int AND_IMM = 0x29;
         public const int CMP_IMM = 0xC9;
+        public const int CLD = 0xD8;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -48,6 +49,7 @@
             InstructionSet[Opcodes.SEC] = SEC;
             InstructionSet[Opcodes.BCS] = BCS;
             InstructionSet[Opcodes.CLC] = CLC;
+            InstructionSet[Opcodes.CLD] = CLD;
             InstructionSet[Opcodes.BCC] = BCC;
             InstructionSet[Opcodes.LDA_IMM] = LDA_IMM;
             InstructionSet[Opcodes.BEQ] = BEQ;
@@ -125,6 +127,12 @@
         private static byte CLC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(false);
+            return 2;
+        }
+
+        private static byte CLD(IBUS bus, IRegisters registers)
+        {
+            registers.SetDecimalFlag(false);
             return 2;
         }
 
