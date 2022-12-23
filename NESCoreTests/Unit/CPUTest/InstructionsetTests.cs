@@ -1133,6 +1133,31 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void CLV()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            var clv = new CPUInstructions().InstructionSet[Opcodes.CLV];
+            var cycles = clv(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
+
+            //Everything else never happens
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void BMI_doesNotTakeTheBranch()
         {
             var bus = new Mock<IBUS>();

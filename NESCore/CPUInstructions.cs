@@ -31,6 +31,7 @@
         public const int PLP = 0x28;
         public const int BMI = 0x30;
         public const int ORA_IMM = 0x09;
+        public const int CLV = 0xB8;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -54,6 +55,7 @@
             InstructionSet[Opcodes.BCS] = BCS;
             InstructionSet[Opcodes.CLC] = CLC;
             InstructionSet[Opcodes.CLD] = CLD;
+            InstructionSet[Opcodes.CLV] = CLV;
             InstructionSet[Opcodes.BCC] = BCC;
             InstructionSet[Opcodes.LDA_IMM] = LDA_IMM;
             InstructionSet[Opcodes.BEQ] = BEQ;
@@ -149,6 +151,12 @@
         private static byte CLD(IBUS bus, IRegisters registers)
         {
             registers.SetDecimalFlag(false);
+            return 2;
+        }
+
+        private static byte CLV(IBUS bus, IRegisters registers)
+        {
+            registers.SetOverflowFlag(false);
             return 2;
         }
 
