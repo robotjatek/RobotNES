@@ -23,7 +23,8 @@
         public const int SEI = 0x78;
         public const int SED = 0xF8;
         public const int PHP = 0x08;
-        public static int PLA = 0x68;
+        public const int PLA = 0x68;
+        public const int AND_IMM = 0x29;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -60,6 +61,7 @@
             InstructionSet[Opcodes.SED] = SED;
             InstructionSet[Opcodes.PHP] = PHP;
             InstructionSet[Opcodes.PLA] = PLA;
+            InstructionSet[Opcodes.AND_IMM] = AND_IMM;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -197,6 +199,16 @@
             registers.SetZeroFlag(isZero);
 
             return 3;
+        }
+
+        private static byte AND_IMM(IBUS bus, IRegisters registers)
+        {
+            var mask = Fetch(bus, registers);
+            var value = (byte)(registers.A & mask);
+            registers.A = value;
+            registers.SetZeroFlag(value == 0);
+            registers.SetNegativeFlag((sbyte)value < 0);
+            return 2;
         }
 
         private static byte JSR_ABS(IBUS bus, IRegisters registers)
