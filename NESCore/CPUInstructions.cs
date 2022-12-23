@@ -30,6 +30,7 @@
         public const int PHA = 0x48;
         public const int PLP = 0x28;
         public const int BMI = 0x30;
+        public const int ORA_IMM = 0x09;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -72,6 +73,7 @@
             InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
             InstructionSet[Opcodes.PHA] = PHA;
             InstructionSet[Opcodes.BMI] = BMI;
+            InstructionSet[Opcodes.ORA_IMM] = ORA_IMM;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -229,6 +231,16 @@
         {
             var mask = Fetch(bus, registers);
             var value = (byte)(registers.A & mask);
+            registers.A = value;
+            registers.SetZeroFlag(value == 0);
+            registers.SetNegativeFlag((sbyte)value < 0);
+            return 2;
+        }
+
+        private static byte ORA_IMM(IBUS bus, IRegisters registers)
+        {
+            var mask = Fetch(bus, registers);
+            var value = (byte)(registers.A | mask);
             registers.A = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
