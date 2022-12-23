@@ -1816,5 +1816,115 @@ namespace NESCoreTests.Unit.CPUTest
 
             cycles.Should().Be(2);
         }
+        
+        [Fact]
+        public void CMP_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CMP_IMM_sets_carry_flag_when_the_two_numbers_are_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CMP_IMM_sets_carry_flag_when_a_is_larger_than_memory()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 27;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CMP_IMM_sets_carry_flag_to_false_when_a_is_less_than_memory()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CMP_IMM_sets_zero_flag_to_false_when_the_two_numbers_are_not_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CMP_IMM_sets_negative_flag_when_operand_is_larger_than_a()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CMP_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
     }
 }

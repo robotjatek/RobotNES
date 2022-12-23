@@ -25,6 +25,7 @@
         public const int PHP = 0x08;
         public const int PLA = 0x68;
         public const int AND_IMM = 0x29;
+        public const int CMP_IMM = 0xC9;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -62,6 +63,7 @@
             InstructionSet[Opcodes.PHP] = PHP;
             InstructionSet[Opcodes.PLA] = PLA;
             InstructionSet[Opcodes.AND_IMM] = AND_IMM;
+            InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -208,6 +210,18 @@
             registers.A = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
+            return 2;
+        }
+
+        private static byte CMP_IMM(IBUS bus, IRegisters registers)
+        {
+            var imm = Fetch(bus, registers);
+            var tmp = registers.A - imm;
+
+            registers.SetZeroFlag(tmp == 0);
+            registers.SetCarryFlag(registers.A >= imm);
+            registers.SetNegativeFlag((tmp & 0x80) > 0);
+
             return 2;
         }
 
