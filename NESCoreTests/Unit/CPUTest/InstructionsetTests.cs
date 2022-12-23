@@ -1695,5 +1695,126 @@ namespace NESCoreTests.Unit.CPUTest
 
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void AND_IMM_does_not_change_A_when_bitmask_is_FF()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x2A;
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xff);
+
+            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            registers.Object.A.Should().Be(0x2A);
+            var cycles = and(bus.Object, registers.Object);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void AND_IMM_zeroes_out_A_when_bitmask_is_0()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xFF;
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0);
+
+            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void AND_IMM_sets_zero_flag_when_bitmask_is_0()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xFF;
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0);
+
+            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0);
+
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+
+            //Doesnt touch other flags
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void AND_IMM_sets_zero_flag_when_acc_is_0()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xff);
+
+            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0);
+
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+
+            //Doesnt touch other flags
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void AND_IMM_sets_negative_flag_when_result_is_negative()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xff);
+
+            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff);
+
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+
+            //Doesnt touch other flags
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(true), Times.Never());
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
     }
 }
