@@ -38,6 +38,7 @@
         public const int CPY_IMM = 0xC0;
         public const int CPX_IMM = 0xE0;
         public const int SBC_IMM = 0xE9;
+        public const int INY = 0xC8;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -88,6 +89,7 @@
             InstructionSet[Opcodes.EOR_IMM] = EOR_IMM;
             InstructionSet[Opcodes.ADC_IMM] = ADC_IMM;
             InstructionSet[Opcodes.SBC_IMM] = SBC_IMM;
+            InstructionSet[Opcodes.INY] = INY;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -402,6 +404,14 @@
             registers.SetOverflowFlag(result > 127 || result < -128);
 
             registers.A = (byte)result;
+            return 2;
+        }
+
+        private static byte INY(IBUS bus, IRegisters registers)
+        {
+            registers.Y++;
+            registers.SetZeroFlag(registers.Y == 0);
+            registers.SetNegativeFlag((registers.Y & 0x80) > 0);
             return 2;
         }
 
