@@ -6,7 +6,7 @@ namespace NESCoreTests.Unit.CPUTest
 {
     public class RegisterTests
     {
-        private const int statusFlagBit5 = 0x32;
+        private const int statusFlagBit5 = 0x20;
 
         [Fact]
         public void CarryFlagShouldBeEnabled()

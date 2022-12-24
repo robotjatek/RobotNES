@@ -235,8 +235,8 @@ namespace NESCoreTests.Unit.CPUTest
             var jsr_abs = new CPUInstructions().InstructionSet[Opcodes.JSR_ABS];
             var cycles = jsr_abs(bus.Object, registers.Object);
 
-            bus.Verify(b => b.Write(0x100 | 0xff, 0xd0));
-            bus.Verify(b => b.Write(0x100 | 0xfe, 0x01));
+            bus.Verify(b => b.Write(0x100 | 0xfd, 0xd0));
+            bus.Verify(b => b.Write(0x100 | 0xfc, 0x01));
 
             registers.Object.PC.Should().Be((UInt16)0xdead);
             registers.Object.STATUS.Should().Be(0);
@@ -2937,6 +2937,25 @@ namespace NESCoreTests.Unit.CPUTest
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_sets_overflow_flag4()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x7F);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7f;
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(unchecked((byte)-2));
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
