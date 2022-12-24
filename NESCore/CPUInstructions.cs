@@ -33,6 +33,7 @@
         public const int ORA_IMM = 0x09;
         public const int CLV = 0xB8;
         public const int EOR_IMM = 0x49;
+        public const int ADC_IMM = 0x69;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -78,6 +79,7 @@
             InstructionSet[Opcodes.BMI] = BMI;
             InstructionSet[Opcodes.ORA_IMM] = ORA_IMM;
             InstructionSet[Opcodes.EOR_IMM] = EOR_IMM;
+            InstructionSet[Opcodes.ADC_IMM] = ADC_IMM;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -323,6 +325,25 @@
             var value = Pop8(bus, registers);
             registers.STATUS = value;
             return 4;
+        }
+
+        private static byte ADC_IMM(IBUS bus, IRegisters registers)
+        {
+            var operand = Fetch(bus, registers);
+            var result = registers.A + operand;
+
+            if(registers.GetCarryFlag() == true)
+            {
+                result++;
+            }
+
+            registers.SetCarryFlag(result > 255);
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            registers.SetOverflowFlag(result > 127 || result < -128); // The result is outside of the range of the accumulator. This check can be done in various ways, but this is the most readable way in my opinion.
+
+            registers.A = (byte)result;
+            return 2;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

@@ -55,7 +55,7 @@
 
         public byte Y { get; set; } = 0;
 
-        public byte STATUS { get; set; } = 0;
+        public byte STATUS { get; set; } = 0x32; //Bit 5 is always set
 
         public byte SP { get; set; } = 0xFF;
 
@@ -134,11 +134,13 @@
         private void EnableFlag(byte mask)
         {
             STATUS |= mask;
+            STATUS |= 0x32;
         }
 
         private void DisableFlag(byte mask)
         {
             STATUS &= (byte)~mask;
+            STATUS |= 0x32;
         }
 
         public bool GetCarryFlag()
