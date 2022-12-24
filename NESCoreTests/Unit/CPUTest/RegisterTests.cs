@@ -6,12 +6,14 @@ namespace NESCoreTests.Unit.CPUTest
 {
     public class RegisterTests
     {
+        private const int statusFlagBit5 = 0x32;
+
         [Fact]
         public void CarryFlagShouldBeEnabled()
         {
             var sut = new Registers();
             sut.SetCarryFlag(true);
-            sut.STATUS.Should().Be(0b00000001);
+            sut.STATUS.Should().Be(0b00000001 | statusFlagBit5);
         }
 
         [Fact]
@@ -20,7 +22,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetCarryFlag(true);
             sut.SetCarryFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -28,7 +30,7 @@ namespace NESCoreTests.Unit.CPUTest
         {
             var sut = new Registers();
             sut.SetZeroFlag(true);
-            sut.STATUS.Should().Be(0b00000010);
+            sut.STATUS.Should().Be(0b00000010 | statusFlagBit5);
         }
 
         [Fact]
@@ -37,7 +39,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetZeroFlag(true);
             sut.SetZeroFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -45,7 +47,7 @@ namespace NESCoreTests.Unit.CPUTest
         {
             var sut = new Registers();
             sut.SetInterruptDisableFlag(true);
-            sut.STATUS.Should().Be(0b00000100);
+            sut.STATUS.Should().Be(0b00000100 | statusFlagBit5);
         }
 
         [Fact]
@@ -54,14 +56,14 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetInterruptDisableFlag(true);
             sut.SetInterruptDisableFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
         [Fact]
         public void DecimalFlagShouldBeEnabled()
         {
             var sut = new Registers();
             sut.SetDecimalFlag(true);
-            sut.STATUS.Should().Be(0b00001000);
+            sut.STATUS.Should().Be(0b00001000 | statusFlagBit5    );
         }
 
         [Fact]
@@ -70,7 +72,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetDecimalFlag(true);
             sut.SetDecimalFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -78,7 +80,7 @@ namespace NESCoreTests.Unit.CPUTest
         {
             var sut = new Registers();
             sut.SetOverflowFlag(true);
-            sut.STATUS.Should().Be(0b01000000);
+            sut.STATUS.Should().Be(0b01000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -87,7 +89,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetOverflowFlag(true);
             sut.SetOverflowFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -95,7 +97,7 @@ namespace NESCoreTests.Unit.CPUTest
         {
             var sut = new Registers();
             sut.SetNegativeFlag(true);
-            sut.STATUS.Should().Be(0b10000000);
+            sut.STATUS.Should().Be(0b10000000 | statusFlagBit5);
         }
 
         [Fact]
@@ -104,7 +106,7 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetNegativeFlag(true);
             sut.SetNegativeFlag(false);
-            sut.STATUS.Should().Be(0b00000000);
+            sut.STATUS.Should().Be(0b00000000 | statusFlagBit5);
         }
 
     }
