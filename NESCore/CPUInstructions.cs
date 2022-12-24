@@ -205,7 +205,7 @@
             var immediateValue = Fetch(bus, registers);
             registers.A = immediateValue;
             registers.SetZeroFlag(immediateValue == 0);
-            registers.SetNegativeFlag((sbyte)immediateValue < 0);
+            registers.SetNegativeFlag(((sbyte)immediateValue) < 0);
             return 2;
         }
 
