@@ -2428,6 +2428,116 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void CPY_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 26;
+
+            var cpy = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cpy(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CPY_IMM_sets_carry_flag_when_the_two_numbers_are_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 26;
+
+            var cpy = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cpy(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CPY_IMM_sets_carry_flag_when_a_is_larger_than_memory()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(26);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 27;
+
+            var cpy = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cpy(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CPY_IMM_sets_carry_flag_to_false_when_a_is_less_than_memory()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 26;
+
+            var cpy = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cpy(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CPY_IMM_sets_zero_flag_to_false_when_the_two_numbers_are_not_equal()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 26;
+
+            var cmp = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cmp(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void CPY_IMM_sets_negative_flag_when_operand_is_larger_than_a()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(27);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 26;
+
+            var cpy = new CPUInstructions().InstructionSet[Opcodes.CPY_IMM];
+            var cycles = cpy(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void ADC_IMM_adds_two_numbers()
         {
             var bus = new Mock<IBUS>();
