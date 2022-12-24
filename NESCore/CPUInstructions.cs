@@ -391,17 +391,18 @@
 
         private static byte SBC_IMM(IBUS bus, IRegisters registers)
         {
-            var operand = Fetch(bus, registers);
-            var result = registers.A - operand;
-            if (registers.GetCarryFlag() == false)
+            var operand = (sbyte)~Fetch(bus, registers);
+            var result = registers.A + operand;
+
+            if (registers.GetCarryFlag() == true)
             {
-                result--;
+                result++;
             }
 
-            registers.SetCarryFlag(result >= 0);
+            registers.SetCarryFlag(result > 255);
             registers.SetZeroFlag(result == 0);
             registers.SetNegativeFlag((result & 0x80) > 0);
-            registers.SetOverflowFlag(result > 127 || result < -128);
+            registers.SetOverflowFlag(result > 127 || result < -128); // The result is outside of the range of the accumulator. This check can be done in various ways, but this is the most readable way in my opinion.
 
             registers.A = (byte)result;
             return 2;
