@@ -391,7 +391,7 @@
         {
             var operand = Fetch(bus, registers);
             var result = registers.A - operand;
-            if (registers.GetCarryFlag() == true)
+            if (registers.GetCarryFlag() == false)
             {
                 result--;
             }
