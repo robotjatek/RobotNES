@@ -2744,22 +2744,61 @@ namespace NESCoreTests.Unit.CPUTest
         public void SBC_IMM_sets_overflow()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(255);
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.A = 0;
+            registers.Object.A = 0x7F;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sbc(bus.Object, registers.Object);
 
-            registers.Object.A.Should().Be(unchecked((byte)-255));
+            registers.Object.A.Should().Be(0xff);
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
         }
 
+        [Fact]
+        public void SBC_IMM_sets_overflow2()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(1);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+
+            var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0x7F);
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_overflow3()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7F;
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+
+            var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0xfe);
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
 
 
         [Fact]
