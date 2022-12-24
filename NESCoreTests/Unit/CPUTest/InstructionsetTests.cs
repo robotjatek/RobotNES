@@ -2653,6 +2653,7 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(5);
             var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.SetupAllProperties();
             registers.Object.A = 10;
 
@@ -2672,7 +2673,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 10;
-            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
             var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sub(bus.Object, registers.Object);
@@ -2690,6 +2691,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 10;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sub(bus.Object, registers.Object);
@@ -2708,6 +2710,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 10;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sub(bus.Object, registers.Object);
@@ -2726,6 +2729,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 5;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sub(bus.Object, registers.Object);
@@ -2745,6 +2749,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 0;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sbc(bus.Object, registers.Object);
