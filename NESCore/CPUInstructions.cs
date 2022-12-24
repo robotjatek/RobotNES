@@ -34,6 +34,7 @@
         public const int CLV = 0xB8;
         public const int EOR_IMM = 0x49;
         public const int ADC_IMM = 0x69;
+        public const int LDY_IMM = 0xA0;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -50,6 +51,7 @@
 
             InstructionSet[Opcodes.JMP_ABS] = JMP_ABS;
             InstructionSet[Opcodes.LDX_IMM] = LDX_IMM;
+            InstructionSet[Opcodes.LDY_IMM] = LDY_IMM;
             InstructionSet[Opcodes.STX_ZERO] = STX_ZERO;
             InstructionSet[Opcodes.JSR_ABS] = JSR_ABS;
             InstructionSet[Opcodes.NOP] = NOP;
@@ -203,6 +205,15 @@
         {
             var immediateValue = Fetch(bus, registers);
             registers.X = immediateValue;
+            registers.SetZeroFlag(immediateValue == 0);
+            registers.SetNegativeFlag((sbyte)immediateValue < 0);
+            return 2;
+        }
+
+        private static byte LDY_IMM(IBUS bus, IRegisters registers)
+        {
+            var immediateValue = Fetch(bus, registers);
+            registers.Y = immediateValue;
             registers.SetZeroFlag(immediateValue == 0);
             registers.SetNegativeFlag((sbyte)immediateValue < 0);
             return 2;
