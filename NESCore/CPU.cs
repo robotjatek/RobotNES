@@ -41,6 +41,7 @@
         public const byte ZERO = 0b00000010;
         public const byte INTERRUPT_DISABLE = 0b00000100;
         public const byte DECIMAL = 0b00001000;
+        public const byte BREAK = 0b00010000;
         public const byte OVERFLOW = 0b01000000;
         public const byte NEGATIVE = 0b10000000;
     }
@@ -55,9 +56,9 @@
 
         public byte Y { get; set; } = 0;
 
-        public byte STATUS { get; set; } = 0x32; //Bit 5 is always set
+        public byte STATUS { get; set; } = 0x20; //Bit 5 is always set
 
-        public byte SP { get; set; } = 0xFF;
+        public byte SP { get; set; } = 0xFD;
 
         public void SetCarryFlag(bool flag)
         {
@@ -134,13 +135,13 @@
         private void EnableFlag(byte mask)
         {
             STATUS |= mask;
-            STATUS |= 0x32;
+            STATUS |= 0x20;
         }
 
         private void DisableFlag(byte mask)
         {
             STATUS &= (byte)~mask;
-            STATUS |= 0x32;
+            STATUS |= 0x20;
         }
 
         public bool GetCarryFlag()
