@@ -2648,6 +2648,116 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void SBC_IMM_subtracts_two_numbers()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(5);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(5);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_subtracts_carry_from_result()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(5);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(4);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_carry_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(5);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(5);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_zero_bits_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_negative_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 5;
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(unchecked((byte)-5));
+            registers.Verify(r => r.SetNegativeFlag(true),Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_overflow()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(255);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(unchecked((byte)-255));
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+
+
+        [Fact]
         public void ADC_IMM_adds_two_numbers()
         {
             var bus = new Mock<IBUS>();
@@ -2784,7 +2894,7 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void ADC_IMM_sets_carry_flag2()
+        public void ADC_IMM_sets_overflow_flag2()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(3);
@@ -2806,7 +2916,7 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void ADC_IMM_sets_carry_flag3()
+        public void ADC_IMM_sets_overflow_flag3()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x7F);
