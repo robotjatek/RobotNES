@@ -37,6 +37,7 @@
         public const int LDY_IMM = 0xA0;
         public const int CPY_IMM = 0xC0;
         public const int CPX_IMM = 0xE0;
+        public const int SBC_IMM = 0xE9;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -86,7 +87,7 @@
             InstructionSet[Opcodes.ORA_IMM] = ORA_IMM;
             InstructionSet[Opcodes.EOR_IMM] = EOR_IMM;
             InstructionSet[Opcodes.ADC_IMM] = ADC_IMM;
-
+            InstructionSet[Opcodes.SBC_IMM] = SBC_IMM;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -205,7 +206,7 @@
             registers.SetNegativeFlag((sbyte)immediateValue < 0);
             return 2;
         }
-        
+
         private static byte LDX_IMM(IBUS bus, IRegisters registers)
         {
             var immediateValue = Fetch(bus, registers);
@@ -372,7 +373,7 @@
             var operand = Fetch(bus, registers);
             var result = registers.A + operand;
 
-            if(registers.GetCarryFlag() == true)
+            if (registers.GetCarryFlag() == true)
             {
                 result++;
             }
@@ -381,6 +382,24 @@
             registers.SetZeroFlag(result == 0);
             registers.SetNegativeFlag((result & 0x80) > 0);
             registers.SetOverflowFlag(result > 127 || result < -128); // The result is outside of the range of the accumulator. This check can be done in various ways, but this is the most readable way in my opinion.
+
+            registers.A = (byte)result;
+            return 2;
+        }
+
+        private static byte SBC_IMM(IBUS bus, IRegisters registers)
+        {
+            var operand = Fetch(bus, registers);
+            var result = registers.A - operand;
+            if (registers.GetCarryFlag() == true)
+            {
+                result--;
+            }
+
+            registers.SetCarryFlag(result >= 0);
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            registers.SetOverflowFlag(result > 127 || result < -128);
 
             registers.A = (byte)result;
             return 2;
