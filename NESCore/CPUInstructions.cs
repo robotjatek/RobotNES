@@ -36,6 +36,7 @@
         public const int ADC_IMM = 0x69;
         public const int LDY_IMM = 0xA0;
         public const int CPY_IMM = 0xC0;
+        public const int CPX_IMM = 0xE0;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -78,6 +79,7 @@
             InstructionSet[Opcodes.PLP] = PLP;
             InstructionSet[Opcodes.AND_IMM] = AND_IMM;
             InstructionSet[Opcodes.CMP_IMM] = CMP_IMM;
+            InstructionSet[Opcodes.CPX_IMM] = CPX_IMM;
             InstructionSet[Opcodes.CPY_IMM] = CPY_IMM;
             InstructionSet[Opcodes.PHA] = PHA;
             InstructionSet[Opcodes.BMI] = BMI;
@@ -290,6 +292,18 @@
 
             registers.SetZeroFlag(tmp == 0);
             registers.SetCarryFlag(registers.A >= imm);
+            registers.SetNegativeFlag((tmp & 0x80) > 0);
+
+            return 2;
+        }
+
+        private static byte CPX_IMM(IBUS bus, IRegisters registers)
+        {
+            var imm = Fetch(bus, registers);
+            var tmp = registers.X - imm;
+
+            registers.SetZeroFlag(tmp == 0);
+            registers.SetCarryFlag(registers.X >= imm);
             registers.SetNegativeFlag((tmp & 0x80) > 0);
 
             return 2;
