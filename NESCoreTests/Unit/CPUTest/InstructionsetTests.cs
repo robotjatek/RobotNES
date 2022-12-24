@@ -2380,5 +2380,185 @@ namespace NESCoreTests.Unit.CPUTest
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ADC_IMM_adds_two_numbers()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(30);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once);
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_adds_carry_to_the_result()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(31);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once);
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_sets_carry_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(6);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 253;
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(3);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_sets_zero_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+
+        [Fact]
+        public void ADC_IMM_sets_negative_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(253);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 2;
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(255);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_resets_negative_bit_sets_carry_and_overflow()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(6);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 253;
+            registers.Setup(r => r.GetNegativeFlag()).Returns(false);
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(3);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_sets_carry_flag2()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(3);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 125;
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(128);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ADC_IMM_sets_carry_flag3()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x7F);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 1;
+
+            var adc = new CPUInstructions().InstructionSet[Opcodes.ADC_IMM];
+            var cycles = adc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0x80);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
     }
 }
