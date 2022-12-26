@@ -2696,8 +2696,29 @@ namespace NESCoreTests.Unit.CPUTest
             var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sub(bus.Object, registers.Object);
 
-            registers.Object.A.Should().Be(5);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+            registers.Object.A.Should().Be(5);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IMM_sets_carry_and_overflow_bit_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+
+            var sub = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
+            registers.Object.A.Should().Be(0x7F);
 
             cycles.Should().Be(2);
         }
@@ -2764,17 +2785,17 @@ namespace NESCoreTests.Unit.CPUTest
         public void SBC_IMM_sets_overflow2()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(1);
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(112);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.A = 0x80;
+            registers.Object.A = 0xd0;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
             var sbc = new CPUInstructions().InstructionSet[Opcodes.SBC_IMM];
             var cycles = sbc(bus.Object, registers.Object);
 
-            registers.Object.A.Should().Be(0x7F);
+            registers.Object.A.Should().Be(96);
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
@@ -2915,7 +2936,7 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void ADC_IMM_resets_negative_bit_sets_carry_and_overflow()
+        public void ADC_IMM_resets_negative_bit_sets_carry()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(6);
@@ -2932,7 +2953,6 @@ namespace NESCoreTests.Unit.CPUTest
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-            registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
         }
