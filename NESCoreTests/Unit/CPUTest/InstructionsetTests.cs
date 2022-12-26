@@ -3021,6 +3021,55 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void INX_increments_X()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 1;
+
+            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var cycles = inx(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(2);
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void INX_sets_the_zero_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 0xff;
+
+            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var cycles = inx(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void INX_sets_the_negative_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 0x7F;
+
+            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var cycles = inx(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x80);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void INY_increments_Y()
         {
             var bus = new Mock<IBUS>();
