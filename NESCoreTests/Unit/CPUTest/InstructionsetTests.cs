@@ -3124,11 +3124,11 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.Y = 2;
+            registers.Object.X = 2;
 
-            var iny = new CPUInstructions().InstructionSet[Opcodes.DEY];
-            var cycles = iny(bus.Object, registers.Object);
-            registers.Object.Y.Should().Be(1);
+            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var cycles = dex(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(1);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
 
             cycles.Should().Be(2);
@@ -3136,6 +3136,55 @@ namespace NESCoreTests.Unit.CPUTest
 
         [Fact]
         public void DEX_sets_the_zero_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 0x1;
+
+            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var cycles = dex(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void DEX_sets_the_negative_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 0x0;
+
+            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var cycles = dex(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0xff);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void DEY_decrements_Y()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 2;
+
+            var dey = new CPUInstructions().InstructionSet[Opcodes.DEY];
+            var cycles = dey(bus.Object, registers.Object);
+            registers.Object.Y.Should().Be(1);
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void DEY_sets_the_zero_flag()
         {
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
