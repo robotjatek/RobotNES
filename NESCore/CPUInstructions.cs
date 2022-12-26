@@ -42,6 +42,7 @@
         public const int INX = 0xE8;
         public const int DEY = 0x88;
         public const int DEX = 0xCA;
+        public const int TAY = 0xA8;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -96,6 +97,7 @@
             InstructionSet[Opcodes.INX] = INX;
             InstructionSet[Opcodes.DEY] = DEY;
             InstructionSet[Opcodes.DEX] = DEX;
+            InstructionSet[Opcodes.TAY] = TAY;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -444,6 +446,14 @@
         private static byte DEY(IBUS bus, IRegisters registers)
         {
             registers.Y--;
+            registers.SetZeroFlag(registers.Y == 0);
+            registers.SetNegativeFlag((registers.Y & 0x80) > 0);
+            return 2;
+        }
+
+        private static byte TAY(IBUS bus, IRegisters registers)
+        {
+            registers.Y = registers.A;
             registers.SetZeroFlag(registers.Y == 0);
             registers.SetNegativeFlag((registers.Y & 0x80) > 0);
             return 2;
