@@ -2,7 +2,6 @@
 
 //TODO: Support iNES2.0 format
 //TODO: detect data after rom data
-
 namespace NESCore.Cartridge
 {
     public class CartridgeParser
