@@ -47,6 +47,7 @@
         public const int TYA = 0x98;
         public const int TXA = 0x8A;
         public const int TSX = 0xBA;
+        public const int STX_ABS = 0x8E;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -106,6 +107,7 @@
             InstructionSet[Opcodes.TYA] = TYA;
             InstructionSet[Opcodes.TXA] = TXA;
             InstructionSet[Opcodes.TSX] = TSX;
+            InstructionSet[Opcodes.STX_ABS] = STX_ABS;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -254,7 +256,14 @@
         {
             var address = Fetch(bus, registers);
             bus.Write(address, registers.X);
-            return 3; //1(opcode fetch) + 1 (1byte fetch from memory) + 1 (1byte write to memory)
+            return 3; //1(opcode fetch) + 1 (1 byte fetch from memory) + 1 (1 byte write to memory)
+        }
+
+        private static byte STX_ABS(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch16(bus, registers);
+            bus.Write(address, registers.X);
+            return 4; //1(opcode fetch) + 2 (2 byte fetch from memory) + 1 (1 byte write to memory)
         }
 
         private static byte BIT_ZERO(IBUS bus, IRegisters registers)
