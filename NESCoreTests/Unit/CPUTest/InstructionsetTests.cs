@@ -3366,5 +3366,55 @@ namespace NESCoreTests.Unit.CPUTest
             cycles.Should().Be(2);
         }
 
+        [Fact]
+        public void TXA_transfers_x_to_a()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 0x50;
+
+            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var cycles = txa(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x50);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TXA_sets_zero_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 0x0;
+
+            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var cycles = txa(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TXA_sets_negative_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 0x80;
+
+            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var cycles = txa(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x80);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
     }
 }
