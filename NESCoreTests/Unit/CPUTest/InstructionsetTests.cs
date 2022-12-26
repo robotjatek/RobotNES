@@ -3267,7 +3267,7 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void TAX_transfers_a_to_y()
+        public void TAX_transfers_a_to_x()
         {
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
@@ -3310,6 +3310,56 @@ namespace NESCoreTests.Unit.CPUTest
 
             var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
             var cycles = tax(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x80);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TSX_transfers_s_to_x()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.STATUS = 0x50;
+            registers.Object.X = 0xff;
+
+            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var cycles = tsx(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x50);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TSX_sets_zero_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.STATUS = 0x0;
+            registers.Object.X = 0xff;
+
+            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var cycles = tsx(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TSX_sets_negative_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.STATUS = 0x80;
+            registers.Object.X = 0xff;
+
+            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var cycles = tsx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
 
