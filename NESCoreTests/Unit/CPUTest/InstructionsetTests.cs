@@ -3497,5 +3497,20 @@ namespace NESCoreTests.Unit.CPUTest
             cycles.Should().Be(2);
         }
 
+        [Fact]
+        public void TXS_transfers_x_to_s()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.STATUS = 0xff;
+            registers.Object.X = 0x50;
+
+            var txs = new CPUInstructions().InstructionSet[Opcodes.TXS];
+            var cycles = txs(bus.Object, registers.Object);
+            registers.Object.STATUS.Should().Be(0x50);
+
+            cycles.Should().Be(2);
+        }
     }
 }

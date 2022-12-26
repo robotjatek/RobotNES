@@ -48,6 +48,7 @@
         public const int TXA = 0x8A;
         public const int TSX = 0xBA;
         public const int STX_ABS = 0x8E;
+        public const int TXS = 0x9A;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -108,6 +109,7 @@
             InstructionSet[Opcodes.TXA] = TXA;
             InstructionSet[Opcodes.TSX] = TSX;
             InstructionSet[Opcodes.STX_ABS] = STX_ABS;
+            InstructionSet[Opcodes.TXS] = TXS;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -505,6 +507,12 @@
             registers.A = registers.Y;
             registers.SetZeroFlag(registers.A == 0);
             registers.SetNegativeFlag((registers.A & 0x80) > 0);
+            return 2;
+        }
+
+        private static byte TXS(IBUS bus, IRegisters registers)
+        {
+            registers.STATUS = registers.X;
             return 2;
         }
 
