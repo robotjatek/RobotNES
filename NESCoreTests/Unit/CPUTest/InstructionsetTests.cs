@@ -3265,5 +3265,56 @@ namespace NESCoreTests.Unit.CPUTest
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void TAX_transfers_a_to_y()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x50;
+            registers.Object.X = 0xff;
+
+            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var cycles = tax(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x50);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TAX_sets_zero_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x0;
+            registers.Object.X = 0xff;
+
+            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var cycles = tax(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x0);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void TAX_sets_negative_flag()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            registers.Object.X = 0xff;
+
+            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var cycles = tax(bus.Object, registers.Object);
+            registers.Object.X.Should().Be(0x80);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
     }
 }
