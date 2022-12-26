@@ -493,7 +493,7 @@
 
         private static byte TSX(IBUS bus, IRegisters registers)
         {
-            registers.X = registers.STATUS;
+            registers.X = registers.SP;
             registers.SetZeroFlag(registers.X == 0);
             registers.SetNegativeFlag((registers.X & 0x80) > 0);
             return 2;
@@ -525,7 +525,7 @@
 
         private static byte TXS(IBUS bus, IRegisters registers)
         {
-            registers.STATUS = registers.X;
+            registers.SP = registers.X;
             return 2;
         }
 

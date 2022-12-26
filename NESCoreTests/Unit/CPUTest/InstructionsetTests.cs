@@ -3402,7 +3402,7 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.STATUS = 0x50;
+            registers.Object.SP = 0x50;
             registers.Object.X = 0xff;
 
             var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
@@ -3418,7 +3418,7 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.STATUS = 0x0;
+            registers.Object.SP = 0x0;
             registers.Object.X = 0xff;
 
             var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
@@ -3435,7 +3435,7 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.STATUS = 0x80;
+            registers.Object.SP = 0x80;
             registers.Object.X = 0xff;
 
             var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
@@ -3552,12 +3552,12 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.STATUS = 0xff;
+            registers.Object.SP = 0xff;
             registers.Object.X = 0x50;
 
             var txs = new CPUInstructions().InstructionSet[Opcodes.TXS];
             var cycles = txs(bus.Object, registers.Object);
-            registers.Object.STATUS.Should().Be(0x50);
+            registers.Object.SP.Should().Be(0x50);
 
             cycles.Should().Be(2);
         }
