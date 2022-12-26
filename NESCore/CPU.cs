@@ -56,7 +56,7 @@
 
         public byte Y { get; set; } = 0;
 
-        public byte STATUS { get; set; } = 0x20; //Bit 5 is always set
+        public byte STATUS { get; set; } = 0x24; //Bit 5 is always set
 
         public byte SP { get; set; } = 0xFD;
 
