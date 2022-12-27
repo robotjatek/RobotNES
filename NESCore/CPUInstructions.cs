@@ -1,58 +1,116 @@
-﻿using Microsoft.Win32;
-
-namespace NESCore
+﻿namespace NESCore
 {
     public class Opcodes
     {
-        public const int JMP_ABS = 0x4C;
-        public const int LDX_IMM = 0xA2;
-        public const int STX_ZERO = 0x86;
-        public const int JSR_ABS = 0x20;
-        public const int NOP = 0xEA;
-        public const int SEC = 0x38;
-        public const int BCS = 0xB0;
-        public const int CLC = 0x18;
-        public const int BCC = 0x90;
+        #region Load/Store
         public const int LDA_IMM = 0xA9;
-        public const int BEQ = 0xF0;
-        public const int BNE = 0xD0;
+        public const int LDA_ABS = 0xAD;
+        //TODO: more LDA modes
+        public const int LDX_IMM = 0xA2;
+        public const int LDX_ABS = 0xAE;
+        //TODO: more ldx modes
+        public const int LDY_IMM = 0xA0;
+        //TODO: more LDY modes
         public const int STA_ZERO = 0x85;
-        public const int BIT_ZERO = 0x24;
-        public const int BVS = 0x70;
-        public const int BVC = 0x50;
-        public const int BPL = 0x10;
-        public const int RTS = 0x60;
-        public const int SEI = 0x78;
-        public const int SED = 0xF8;
+        //TODO: More STA modes
+        public const int STX_ZERO = 0x86;
+        public const int STX_ABS = 0x8E;
+        //TODO: more stx modes
+        //TODO: STY
+        #endregion
+
+        #region Transfer
+        public const int TAX = 0xAA;
+        public const int TAY = 0xA8;
+        public const int TSX = 0xBA;
+        public const int TXA = 0x8A;
+        public const int TXS = 0x9A;
+        public const int TYA = 0x98;
+        #endregion
+
+        #region Stack
+        public const int PHA = 0x48;
         public const int PHP = 0x08;
         public const int PLA = 0x68;
-        public const int AND_IMM = 0x29;
-        public const int CMP_IMM = 0xC9;
-        public const int CLD = 0xD8;
-        public const int PHA = 0x48;
         public const int PLP = 0x28;
-        public const int BMI = 0x30;
-        public const int ORA_IMM = 0x09;
-        public const int CLV = 0xB8;
+        #endregion
+
+        #region Shift
+        //TODO: shift instructions
+        #endregion
+
+        #region Logic
+        public const int AND_IMM = 0x29;
+        //TODO: more AND modes
+        public const int BIT_ZERO = 0x24;
+        //TODO: BIT abs
         public const int EOR_IMM = 0x49;
+        //TODO: more eor modes
+        public const int ORA_IMM = 0x09;
+        //TODO: more ora modes
+        #endregion
+
+        #region Arith
         public const int ADC_IMM = 0x69;
-        public const int LDY_IMM = 0xA0;
-        public const int CPY_IMM = 0xC0;
+        //TODO: more adc modes
+        public const int CMP_IMM = 0xC9;
+        //TODO: more cmp modes
         public const int CPX_IMM = 0xE0;
+        //TODO: cpx abs
+        //TODO: cpx zero
+        public const int CPY_IMM = 0xC0;
+        //TODO: cpy abs
+        //TODO: cpy zero
         public const int SBC_IMM = 0xE9;
-        public const int INY = 0xC8;
-        public const int INX = 0xE8;
-        public const int DEY = 0x88;
+        //TODO: more sbc modes
+        #endregion
+
+        #region Inc
+        //TODO: dec abs
+        //TODO: x abs dec
+        //TODO: zero dec
+        //TODO: x zero dec
         public const int DEX = 0xCA;
-        public const int TAY = 0xA8;
-        public const int TAX = 0xAA;
-        public const int TYA = 0x98;
-        public const int TXA = 0x8A;
-        public const int TSX = 0xBA;
-        public const int STX_ABS = 0x8E;
-        public const int TXS = 0x9A;
-        public const int LDX_ABS = 0xAE;
-        public const int LDA_ABS = 0xAD;
+        public const int DEY = 0x88;
+        //TODO: inc abs
+        //TODO: x abs inc
+        //TODO: zero inc
+        //TODO: x zero inc
+        public const int INX = 0xE8;
+        public const int INY = 0xC8;
+
+        #endregion
+
+        #region Control
+        public const int JMP_ABS = 0x4C;
+        public const int JSR_ABS = 0x20;
+        public const int RTS = 0x60;
+        //TODO: JMP_ABS_INDIRECT
+        #endregion
+
+        #region Branch
+        public const int BCC = 0x90;
+        public const int BCS = 0xB0;
+        public const int BEQ = 0xF0;
+        public const int BMI = 0x30;
+        public const int BNE = 0xD0;
+        public const int BPL = 0x10;
+        public const int BVC = 0x50;
+        public const int BVS = 0x70;
+        #endregion
+
+        #region Flags
+        public const int CLC = 0x18;
+        public const int CLD = 0xD8;
+        //TODO: CLI
+        public const int CLV = 0xB8;
+        public const int SEC = 0x38;
+        public const int SED = 0xF8;
+        public const int SEI = 0x78;
+        #endregion
+
+
+        public const int NOP = 0xEA;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -226,116 +284,91 @@ namespace NESCore
             return 3;
         }
 
-        class AddressingResult
-        {
-            public byte Value { get; init; }
-            public byte Cycles { get; init; }
-        }
-
-        private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
-        {
-            return new AddressingResult
-            {
-                Value = Fetch(bus, registers),
-                Cycles = 1,
-            };
-        }
-
-        private static AddressingResult AddressingAbsolute(IBUS bus, IRegisters registers)
-        {
-            var address = Fetch16(bus, registers);
-            var value = bus.Read(address);
-            return new AddressingResult
-            {
-                Value = value,
-                Cycles = 3,
-            };
-        }
-
-        private static byte LDA(byte value, IRegisters registers)
+        private static void LDA(byte value, IRegisters registers)
         {
             registers.A = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag(((sbyte)value) < 0);
-            return 1;
         }
 
         private static byte LDA_IMM(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingImmediate(bus, registers);
-            var instructionCycles = LDA(addressingResult.Value, registers);
-            return (byte)(instructionCycles + addressingResult.Cycles);
+            LDA(addressingResult.Value, registers);
+            return 2;
         }
 
         private static byte LDA_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsolute(bus, registers);
-            var instructionCycles = LDA(addressingResult.Value, registers);
-            return (byte)(instructionCycles + addressingResult.Cycles);
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            LDA(addressingResult.Value, registers);
+            return 4;
         }
 
-        private static byte LDX(byte value, IRegisters registers)
+        private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
-            return 1;
         }
 
         private static byte LDX_IMM(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingImmediate(bus, registers);
-            var instructionCycles = LDX(addressingResult.Value, registers);
-            return (byte)(instructionCycles + addressingResult.Cycles);
+            LDX(addressingResult.Value, registers);
+            return 2;
         }
 
         private static byte LDX_ABS(IBUS bus, IRegisters registers)
         {
-           var addressingResult = AddressingAbsolute(bus,registers);
-            var instructionCycles = LDX(addressingResult.Value, registers);
-            return (byte)(instructionCycles + addressingResult.Cycles);
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            LDX(addressingResult.Value, registers);
+            return 4;
         }
 
-        private static byte LDY(byte value, IBUS bus, IRegisters registers) 
+        private static void LDY(byte value, IBUS bus, IRegisters registers)
         {
             registers.Y = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
-            return 1;
         }
 
         private static byte LDY_IMM(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingImmediate(bus,registers);
-            var instructionCycles = LDY(addressingResult.Value, bus, registers);
-            return (byte)(instructionCycles + addressingResult.Cycles);
+            var addressingResult = AddressingImmediate(bus, registers);
+            LDY(addressingResult.Value, bus, registers);
+            return 2;
+        }
+
+        private static void STA(UInt16 address, IBUS bus, IRegisters registers)
+        {
+            bus.Write(address, registers.A);
         }
 
         private static byte STA_ZERO(IBUS bus, IRegisters registers)
         {
-            var address = Fetch(bus, registers);
-            bus.Write(address, registers.A);
+            var addressingResult = AddressingZeroAddressOnly(bus, registers);
+            STA(addressingResult.Address, bus, registers);
             return 3;
         }
 
         private static byte STX_ZERO(IBUS bus, IRegisters registers)
         {
-            var address = Fetch(bus, registers);
+            var address = AddressingZeroAddressOnly(bus, registers).Address;
             bus.Write(address, registers.X);
             return 3; //1(opcode fetch) + 1 (1 byte fetch from memory) + 1 (1 byte write to memory)
         }
 
         private static byte STX_ABS(IBUS bus, IRegisters registers)
         {
-            var address = Fetch16(bus, registers);
+            var address = AddressingAbsoulteAddressOnly(bus, registers).Address;
             bus.Write(address, registers.X);
             return 4; //1(opcode fetch) + 2 (2 byte fetch from memory) + 1 (1 byte write to memory)
         }
 
         private static byte BIT_ZERO(IBUS bus, IRegisters registers)
         {
-            var address = Fetch(bus, registers);
-            var value = bus.Read(address);
+            var value = AddressingZeroWithValue(bus, registers).Value;
 
             var isNegative = (value & 0x80) == 0x80;
             registers.SetNegativeFlag(isNegative);
@@ -643,6 +676,63 @@ namespace NESCore
             }
 
             return cycles;
+        }
+
+        class AddressingResult
+        {
+            public byte Value { get; init; }
+            public UInt16 Address { get; init; }
+        }
+
+        private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
+        {
+            return new AddressingResult
+            {
+                Value = Fetch(bus, registers),
+            };
+        }
+
+        // Reads a value from an absolute address
+        private static AddressingResult AddressingAbsoluteWithValue(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch16(bus, registers);
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Value = value,
+                Address = address,
+            };
+        }
+
+        // Fetches the address of a memory location, but doesn't fetch the value
+        private static AddressingResult AddressingAbsoulteAddressOnly(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch16(bus, registers);
+            return new AddressingResult
+            {
+                Address = address,
+            };
+        }
+
+        // Fetches the address of a zero page memory location, but doesn't fetch the value
+        private static AddressingResult AddressingZeroAddressOnly(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch(bus, registers);
+            return new AddressingResult
+            {
+                Address = address,
+            };
+        }
+
+        private static AddressingResult AddressingZeroWithValue(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch(bus, registers);
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Address = address,
+                Value = value,
+            };
         }
     }
 }
