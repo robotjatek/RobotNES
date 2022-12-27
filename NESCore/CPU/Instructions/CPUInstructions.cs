@@ -145,36 +145,6 @@
             return 4; //1(opcode fetch) + 2 (2 byte fetch from memory) + 1 (1 byte write to memory)
         }
 
-       
-
-        private static byte PHA(IBUS bus, IRegisters registers)
-        {
-            Push8(bus, registers, registers.A);
-            return 3;
-        }
-
-        private static byte PHP(IBUS bus, IRegisters registers)
-        {
-            Push8(bus, registers, registers.STATUS);
-            return 3;
-        }
-
-        private static byte PLA(IBUS bus, IRegisters registers)
-        {
-            var value = Pop8(bus, registers);
-            registers.A = value;
-            registers.SetNegativeFlag((sbyte)value < 0);
-            registers.SetZeroFlag(value == 0);
-            return 4;
-        }
-
-        private static byte PLP(IBUS bus, IRegisters registers)
-        {
-            var value = Pop8(bus, registers);
-            registers.STATUS = value;
-            return 4;
-        }
-
         private static byte TAX(IBUS bus, IRegisters registers)
         {
             registers.X = registers.A;
