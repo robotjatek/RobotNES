@@ -2,7 +2,7 @@
 {
     //TODO: extract cpu addressing modes to their own methods
 
-    public class CPUInstructions
+    public partial class CPUInstructions
     {
         //Instructions for the CPU. All instructions return with the elapsed cycles.
         //NOTE: inside the methods the PC points to the first parameter
@@ -125,42 +125,6 @@
             {
                 return r.GetNegativeFlag() == true;
             });
-        }
-
-        private static byte CLC(IBUS bus, IRegisters registers)
-        {
-            registers.SetCarryFlag(false);
-            return 2;
-        }
-
-        private static byte CLD(IBUS bus, IRegisters registers)
-        {
-            registers.SetDecimalFlag(false);
-            return 2;
-        }
-
-        private static byte CLV(IBUS bus, IRegisters registers)
-        {
-            registers.SetOverflowFlag(false);
-            return 2;
-        }
-
-        private static byte SEC(IBUS bus, IRegisters registers)
-        {
-            registers.SetCarryFlag(true);
-            return 2;
-        }
-
-        private static byte SEI(IBUS bus, IRegisters registers)
-        {
-            registers.SetInterruptDisableFlag(true);
-            return 2;
-        }
-
-        private static byte SED(IBUS bus, IRegisters registers)
-        {
-            registers.SetDecimalFlag(true);
-            return 2;
         }
 
         private static byte JMP_ABS(IBUS bus, IRegisters registers)
