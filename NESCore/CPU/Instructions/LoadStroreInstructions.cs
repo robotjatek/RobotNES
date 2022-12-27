@@ -44,7 +44,7 @@
             return 4;
         }
 
-        private static void LDY(byte value, IBUS bus, IRegisters registers)
+        private static void LDY(byte value, IRegisters registers)
         {
             registers.Y = value;
             registers.SetZeroFlag(value == 0);
@@ -54,7 +54,7 @@
         private static byte LDY_IMM(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingImmediate(bus, registers);
-            LDY(addressingResult.Value, bus, registers);
+            LDY(addressingResult.Value, registers);
             return 2;
         }
 
