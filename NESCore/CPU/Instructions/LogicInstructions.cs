@@ -20,7 +20,7 @@
 
         private static byte AND_IMM(IBUS bus, IRegisters registers)
         {
-            var mask = Fetch(bus, registers);
+            var mask = AddressingImmediate(bus, registers).Value;
             var value = (byte)(registers.A & mask);
             registers.A = value;
             registers.SetZeroFlag(value == 0);
@@ -30,7 +30,7 @@
 
         private static byte ORA_IMM(IBUS bus, IRegisters registers)
         {
-            var mask = Fetch(bus, registers);
+            var mask = AddressingImmediate(bus, registers).Value;
             var value = (byte)(registers.A | mask);
             registers.A = value;
             registers.SetZeroFlag(value == 0);
@@ -40,7 +40,7 @@
 
         private static byte EOR_IMM(IBUS bus, IRegisters registers)
         {
-            var mask = Fetch(bus, registers);
+            var mask = AddressingImmediate(bus, registers).Value;
             var value = (byte)(registers.A ^ mask);
             registers.A = value;
             registers.SetZeroFlag(value == 0);
