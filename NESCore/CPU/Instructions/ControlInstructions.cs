@@ -20,6 +20,14 @@
             return 6;
         }
 
+        private static byte RTI(IBUS bus, IRegisters registers)
+        {
+            registers.STATUS = Pop8(bus, registers);
+            registers.PC = Pop16(bus, registers);
+
+            return 6;
+        }
+
         private static byte RTS(IBUS bus, IRegisters registers)
         {
             var address = (ushort)(Pop16(bus, registers) + 1);

@@ -61,6 +61,7 @@
             InstructionSet[Opcodes.TXS] = TXS;
             InstructionSet[Opcodes.LDX_ABS] = LDX_ABS;
             InstructionSet[Opcodes.LDA_ABS] = LDA_ABS;
+            InstructionSet[Opcodes.RTI] = RTI;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

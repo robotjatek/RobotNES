@@ -108,5 +108,12 @@ namespace NESCoreTests.Unit.CPUTest
             sut.STATUS.Should().Be(0b00000000 | StatusRegisterInitialValue);
         }
 
+        [Fact]
+        public void Bit5AlwaysTrue()
+        {
+            var sut = new Registers();
+            sut.STATUS = 0;
+            sut.STATUS.Should().Be(0x20);
+        }
     }
 }

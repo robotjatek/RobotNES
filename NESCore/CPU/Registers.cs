@@ -13,6 +13,7 @@
 
     public class Registers : IRegisters
     {
+        private byte _status = 0x24;  //Bit 5 is always set
         public ushort PC { get; set; } = 0;
 
         public byte A { get; set; } = 0;
@@ -21,7 +22,17 @@
 
         public byte Y { get; set; } = 0;
 
-        public byte STATUS { get; set; } = 0x24; //Bit 5 is always set
+        public byte STATUS
+        {
+            get
+            {
+                return (byte)(_status | 0x20);
+            }
+            set
+            {
+                _status = (byte)(value | 0x20);
+            }
+        }
 
         public byte SP { get; set; } = 0xFD;
 

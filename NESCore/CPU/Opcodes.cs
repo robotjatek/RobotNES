@@ -84,6 +84,7 @@
         #region Control
         public const int JMP_ABS = 0x4C;
         public const int JSR_ABS = 0x20;
+        public const int RTI = 0x40;
         public const int RTS = 0x60;
         //TODO: JMP_ABS_INDIRECT
         #endregion

@@ -25,11 +25,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         [Fact]
         public void JSR_ABS()
         {
-            var registersMock = new Mock<IRegisters>();
-
-            var registers = new Mock<Registers>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
             registers.Object.PC = 0xd000;
             registers.Object.STATUS = 0;
+            registers.Object.SP = 0xfe;
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
@@ -37,8 +37,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var jsr_abs = new CPUInstructions().InstructionSet[Opcodes.JSR_ABS];
             var cycles = jsr_abs(bus.Object, registers.Object);
 
-            bus.Verify(b => b.Write(0x100 | 0xfd, 0xd0));
-            bus.Verify(b => b.Write(0x100 | 0xfc, 0x01));
+            bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
+            bus.Verify(b => b.Write(0x100 | 0xfd, 0x01));
 
             registers.Object.PC.Should().Be(0xdead);
             registers.Object.STATUS.Should().Be(0);
@@ -61,6 +61,27 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             registers.Object.PC.Should().Be(0xdead + 1);
             registers.Object.SP.Should().Be(0xFF);
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RTI()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xaa) //content that goes to the STATUS register
+                .Returns(0xad) //low address byte
+                .Returns(0xde); //high address byte
+
+            var rti = new CPUInstructions().InstructionSet[Opcodes.RTI];
+            var cycles = rti(bus.Object, registers.Object);
+            registers.Object.PC.Should().Be(0xdead);
+            registers.Object.STATUS.Should().Be(0xAA);
+            registers.Object.SP.Should().Be(3);
 
             cycles.Should().Be(6);
         }
