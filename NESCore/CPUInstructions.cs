@@ -1,4 +1,6 @@
-﻿namespace NESCore
+﻿using Microsoft.Win32;
+
+namespace NESCore
 {
     public class Opcodes
     {
@@ -50,6 +52,7 @@
         public const int STX_ABS = 0x8E;
         public const int TXS = 0x9A;
         public const int LDX_ABS = 0xAE;
+        public const int LDA_ABS = 0xAD;
     }
 
     //TODO: extract cpu addressing modes to their own methods
@@ -112,6 +115,7 @@
             InstructionSet[Opcodes.STX_ABS] = STX_ABS;
             InstructionSet[Opcodes.TXS] = TXS;
             InstructionSet[Opcodes.LDX_ABS] = LDX_ABS;
+            InstructionSet[Opcodes.LDA_ABS] = LDA_ABS;
         }
 
         private static byte BCC(IBUS bus, IRegisters registers)
@@ -222,42 +226,89 @@
             return 3;
         }
 
+        class AddressingResult
+        {
+            public byte Value { get; init; }
+            public byte Cycles { get; init; }
+        }
+
+        private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
+        {
+            return new AddressingResult
+            {
+                Value = Fetch(bus, registers),
+                Cycles = 1,
+            };
+        }
+
+        private static AddressingResult AddressingAbsolute(IBUS bus, IRegisters registers)
+        {
+            var address = Fetch16(bus, registers);
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Value = value,
+                Cycles = 3,
+            };
+        }
+
+        private static byte LDA(byte value, IRegisters registers)
+        {
+            registers.A = value;
+            registers.SetZeroFlag(value == 0);
+            registers.SetNegativeFlag(((sbyte)value) < 0);
+            return 1;
+        }
+
         private static byte LDA_IMM(IBUS bus, IRegisters registers)
         {
-            var immediateValue = Fetch(bus, registers);
-            registers.A = immediateValue;
-            registers.SetZeroFlag(immediateValue == 0);
-            registers.SetNegativeFlag(((sbyte)immediateValue) < 0);
-            return 2;
+            var addressingResult = AddressingImmediate(bus, registers);
+            var instructionCycles = LDA(addressingResult.Value, registers);
+            return (byte)(instructionCycles + addressingResult.Cycles);
+        }
+
+        private static byte LDA_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            var instructionCycles = LDA(addressingResult.Value, registers);
+            return (byte)(instructionCycles + addressingResult.Cycles);
+        }
+
+        private static byte LDX(byte value, IRegisters registers)
+        {
+            registers.X = value;
+            registers.SetZeroFlag(value == 0);
+            registers.SetNegativeFlag((sbyte)value < 0);
+            return 1;
         }
 
         private static byte LDX_IMM(IBUS bus, IRegisters registers)
         {
-            var immediateValue = Fetch(bus, registers);
-            registers.X = immediateValue;
-            registers.SetZeroFlag(immediateValue == 0);
-            registers.SetNegativeFlag((sbyte)immediateValue < 0);
-            return 2;
+            var addressingResult = AddressingImmediate(bus, registers);
+            var instructionCycles = LDX(addressingResult.Value, registers);
+            return (byte)(instructionCycles + addressingResult.Cycles);
         }
 
         private static byte LDX_ABS(IBUS bus, IRegisters registers)
         {
-            var address = Fetch16(bus, registers);
+           var addressingResult = AddressingAbsolute(bus,registers);
+            var instructionCycles = LDX(addressingResult.Value, registers);
+            return (byte)(instructionCycles + addressingResult.Cycles);
+        }
 
-            var value = bus.Read(address);
-            registers.X = value;
+        private static byte LDY(byte value, IBUS bus, IRegisters registers) 
+        {
+            registers.Y = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
-            return 2;
+            return 1;
         }
 
         private static byte LDY_IMM(IBUS bus, IRegisters registers)
         {
-            var immediateValue = Fetch(bus, registers);
-            registers.Y = immediateValue;
-            registers.SetZeroFlag(immediateValue == 0);
-            registers.SetNegativeFlag((sbyte)immediateValue < 0);
-            return 2;
+            var addressingResult = AddressingImmediate(bus,registers);
+            var instructionCycles = LDY(addressingResult.Value, bus, registers);
+            return (byte)(instructionCycles + addressingResult.Cycles);
         }
 
         private static byte STA_ZERO(IBUS bus, IRegisters registers)
