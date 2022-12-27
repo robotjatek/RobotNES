@@ -50,7 +50,7 @@
         //TODO: more ora modes
         #endregion
 
-        #region Arith
+        #region Aritm
         public const int ADC_IMM = 0x69;
         //TODO: more adc modes
         public const int CMP_IMM = 0xC9;
