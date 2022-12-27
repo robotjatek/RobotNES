@@ -63,8 +63,6 @@
             InstructionSet[Opcodes.LDA_ABS] = LDA_ABS;
         }
 
-               
-
         private static byte NOP(IBUS bus, IRegisters registers)
         {
             return 2;

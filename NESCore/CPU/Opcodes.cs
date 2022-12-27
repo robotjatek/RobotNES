@@ -109,7 +109,6 @@
         public const int SEI = 0x78;
         #endregion
 
-
         public const int NOP = 0xEA;
     }
 }
