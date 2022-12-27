@@ -1,4 +1,4 @@
-﻿namespace NESCore
+﻿namespace NESCore.CPU
 {
     public interface ICPU
     {

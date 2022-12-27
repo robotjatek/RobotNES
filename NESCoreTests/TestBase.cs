@@ -2,6 +2,7 @@
 
 using NESCore;
 using NESCore.Cartridge;
+using NESCore.CPU;
 using Serilog;
 
 namespace NESCoreTests

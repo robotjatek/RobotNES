@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
-
-using NESCore;
+using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest
 {

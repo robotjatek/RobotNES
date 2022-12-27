@@ -1,4 +1,5 @@
 ﻿using NESCore.Cartridge;
+using NESCore.CPU;
 using NESCore.Mappers;
 
 using Serilog;
@@ -29,7 +30,7 @@ namespace NESCore
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
-            _cpu = new CPU(_bus, instructions);
+            _cpu = new CPU.CPU(_bus, instructions);
         }
 
         public void Run()

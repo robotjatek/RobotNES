@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 
 using NESCore;
+using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest
 {

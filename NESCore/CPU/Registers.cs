@@ -1,40 +1,5 @@
-﻿namespace NESCore
+﻿namespace NESCore.CPU
 {
-    public interface IRegisters
-    {
-        UInt16 PC { get; set; }
-        byte A { get; set; }
-        byte X { get; set; }
-        byte Y { get; set; }
-
-        /*
-         * Bit 0 Carry
-         * Bit 1 Zero
-         * Bit 2 Interrupt disable
-         * Bit 3 Decimal
-         * Bit 4 --
-         * Bit 5 --
-         * Bit 6 Overflow
-         * Bit 7 Negative
-         */
-        byte STATUS { get; set; }
-        byte SP { get; set; }
-
-        void SetCarryFlag(bool flag);
-        void SetZeroFlag(bool flag);
-        void SetInterruptDisableFlag(bool flag);
-        void SetDecimalFlag(bool flag);
-        void SetOverflowFlag(bool flag);
-        void SetNegativeFlag(bool flag);
-
-        bool GetCarryFlag();
-        bool GetZeroFlag();
-        bool GetInterruptDisableFlag();
-        bool GetDecimalFlag();
-        bool GetOverflowFlag();
-        bool GetNegativeFlag();
-    }
-
     public class FlagPositions
     {
         public const byte CARRY = 0b00000001;
@@ -48,7 +13,7 @@
 
     public class Registers : IRegisters
     {
-        public UInt16 PC { get; set; } = 0;
+        public ushort PC { get; set; } = 0;
 
         public byte A { get; set; } = 0;
 
@@ -62,7 +27,7 @@
 
         public void SetCarryFlag(bool flag)
         {
-            if(flag)
+            if (flag)
             {
                 EnableFlag(FlagPositions.CARRY);
             }
@@ -172,45 +137,6 @@
         public bool GetNegativeFlag()
         {
             return (STATUS & FlagPositions.NEGATIVE) > 0;
-        }
-    }
-
-    public class CPU : ICPU
-    {
-        private readonly IBUS _bus;
-        private readonly IRegisters _registers = new Registers();
-        private readonly Func<IBUS, IRegisters, byte>[] _instructions;
-
-        public CPU(IBUS bus, Func<IBUS, IRegisters, byte>[] instuctions)
-        {
-            _bus = bus;
-            _instructions = instuctions;
-            //_registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc)); // Reset vector //TODO: uncomment this after instructionset implementation
-            _registers.PC = 0xc000; //nestest.nes start //TODO: delete this after instructionset implementation
-        }
-
-        public void Cycle()
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint RunInstruction()
-        {
-            var instructionCode = Fetch();
-            var instruction = _instructions[instructionCode];
-
-            if(instruction == null)
-            {
-                throw new NotImplementedException($"0x{instructionCode:X}@0x{_registers.PC-1:X}");
-            }
-
-            var elapsedCycles = instruction(_bus, _registers);
-            return elapsedCycles;
-        }
-
-        private byte Fetch()
-        {
-            return _bus.Read(_registers.PC++);
         }
     }
 }

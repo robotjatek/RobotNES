@@ -1,118 +1,5 @@
-﻿namespace NESCore
+﻿namespace NESCore.CPU
 {
-    public class Opcodes
-    {
-        #region Load/Store
-        public const int LDA_IMM = 0xA9;
-        public const int LDA_ABS = 0xAD;
-        //TODO: more LDA modes
-        public const int LDX_IMM = 0xA2;
-        public const int LDX_ABS = 0xAE;
-        //TODO: more ldx modes
-        public const int LDY_IMM = 0xA0;
-        //TODO: more LDY modes
-        public const int STA_ZERO = 0x85;
-        //TODO: More STA modes
-        public const int STX_ZERO = 0x86;
-        public const int STX_ABS = 0x8E;
-        //TODO: more stx modes
-        //TODO: STY
-        #endregion
-
-        #region Transfer
-        public const int TAX = 0xAA;
-        public const int TAY = 0xA8;
-        public const int TSX = 0xBA;
-        public const int TXA = 0x8A;
-        public const int TXS = 0x9A;
-        public const int TYA = 0x98;
-        #endregion
-
-        #region Stack
-        public const int PHA = 0x48;
-        public const int PHP = 0x08;
-        public const int PLA = 0x68;
-        public const int PLP = 0x28;
-        #endregion
-
-        #region Shift
-        //TODO: shift instructions
-        #endregion
-
-        #region Logic
-        public const int AND_IMM = 0x29;
-        //TODO: more AND modes
-        public const int BIT_ZERO = 0x24;
-        //TODO: BIT abs
-        public const int EOR_IMM = 0x49;
-        //TODO: more eor modes
-        public const int ORA_IMM = 0x09;
-        //TODO: more ora modes
-        #endregion
-
-        #region Arith
-        public const int ADC_IMM = 0x69;
-        //TODO: more adc modes
-        public const int CMP_IMM = 0xC9;
-        //TODO: more cmp modes
-        public const int CPX_IMM = 0xE0;
-        //TODO: cpx abs
-        //TODO: cpx zero
-        public const int CPY_IMM = 0xC0;
-        //TODO: cpy abs
-        //TODO: cpy zero
-        public const int SBC_IMM = 0xE9;
-        //TODO: more sbc modes
-        #endregion
-
-        #region Inc
-        //TODO: dec abs
-        //TODO: x abs dec
-        //TODO: zero dec
-        //TODO: x zero dec
-        public const int DEX = 0xCA;
-        public const int DEY = 0x88;
-        //TODO: inc abs
-        //TODO: x abs inc
-        //TODO: zero inc
-        //TODO: x zero inc
-        public const int INX = 0xE8;
-        public const int INY = 0xC8;
-
-        #endregion
-
-        #region Control
-        public const int JMP_ABS = 0x4C;
-        public const int JSR_ABS = 0x20;
-        public const int RTS = 0x60;
-        //TODO: JMP_ABS_INDIRECT
-        #endregion
-
-        #region Branch
-        public const int BCC = 0x90;
-        public const int BCS = 0xB0;
-        public const int BEQ = 0xF0;
-        public const int BMI = 0x30;
-        public const int BNE = 0xD0;
-        public const int BPL = 0x10;
-        public const int BVC = 0x50;
-        public const int BVS = 0x70;
-        #endregion
-
-        #region Flags
-        public const int CLC = 0x18;
-        public const int CLD = 0xD8;
-        //TODO: CLI
-        public const int CLV = 0xB8;
-        public const int SEC = 0x38;
-        public const int SED = 0xF8;
-        public const int SEI = 0x78;
-        #endregion
-
-
-        public const int NOP = 0xEA;
-    }
-
     //TODO: extract cpu addressing modes to their own methods
 
     public class CPUInstructions
@@ -288,7 +175,7 @@
         {
             registers.A = value;
             registers.SetZeroFlag(value == 0);
-            registers.SetNegativeFlag(((sbyte)value) < 0);
+            registers.SetNegativeFlag((sbyte)value < 0);
         }
 
         private static byte LDA_IMM(IBUS bus, IRegisters registers)
@@ -340,7 +227,7 @@
             return 2;
         }
 
-        private static void STA(UInt16 address, IBUS bus, IRegisters registers)
+        private static void STA(ushort address, IBUS bus, IRegisters registers)
         {
             bus.Write(address, registers.A);
         }
@@ -452,7 +339,7 @@
         {
             var address = Fetch16(bus, registers);
 
-            Push16(bus, registers, (UInt16)(registers.PC - 1));
+            Push16(bus, registers, (ushort)(registers.PC - 1));
             registers.PC = address;
 
             return 6;
@@ -460,7 +347,7 @@
 
         private static byte RTS(IBUS bus, IRegisters registers)
         {
-            var address = (UInt16)(Pop16(bus, registers) + 1);
+            var address = (ushort)(Pop16(bus, registers) + 1);
             registers.PC = address;
 
             return 6;
@@ -482,7 +369,7 @@
         {
             var value = Pop8(bus, registers);
             registers.A = value;
-            registers.SetNegativeFlag(((sbyte)value) < 0);
+            registers.SetNegativeFlag((sbyte)value < 0);
             registers.SetZeroFlag(value == 0);
             return 4;
         }
@@ -524,7 +411,7 @@
                 result++;
             }
 
-            registers.SetCarryFlag(((sbyte)result) >= 0);
+            registers.SetCarryFlag((sbyte)result >= 0);
             registers.SetZeroFlag(result == 0);
             registers.SetNegativeFlag((result & 0x80) > 0);
             //var overflow = ((registers.A ^ result) & (operand ^ result) & 0x80) > 0; // overflow can be detected this way, but it looks like the solution below is sufficient when I downcast the result to sbyte in carry check and use range check in the overflow check on the original int result.
@@ -618,11 +505,11 @@
             return 2;
         }
 
-        private static UInt16 Fetch16(IBUS bus, IRegisters registers)
+        private static ushort Fetch16(IBUS bus, IRegisters registers)
         {
             var low = Fetch(bus, registers);
             var high = Fetch(bus, registers);
-            return (UInt16)(high << 8 | low);
+            return (ushort)(high << 8 | low);
         }
 
         private static byte Fetch(IBUS bus, IRegisters registers)
@@ -630,7 +517,7 @@
             return bus.Read(registers.PC++);
         }
 
-        private static void Push16(IBUS bus, IRegisters registers, UInt16 value)
+        private static void Push16(IBUS bus, IRegisters registers, ushort value)
         {
             var pcLow = (byte)(value & 0xff);
             var pcHigh = (byte)((value & 0xff00) >> 8);
@@ -641,15 +528,15 @@
 
         private static void Push8(IBUS bus, IRegisters registers, byte value)
         {
-            bus.Write((UInt16)(0x100 | registers.SP--), value);
+            bus.Write((ushort)(0x100 | registers.SP--), value);
         }
 
-        private static UInt16 Pop16(IBUS bus, IRegisters registers)
+        private static ushort Pop16(IBUS bus, IRegisters registers)
         {
             var low = Pop8(bus, registers);
             var high = Pop8(bus, registers);
 
-            var address = (UInt16)(high << 8 | low);
+            var address = (ushort)(high << 8 | low);
             return address;
         }
 
@@ -657,7 +544,7 @@
         {
             var sp = registers.SP + 1;
             registers.SP++;
-            return bus.Read((UInt16)(0x100 | sp));
+            return bus.Read((ushort)(0x100 | sp));
         }
 
         private static byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
@@ -681,7 +568,7 @@
         class AddressingResult
         {
             public byte Value { get; init; }
-            public UInt16 Address { get; init; }
+            public ushort Address { get; init; }
         }
 
         private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
