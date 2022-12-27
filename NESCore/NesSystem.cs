@@ -1,5 +1,6 @@
 ﻿using NESCore.Cartridge;
 using NESCore.CPU;
+using NESCore.CPU.Instructions;
 using NESCore.Mappers;
 
 using Serilog;

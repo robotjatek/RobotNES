@@ -1,4 +1,4 @@
-﻿namespace NESCore.CPU
+﻿namespace NESCore.CPU.Instructions
 {
     //TODO: extract cpu addressing modes to their own methods
 

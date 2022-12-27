@@ -5,6 +5,7 @@ using Moq;
 
 using NESCore;
 using NESCore.CPU;
+using NESCore.CPU.Instructions;
 
 namespace NESCoreTests.Unit.CPUTest
 {
