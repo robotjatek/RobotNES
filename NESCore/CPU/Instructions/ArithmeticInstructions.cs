@@ -4,7 +4,7 @@
     {
         private static byte ADC_IMM(IBUS bus, IRegisters registers)
         {
-            var operand = Fetch(bus, registers);
+            var operand = AddressingImmediate(bus, registers).Value;
             var result = registers.A + operand;
 
             if (registers.GetCarryFlag() == true)
@@ -24,7 +24,7 @@
 
         private static byte SBC_IMM(IBUS bus, IRegisters registers)
         {
-            var operand = (sbyte)~Fetch(bus, registers);
+            var operand = (sbyte)~AddressingImmediate(bus, registers).Value;
             //var result = registers.A + operand;
             var result = (sbyte)registers.A + operand;
             if (registers.GetCarryFlag() == true)
@@ -45,7 +45,7 @@
 
         private static byte CMP_IMM(IBUS bus, IRegisters registers)
         {
-            var imm = Fetch(bus, registers);
+            var imm = AddressingImmediate(bus, registers).Value;
             var tmp = registers.A - imm;
 
             registers.SetZeroFlag(tmp == 0);
@@ -57,7 +57,7 @@
 
         private static byte CPX_IMM(IBUS bus, IRegisters registers)
         {
-            var imm = Fetch(bus, registers);
+            var imm = AddressingImmediate(bus, registers).Value;
             var tmp = registers.X - imm;
 
             registers.SetZeroFlag(tmp == 0);
@@ -69,7 +69,7 @@
 
         private static byte CPY_IMM(IBUS bus, IRegisters registers)
         {
-            var imm = Fetch(bus, registers);
+            var imm = AddressingImmediate(bus, registers).Value;
             var tmp = registers.Y - imm;
 
             registers.SetZeroFlag(tmp == 0);
