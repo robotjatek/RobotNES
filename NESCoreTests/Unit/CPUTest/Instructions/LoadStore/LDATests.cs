@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LDATests
+    public class LDATests : InstructionTestBase
     {
         [Fact]
         public void LDA_IMM()
@@ -15,7 +15,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x10);
 
-            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var lda_imm = _instructions[Opcodes.LDA_IMM];
             var cycles = lda_imm(bus.Object, registers.Object);
             registers.VerifySet(r => r.A = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
@@ -31,7 +31,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var lda_imm = _instructions[Opcodes.LDA_IMM];
             var cycles = lda_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.A = 0);
@@ -46,7 +46,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(unchecked((byte)-1));
 
-            var lda_imm = new CPUInstructions().InstructionSet[Opcodes.LDA_IMM];
+            var lda_imm = _instructions[Opcodes.LDA_IMM];
             var cycles = lda_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.A = unchecked((byte)-1));
@@ -61,7 +61,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
 
-            var lda_abs = new CPUInstructions().InstructionSet[Opcodes.LDA_ABS];
+            var lda_abs = _instructions[Opcodes.LDA_ABS];
             var cycles = lda_abs(bus.Object, registers.Object);
             registers.VerifySet(r => r.A = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
@@ -78,7 +78,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0);
 
-            var lda_abs = new CPUInstructions().InstructionSet[Opcodes.LDA_ABS];
+            var lda_abs = _instructions[Opcodes.LDA_ABS];
             var cycles = lda_abs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.A = 0);
@@ -94,13 +94,48 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(unchecked((byte)-1));
 
-            var lda_abs = new CPUInstructions().InstructionSet[Opcodes.LDA_ABS];
+            var lda_abs = _instructions[Opcodes.LDA_ABS];
             var cycles = lda_abs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.A = unchecked((byte)-1));
             registers.Verify(r => r.SetNegativeFlag(true));
             bus.Verify(b => b.Read(0xdead));
             cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void LDA_zero_loads_A_with_value_from_on_zero_page_address()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0) // address
+                .Returns(0xde); // value
+
+            var lda = _instructions[Opcodes.LDA_ZERO];
+            var cycles = lda(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xde);
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void LDA_zero_loads_A_with_value_from_on_zero_page_address_2()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x20) // address
+                .Returns(0xde); // value
+
+            var lda = _instructions[Opcodes.LDA_ZERO];
+            var cycles = lda(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xde);
+            bus.Verify(b => b.Read(0x20));
+
+            cycles.Should().Be(3);
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LDYTests
+    public class LDYTests : InstructionTestBase
     {
         [Fact]
         public void LDY_IMM()
@@ -15,7 +14,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x10);
 
-            var ldy_imm = new CPUInstructions().InstructionSet[Opcodes.LDY_IMM];
+            var ldy_imm = _instructions[Opcodes.LDY_IMM];
             var cycles = ldy_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = 0x10);
@@ -31,7 +30,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var ldy_imm = new CPUInstructions().InstructionSet[Opcodes.LDY_IMM];
+            var ldy_imm = _instructions[Opcodes.LDY_IMM];
             var cycles = ldy_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = 0);
@@ -46,7 +45,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(unchecked((byte)-1));
 
-            var ldy_imm = new CPUInstructions().InstructionSet[Opcodes.LDY_IMM];
+            var ldy_imm = _instructions[Opcodes.LDY_IMM];
             var cycles = ldy_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = unchecked((byte)-1));

@@ -23,6 +23,13 @@
             return 4;
         }
 
+        private static byte LDA_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            LDA(addressingResult.Value, registers);
+            return 3;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;

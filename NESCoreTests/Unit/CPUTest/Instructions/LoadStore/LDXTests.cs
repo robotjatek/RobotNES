@@ -1,12 +1,11 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LDXTests
+    public class LDXTests : InstructionsetTests
     {
         [Fact]
         public void LDX_IMM()
@@ -15,7 +14,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x10);
 
-            var ldx_imm = new CPUInstructions().InstructionSet[Opcodes.LDX_IMM];
+            var ldx_imm = _instructions[Opcodes.LDX_IMM];
             var cycles = ldx_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.X = 0x10);
@@ -31,7 +30,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var ldx_imm = new CPUInstructions().InstructionSet[Opcodes.LDX_IMM];
+            var ldx_imm = _instructions[Opcodes.LDX_IMM];
             var cycles = ldx_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.X = 0);
@@ -46,7 +45,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(unchecked((byte)-1));
 
-            var ldx_imm = new CPUInstructions().InstructionSet[Opcodes.LDX_IMM];
+            var ldx_imm = _instructions[Opcodes.LDX_IMM];
             var cycles = ldx_imm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.X = unchecked((byte)-1));
@@ -61,7 +60,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
 
-            var ldx_abs = new CPUInstructions().InstructionSet[Opcodes.LDX_ABS];
+            var ldx_abs = _instructions[Opcodes.LDX_ABS];
             var cycles = ldx_abs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead));
@@ -78,7 +77,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x0);
 
-            var ldx_abs = new CPUInstructions().InstructionSet[Opcodes.LDX_ABS];
+            var ldx_abs = _instructions[Opcodes.LDX_ABS];
             var cycles = ldx_abs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead));
@@ -94,7 +93,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(unchecked((byte)-1));
 
-            var ldx_abs = new CPUInstructions().InstructionSet[Opcodes.LDX_ABS];
+            var ldx_abs = _instructions[Opcodes.LDX_ABS];
             var cycles = ldx_abs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead));

@@ -1,12 +1,11 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class STATests
+    public class STATests : InstructionTestBase
     {
         [Fact]
         public void STA_ZERO()
@@ -15,7 +14,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Setup(r => r.A).Returns(10);
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
-            var sut = new CPUInstructions().InstructionSet[Opcodes.STA_ZERO];
+            var sut = _instructions[Opcodes.STA_ZERO];
             var cycles = sut(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0x00de, 10));
 
