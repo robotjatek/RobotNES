@@ -1,12 +1,11 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class ArtithmeticTests : InstructionTestBase
+    public class ArtitmeticTests : InstructionTestBase
     {
         [Fact]
         public void ADC_IMM_adds_two_numbers()

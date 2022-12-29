@@ -1,5 +1,4 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
