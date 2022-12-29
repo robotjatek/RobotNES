@@ -13,6 +13,7 @@
         public const int LDY_IMM = 0xA0;
         //TODO: more LDY modes
         public const int STA_ZERO = 0x85;
+        public const int STA_ABS = 0x8D;
         //TODO: More STA modes
         public const int STX_ZERO = 0x86;
         public const int STX_ABS = 0x8E;

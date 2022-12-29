@@ -77,6 +77,13 @@
             return 3;
         }
 
+        private static byte STA_ABS(IBUS bus, IRegisters registers)
+        {
+            var address = AddressingAbsoulteAddressOnly(bus, registers).Address;
+            STA(address, bus, registers);
+            return 4;
+        }
+
         private static byte STX_ZERO(IBUS bus, IRegisters registers)
         {
             var address = AddressingZeroAddressOnly(bus, registers).Address;
