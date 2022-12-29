@@ -65,6 +65,7 @@
             InstructionSet[Opcodes.LSR_A] = LSR_A;
             InstructionSet[Opcodes.ASL_A] = ASL_A;
             InstructionSet[Opcodes.ROR_A] = ROR_A;
+            InstructionSet[Opcodes.ROL_A] = ROL_A;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

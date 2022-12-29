@@ -8,7 +8,7 @@
             registers.SetNegativeFlag(false);
             var result = (byte)(value >> 1);
             registers.SetZeroFlag(result == 0);
-            return (byte)result;
+            return result;
         }
 
         private static byte LSR_A(IBUS bus, IRegisters registers)
@@ -29,6 +29,26 @@
         private static byte ASL_A(IBUS bus, IRegisters registers)
         {
             registers.A = ASL(registers.A, registers);
+            return 2;
+        }
+
+        private static byte ROL(byte value, IRegisters registers)
+        {
+            var carryAfterShift = (value & 0x80) > 0;
+            var result = (byte)(value << 1);
+            if(registers.GetCarryFlag())
+            {
+                result |= 0x1;
+            }
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            registers.SetZeroFlag(result == 0);
+            registers.SetCarryFlag(carryAfterShift);
+            return result;
+        }
+
+        private static byte ROL_A(IBUS bus, IRegisters registers)
+        {
+            registers.A = ROL(registers.A, registers);
             return 2;
         }
 

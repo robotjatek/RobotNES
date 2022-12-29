@@ -39,6 +39,7 @@
         //TODO: shift instructions
         public const int ASL_A = 0x0A;
         public const int LSR_A = 0x4A;
+        public const int ROL_A = 0x2A;
         public const int ROR_A = 0x6A;
         #endregion
 
