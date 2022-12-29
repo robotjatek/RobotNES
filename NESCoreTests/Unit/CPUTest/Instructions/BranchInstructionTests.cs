@@ -7,7 +7,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class BranchInstructionTests
+    public class BranchInstructionTests : InstructionTestBase
     {
         [Fact]
         public void BCC_doesNotTakeTheBranch()
@@ -18,7 +18,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcc = new CPUInstructions().InstructionSet[Opcodes.BCC];
+            var bcc = _instructions[Opcodes.BCC];
             var cycles = bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -49,7 +49,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = new CPUInstructions().InstructionSet[Opcodes.BCC];
+            var bcc = _instructions[Opcodes.BCC];
             var cycles = bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -80,7 +80,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = new CPUInstructions().InstructionSet[Opcodes.BCC];
+            var bcc = _instructions[Opcodes.BCC];
             var cycles = bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -111,7 +111,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = new CPUInstructions().InstructionSet[Opcodes.BCC];
+            var bcc = _instructions[Opcodes.BCC];
             var cycles = bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -142,7 +142,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = new CPUInstructions().InstructionSet[Opcodes.BCC];
+            var bcc = _instructions[Opcodes.BCC];
             var cycles = bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -171,7 +171,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var bcs = new CPUInstructions().InstructionSet[Opcodes.BCS];
+            var bcs = _instructions[Opcodes.BCS];
             var cycles = bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -202,7 +202,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = new CPUInstructions().InstructionSet[Opcodes.BCS];
+            var bcs = _instructions[Opcodes.BCS];
             var cycles = bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -233,7 +233,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = new CPUInstructions().InstructionSet[Opcodes.BCS];
+            var bcs = _instructions[Opcodes.BCS];
             var cycles = bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -264,7 +264,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = new CPUInstructions().InstructionSet[Opcodes.BCS];
+            var bcs = _instructions[Opcodes.BCS];
             var cycles = bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -295,7 +295,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = new CPUInstructions().InstructionSet[Opcodes.BCS];
+            var bcs = _instructions[Opcodes.BCS];
             var cycles = bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -324,7 +324,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var beq = new CPUInstructions().InstructionSet[Opcodes.BEQ];
+            var beq = _instructions[Opcodes.BEQ];
             var cycles = beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -355,7 +355,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = new CPUInstructions().InstructionSet[Opcodes.BEQ];
+            var beq = _instructions[Opcodes.BEQ];
             var cycles = beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -386,7 +386,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = new CPUInstructions().InstructionSet[Opcodes.BEQ];
+            var beq = _instructions[Opcodes.BEQ];
             var cycles = beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -417,7 +417,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = new CPUInstructions().InstructionSet[Opcodes.BEQ];
+            var beq = _instructions[Opcodes.BEQ];
             var cycles = beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -448,7 +448,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = new CPUInstructions().InstructionSet[Opcodes.BEQ];
+            var beq = _instructions[Opcodes.BEQ];
             var cycles = beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -478,7 +478,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bmi = new CPUInstructions().InstructionSet[Opcodes.BMI];
+            var bmi = _instructions[Opcodes.BMI];
             var cycles = bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -509,7 +509,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = new CPUInstructions().InstructionSet[Opcodes.BMI];
+            var bmi = _instructions[Opcodes.BMI];
             var cycles = bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -540,7 +540,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = new CPUInstructions().InstructionSet[Opcodes.BMI];
+            var bmi = _instructions[Opcodes.BMI];
             var cycles = bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -571,7 +571,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = new CPUInstructions().InstructionSet[Opcodes.BMI];
+            var bmi = _instructions[Opcodes.BMI];
             var cycles = bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -602,7 +602,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = new CPUInstructions().InstructionSet[Opcodes.BMI];
+            var bmi = _instructions[Opcodes.BMI];
             var cycles = bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -632,7 +632,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var bne = new CPUInstructions().InstructionSet[Opcodes.BNE];
+            var bne = _instructions[Opcodes.BNE];
             var cycles = bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -663,7 +663,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = new CPUInstructions().InstructionSet[Opcodes.BNE];
+            var bne = _instructions[Opcodes.BNE];
             var cycles = bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -694,7 +694,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = new CPUInstructions().InstructionSet[Opcodes.BNE];
+            var bne = _instructions[Opcodes.BNE];
             var cycles = bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -725,7 +725,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = new CPUInstructions().InstructionSet[Opcodes.BNE];
+            var bne = _instructions[Opcodes.BNE];
             var cycles = bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -756,7 +756,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = new CPUInstructions().InstructionSet[Opcodes.BNE];
+            var bne = _instructions[Opcodes.BNE];
             var cycles = bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -786,7 +786,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bpl = new CPUInstructions().InstructionSet[Opcodes.BPL];
+            var bpl = _instructions[Opcodes.BPL];
             var cycles = bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -817,7 +817,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = new CPUInstructions().InstructionSet[Opcodes.BPL];
+            var bpl = _instructions[Opcodes.BPL];
             var cycles = bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -848,7 +848,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = new CPUInstructions().InstructionSet[Opcodes.BPL];
+            var bpl = _instructions[Opcodes.BPL];
             var cycles = bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -879,7 +879,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = new CPUInstructions().InstructionSet[Opcodes.BPL];
+            var bpl = _instructions[Opcodes.BPL];
             var cycles = bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -910,7 +910,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = new CPUInstructions().InstructionSet[Opcodes.BPL];
+            var bpl = _instructions[Opcodes.BPL];
             var cycles = bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -940,7 +940,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var bvc = _instructions[Opcodes.BVC];
             var cycles = bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -971,7 +971,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var bvc = _instructions[Opcodes.BVC];
             var cycles = bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -1002,7 +1002,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var bvc = _instructions[Opcodes.BVC];
             var cycles = bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -1033,7 +1033,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var bvc = _instructions[Opcodes.BVC];
             var cycles = bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -1064,7 +1064,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = new CPUInstructions().InstructionSet[Opcodes.BVC];
+            var bvc = _instructions[Opcodes.BVC];
             var cycles = bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
@@ -1093,7 +1093,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var bvs = new CPUInstructions().InstructionSet[Opcodes.BVS];
+            var bvs = _instructions[Opcodes.BVS];
             var cycles = bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
@@ -1124,7 +1124,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = new CPUInstructions().InstructionSet[Opcodes.BVS];
+            var bvs = _instructions[Opcodes.BVS];
             var cycles = bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
@@ -1155,7 +1155,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = new CPUInstructions().InstructionSet[Opcodes.BVS];
+            var bvs = _instructions[Opcodes.BVS];
             var cycles = bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
@@ -1186,7 +1186,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = new CPUInstructions().InstructionSet[Opcodes.BVS];
+            var bvs = _instructions[Opcodes.BVS];
             var cycles = bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
@@ -1217,7 +1217,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = new CPUInstructions().InstructionSet[Opcodes.BVS];
+            var bvs = _instructions[Opcodes.BVS];
             var cycles = bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);

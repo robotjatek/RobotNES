@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class TransferInstructionTests
+    public class TransferInstructionTests : InstructionTestBase
     {
         [Fact]
         public void TAX_transfers_a_to_x()
@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x50;
             registers.Object.X = 0xff;
 
-            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var tax = _instructions[Opcodes.TAX];
             var cycles = tax(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x50);
 
@@ -33,7 +33,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x0;
             registers.Object.X = 0xff;
 
-            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var tax = _instructions[Opcodes.TAX];
             var cycles = tax(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -50,7 +50,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x80;
             registers.Object.X = 0xff;
 
-            var tax = new CPUInstructions().InstructionSet[Opcodes.TAX];
+            var tax = _instructions[Opcodes.TAX];
             var cycles = tax(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -67,7 +67,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x50;
             registers.Object.Y = 0xff;
 
-            var tay = new CPUInstructions().InstructionSet[Opcodes.TAY];
+            var tay = _instructions[Opcodes.TAY];
             var cycles = tay(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0x50);
 
@@ -83,7 +83,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x0;
             registers.Object.Y = 0xff;
 
-            var tay = new CPUInstructions().InstructionSet[Opcodes.TAY];
+            var tay = _instructions[Opcodes.TAY];
             var cycles = tay(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -100,7 +100,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x80;
             registers.Object.Y = 0xff;
 
-            var tay = new CPUInstructions().InstructionSet[Opcodes.TAY];
+            var tay = _instructions[Opcodes.TAY];
             var cycles = tay(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -117,7 +117,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0x50;
             registers.Object.X = 0xff;
 
-            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var tsx = _instructions[Opcodes.TSX];
             var cycles = tsx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x50);
 
@@ -133,7 +133,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0x0;
             registers.Object.X = 0xff;
 
-            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var tsx = _instructions[Opcodes.TSX];
             var cycles = tsx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -150,7 +150,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0x80;
             registers.Object.X = 0xff;
 
-            var tsx = new CPUInstructions().InstructionSet[Opcodes.TSX];
+            var tsx = _instructions[Opcodes.TSX];
             var cycles = tsx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -167,7 +167,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 0x50;
 
-            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var txa = _instructions[Opcodes.TXA];
             var cycles = txa(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x50);
 
@@ -183,7 +183,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 0x0;
 
-            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var txa = _instructions[Opcodes.TXA];
             var cycles = txa(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -200,7 +200,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 0x80;
 
-            var txa = new CPUInstructions().InstructionSet[Opcodes.TXA];
+            var txa = _instructions[Opcodes.TXA];
             var cycles = txa(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -217,7 +217,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0xff;
             registers.Object.X = 0x50;
 
-            var txs = new CPUInstructions().InstructionSet[Opcodes.TXS];
+            var txs = _instructions[Opcodes.TXS];
             var cycles = txs(bus.Object, registers.Object);
             registers.Object.SP.Should().Be(0x50);
 
@@ -233,7 +233,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.Y = 0x80;
 
-            var tya = new CPUInstructions().InstructionSet[Opcodes.TYA];
+            var tya = _instructions[Opcodes.TYA];
             var cycles = tya(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -250,7 +250,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.Y = 0x50;
 
-            var tya = new CPUInstructions().InstructionSet[Opcodes.TYA];
+            var tya = _instructions[Opcodes.TYA];
             var cycles = tya(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x50);
 
@@ -266,7 +266,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.Y = 0x0;
 
-            var tya = new CPUInstructions().InstructionSet[Opcodes.TYA];
+            var tya = _instructions[Opcodes.TYA];
             var cycles = tya(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());

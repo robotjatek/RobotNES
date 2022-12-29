@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class ControlInstructionTests
+    public class ControlInstructionTests : InstructionTestBase
     {
         [Fact]
         public void JMP_ABS()
@@ -15,7 +15,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
-            var jmp_abs = new CPUInstructions().InstructionSet[Opcodes.JMP_ABS];
+            var jmp_abs = _instructions[Opcodes.JMP_ABS];
             var cycles = jmp_abs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xdead);
@@ -34,7 +34,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
-            var jsr_abs = new CPUInstructions().InstructionSet[Opcodes.JSR_ABS];
+            var jsr_abs = _instructions[Opcodes.JSR_ABS];
             var cycles = jsr_abs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
@@ -56,7 +56,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Setup(b => b.Read(0x100 | 0xff)).Returns(0xde);
             bus.Setup(b => b.Read(0x100 | 0xff - 1)).Returns(0xad);
 
-            var sut = new CPUInstructions().InstructionSet[Opcodes.RTS];
+            var sut = _instructions[Opcodes.RTS];
             var cycles = sut(bus.Object, registers.Object);
 
             registers.Object.PC.Should().Be(0xdead + 1);
@@ -77,7 +77,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xad) //low address byte
                 .Returns(0xde); //high address byte
 
-            var rti = new CPUInstructions().InstructionSet[Opcodes.RTI];
+            var rti = _instructions[Opcodes.RTI];
             var cycles = rti(bus.Object, registers.Object);
             registers.Object.PC.Should().Be(0xdead);
             registers.Object.STATUS.Should().Be(0xAA);

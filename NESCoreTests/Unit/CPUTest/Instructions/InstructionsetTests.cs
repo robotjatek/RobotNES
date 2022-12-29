@@ -8,14 +8,14 @@ using NESCore.CPU.Instructions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class InstructionsetTests
+    public class InstructionsetTests : InstructionTestBase
     {
         [Fact]
         public void NOP()
         {
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
-            var nop = new CPUInstructions().InstructionSet[Opcodes.NOP];
+            var nop = _instructions[Opcodes.NOP];
             var cycles = nop(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Never());

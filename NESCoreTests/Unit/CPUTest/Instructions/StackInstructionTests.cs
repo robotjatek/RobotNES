@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class StackInstructionTests
+    public class StackInstructionTests : InstructionTestBase
     {
         [Fact]
         public void PHA()
@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xde;
 
             var bus = new Mock<IBUS>();
-            var pha = new CPUInstructions().InstructionSet[Opcodes.PHA];
+            var pha = _instructions[Opcodes.PHA];
             var cycles = pha(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x1ff, 0xde));
@@ -35,7 +35,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.STATUS = 0xAA;
 
             var bus = new Mock<IBUS>();
-            var php = new CPUInstructions().InstructionSet[Opcodes.PHP];
+            var php = _instructions[Opcodes.PHP];
             var cycles = php(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x1ff, 0xAA));
@@ -54,7 +54,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(unchecked((byte)-34));
 
-            var pla = new CPUInstructions().InstructionSet[Opcodes.PLA];
+            var pla = _instructions[Opcodes.PLA];
             var cycles = pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(unchecked((byte)-34));
@@ -89,7 +89,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(0);
 
-            var pla = new CPUInstructions().InstructionSet[Opcodes.PLA];
+            var pla = _instructions[Opcodes.PLA];
             var cycles = pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
@@ -124,7 +124,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(10);
 
-            var pla = new CPUInstructions().InstructionSet[Opcodes.PLA];
+            var pla = _instructions[Opcodes.PLA];
             var cycles = pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(10);
@@ -159,7 +159,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(unchecked((byte)-34));
 
-            var plp = new CPUInstructions().InstructionSet[Opcodes.PLP];
+            var plp = _instructions[Opcodes.PLP];
             var cycles = plp(bus.Object, registers.Object);
 
             registers.Object.STATUS.Should().Be(unchecked((byte)-34));

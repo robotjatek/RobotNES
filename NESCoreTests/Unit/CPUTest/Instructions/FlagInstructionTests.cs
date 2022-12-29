@@ -6,14 +6,14 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class FlagInstructionTests
+    public class FlagInstructionTests : InstructionTestBase
     {
         [Fact]
         public void CLC()
         {
             var registers = new Mock<IRegisters>();
             var bus = new Mock<IBUS>();
-            var clc = new CPUInstructions().InstructionSet[Opcodes.CLC];
+            var clc = _instructions[Opcodes.CLC];
             var cycles = clc(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(false));
@@ -39,7 +39,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         {
             var registers = new Mock<IRegisters>();
             var bus = new Mock<IBUS>();
-            var cld = new CPUInstructions().InstructionSet[Opcodes.CLD];
+            var cld = _instructions[Opcodes.CLD];
             var cycles = cld(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetDecimalFlag(false));
@@ -65,7 +65,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         {
             var registers = new Mock<IRegisters>();
             var bus = new Mock<IBUS>();
-            var clv = new CPUInstructions().InstructionSet[Opcodes.CLV];
+            var clv = _instructions[Opcodes.CLV];
             var cycles = clv(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
@@ -91,7 +91,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            var sec = new CPUInstructions().InstructionSet[Opcodes.SEC];
+            var sec = _instructions[Opcodes.SEC];
             var cycles = sec(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once);
@@ -115,7 +115,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            var sei = new CPUInstructions().InstructionSet[Opcodes.SEI];
+            var sei = _instructions[Opcodes.SEI];
             var cycles = sei(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Never());
@@ -139,7 +139,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            var sed = new CPUInstructions().InstructionSet[Opcodes.SED];
+            var sed = _instructions[Opcodes.SED];
             var cycles = sed(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Never());

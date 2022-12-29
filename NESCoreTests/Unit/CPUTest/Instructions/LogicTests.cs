@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class LogicTests
+    public class LogicTests : InstructionTestBase
     {
         [Fact]
         public void AND_IMM_does_not_change_A_when_bitmask_is_FF()
@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var and = _instructions[Opcodes.AND_IMM];
             registers.Object.A.Should().Be(0x2A);
             var cycles = and(bus.Object, registers.Object);
 
@@ -33,7 +33,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var and = _instructions[Opcodes.AND_IMM];
             var cycles = and(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -49,7 +49,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var and = _instructions[Opcodes.AND_IMM];
             var cycles = and(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -78,7 +78,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var and = _instructions[Opcodes.AND_IMM];
             var cycles = and(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -107,7 +107,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var and = new CPUInstructions().InstructionSet[Opcodes.AND_IMM];
+            var and = _instructions[Opcodes.AND_IMM];
             var cycles = and(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 
@@ -136,7 +136,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x80); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -152,7 +152,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x40); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -169,7 +169,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0xC0); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -186,7 +186,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x0); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -205,7 +205,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0xFF); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -225,7 +225,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -243,7 +243,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0xFF); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -261,7 +261,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x55); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -279,7 +279,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0xAA); //0x0010 address on zero page, then the value
-            var sut = new CPUInstructions().InstructionSet[Opcodes.BIT_ZERO];
+            var sut = _instructions[Opcodes.BIT_ZERO];
             var cycles = sut(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10));
@@ -297,7 +297,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x00);
 
-            var eor = new CPUInstructions().InstructionSet[Opcodes.EOR_IMM];
+            var eor = _instructions[Opcodes.EOR_IMM];
             registers.Object.A.Should().Be(0x2A);
             var cycles = eor(bus.Object, registers.Object);
 
@@ -313,7 +313,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
-            var eor = new CPUInstructions().InstructionSet[Opcodes.EOR_IMM];
+            var eor = _instructions[Opcodes.EOR_IMM];
             var cycles = eor(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -329,7 +329,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xFF);
 
-            var eor = new CPUInstructions().InstructionSet[Opcodes.EOR_IMM];
+            var eor = _instructions[Opcodes.EOR_IMM];
             var cycles = eor(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -358,7 +358,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var eor = new CPUInstructions().InstructionSet[Opcodes.EOR_IMM];
+            var eor = _instructions[Opcodes.EOR_IMM];
             var cycles = eor(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 
@@ -389,7 +389,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x55);
 
-            var eor = new CPUInstructions().InstructionSet[Opcodes.EOR_IMM];
+            var eor = _instructions[Opcodes.EOR_IMM];
             var cycles = eor(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 
@@ -415,7 +415,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x00);
 
-            var ora = new CPUInstructions().InstructionSet[Opcodes.ORA_IMM];
+            var ora = _instructions[Opcodes.ORA_IMM];
             registers.Object.A.Should().Be(0x2A);
             var cycles = ora(bus.Object, registers.Object);
 
@@ -431,7 +431,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var ora = new CPUInstructions().InstructionSet[Opcodes.ORA_IMM];
+            var ora = _instructions[Opcodes.ORA_IMM];
             var cycles = ora(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 
@@ -447,7 +447,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var ora = new CPUInstructions().InstructionSet[Opcodes.ORA_IMM];
+            var ora = _instructions[Opcodes.ORA_IMM];
             var cycles = ora(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
 
@@ -476,7 +476,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
 
-            var ora = new CPUInstructions().InstructionSet[Opcodes.ORA_IMM];
+            var ora = _instructions[Opcodes.ORA_IMM];
             var cycles = ora(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 

@@ -8,7 +8,7 @@ using NESCore.CPU.Instructions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class ShiftTests
+    public class ShiftTests : InstructionTestBase
     {
         [Fact]
         public void LSR_A_shifts_value_to_right_by_one()
@@ -18,7 +18,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 8;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(4);
@@ -34,7 +34,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 1;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
@@ -51,7 +51,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(1);
@@ -68,7 +68,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xFF;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x7F);
@@ -86,7 +86,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xFF;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(false));
 
@@ -101,7 +101,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x1;
 
-            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var lsr = _instructions[Opcodes.LSR_A];
             var cycles = lsr(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(true));
 
@@ -116,7 +116,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
@@ -131,7 +131,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x80;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
@@ -147,7 +147,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x7f;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfe);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
@@ -163,7 +163,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x1;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x2);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
@@ -179,7 +179,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x7F;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfe);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -195,7 +195,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
 
@@ -210,7 +210,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x80;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
 
@@ -225,7 +225,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xFF;
 
-            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var asl = _instructions[Opcodes.ASL_A];
             var cycles = asl(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfe);
             (registers.Object.A & 0x1).Should().Be(0);

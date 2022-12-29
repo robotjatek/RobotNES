@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class IncrementInstructionTests
+    public class IncrementInstructionTests : InstructionTestBase
     {
         [Fact]
         public void DEX_decrements_Y()
@@ -16,7 +16,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 2;
 
-            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var dex = _instructions[Opcodes.DEX];
             var cycles = dex(bus.Object, registers.Object);
             registers.Object.X.Should().Be(1);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
@@ -32,7 +32,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 0x1;
 
-            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var dex = _instructions[Opcodes.DEX];
             var cycles = dex(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -49,7 +49,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 0x0;
 
-            var dex = new CPUInstructions().InstructionSet[Opcodes.DEX];
+            var dex = _instructions[Opcodes.DEX];
             var cycles = dex(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0xff);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -65,7 +65,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 2;
 
-            var dey = new CPUInstructions().InstructionSet[Opcodes.DEY];
+            var dey = _instructions[Opcodes.DEY];
             var cycles = dey(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(1);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
@@ -81,7 +81,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 0x1;
 
-            var dey = new CPUInstructions().InstructionSet[Opcodes.DEY];
+            var dey = _instructions[Opcodes.DEY];
             var cycles = dey(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -98,7 +98,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 0x0;
 
-            var dey = new CPUInstructions().InstructionSet[Opcodes.DEY];
+            var dey = _instructions[Opcodes.DEY];
             var cycles = dey(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0xff);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -114,7 +114,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 1;
 
-            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var inx = _instructions[Opcodes.INX];
             var cycles = inx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(2);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
@@ -130,7 +130,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 0xff;
 
-            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var inx = _instructions[Opcodes.INX];
             var cycles = inx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -147,7 +147,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 0x7F;
 
-            var inx = new CPUInstructions().InstructionSet[Opcodes.INX];
+            var inx = _instructions[Opcodes.INX];
             var cycles = inx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
@@ -163,7 +163,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 1;
 
-            var iny = new CPUInstructions().InstructionSet[Opcodes.INY];
+            var iny = _instructions[Opcodes.INY];
             var cycles = iny(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(2);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
@@ -179,7 +179,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 0xff;
 
-            var iny = new CPUInstructions().InstructionSet[Opcodes.INY];
+            var iny = _instructions[Opcodes.INY];
             var cycles = iny(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
@@ -196,7 +196,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 0x7F;
 
-            var iny = new CPUInstructions().InstructionSet[Opcodes.INY];
+            var iny = _instructions[Opcodes.INY];
             var cycles = iny(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(0x80);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
