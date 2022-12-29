@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using NESCore.CPU;
 
-namespace NESCoreTests.Unit.CPUTest
+namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class RegisterTests
     {
@@ -55,14 +55,14 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.SetInterruptDisableFlag(true);
             sut.SetInterruptDisableFlag(false);
-            sut.STATUS.Should().Be(0b00000000 | (StatusRegisterInitialValue & ~FlagPositions.INTERRUPT_DISABLE));
+            sut.STATUS.Should().Be(0b00000000 | StatusRegisterInitialValue & ~FlagPositions.INTERRUPT_DISABLE);
         }
         [Fact]
         public void DecimalFlagShouldBeEnabled()
         {
             var sut = new Registers();
             sut.SetDecimalFlag(true);
-            sut.STATUS.Should().Be(0b00001000 | StatusRegisterInitialValue    );
+            sut.STATUS.Should().Be(0b00001000 | StatusRegisterInitialValue);
         }
 
         [Fact]

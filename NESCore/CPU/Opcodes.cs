@@ -37,6 +37,7 @@
 
         #region Shift
         //TODO: shift instructions
+        public const int LSR_A = 0x4A;
         #endregion
 
         #region Logic
