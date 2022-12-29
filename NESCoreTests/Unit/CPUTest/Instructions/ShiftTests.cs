@@ -107,5 +107,130 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ASL_A_shifts_A_by_one_to_the_left()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 2;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_carry_to_true_when_bit_7_is_one()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0);
+            registers.Verify(r => r.SetCarryFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_carry_to_false_when_bit_7_is_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7f;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfe);
+            registers.Verify(r => r.SetCarryFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_negative_flag_to_false_when_the_result_is_not_negative()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x1;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x2);
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_negative_flag_to_true_when_the_result_is_negative()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7F;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfe);
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_zero_flag_to_false_when_to_result_is_not_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 2;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Verify(r => r.SetZeroFlag(false), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_sets_zero_flag_to_true_when_to_result_is_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Verify(r => r.SetZeroFlag(true), Times.Once());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void ASL_A_bit_0_always_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xFF;
+
+            var asl = new CPUInstructions().InstructionSet[Opcodes.ASL_A];
+            var cycles = asl(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfe);
+            (registers.Object.A & 0x1).Should().Be(0);
+
+            cycles.Should().Be(2);
+        }
     }
 }

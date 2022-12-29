@@ -37,6 +37,7 @@
 
         #region Shift
         //TODO: shift instructions
+        public const int ASL_A = 0x0A;
         public const int LSR_A = 0x4A;
         #endregion
 
