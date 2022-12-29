@@ -30,6 +30,13 @@
             return 3;
         }
 
+        private static byte LDA_IND_X(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingIndirectXWithValue(bus, registers).Value;
+            LDA(value, registers);
+            return 6;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;

@@ -68,6 +68,7 @@
             InstructionSet[Opcodes.ROL_A] = ROL_A;
             InstructionSet[Opcodes.LDA_ZERO] = LDA_ZERO;
             InstructionSet[Opcodes.STA_ABS] = STA_ABS;
+            InstructionSet[Opcodes.LDA_IND_X] = LDA_IND_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -171,6 +172,21 @@
             {
                 Address = address,
                 Value = value,
+            };
+        }
+
+        private static AddressingResult AddressingIndirectXWithValue(IBUS bus, IRegisters registers)
+        {
+            var zeropageAddress = Fetch(bus, registers) + registers.X;
+            var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));
+            var highAddress = bus.Read((UInt16)(zeropageAddress + 1 & 0xff));
+            var address = (UInt16)(highAddress << 8 | lowAddress);
+            var value = bus.Read(address);
+
+            return new AddressingResult
+            {
+                Address = address,
+                Value = value
             };
         }
     }
