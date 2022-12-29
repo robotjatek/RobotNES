@@ -77,5 +77,35 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void LSR_A_sets_the_zero_flag_to_false_when_the_result_is_not_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xFF;
+
+            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var cycles = lsr(bus.Object, registers.Object);
+            registers.Verify(r => r.SetZeroFlag(false));
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void LSR_A_sets_the_zero_flag_to_true_when_the_result_is_zero()
+        {
+            var bus = new Mock<IBUS>();
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x1;
+
+            var lsr = new CPUInstructions().InstructionSet[Opcodes.LSR_A];
+            var cycles = lsr(bus.Object, registers.Object);
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(2);
+        }
     }
 }
