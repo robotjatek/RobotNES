@@ -496,5 +496,30 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ORA_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xaa);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0;
+
+            var ora = _instructions[Opcodes.ORA_IND_X];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+
+            cycles.Should().Be(6);
+        }
     }
 }

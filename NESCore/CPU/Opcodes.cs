@@ -55,6 +55,7 @@
         public const int EOR_IMM = 0x49;
         //TODO: more eor modes
         public const int ORA_IMM = 0x09;
+        public const int ORA_IND_X = 0x01;
         //TODO: more ora modes
         #endregion
 

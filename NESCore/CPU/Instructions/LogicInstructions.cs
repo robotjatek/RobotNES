@@ -28,14 +28,28 @@
             return 2;
         }
 
+        private static void ORA(byte value, IRegisters registers)
+        {
+            var result = (byte)(registers.A | value);
+            registers.A = result;
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((sbyte)result < 0);
+        }
+
         private static byte ORA_IMM(IBUS bus, IRegisters registers)
         {
             var mask = AddressingImmediate(bus, registers).Value;
-            var value = (byte)(registers.A | mask);
-            registers.A = value;
-            registers.SetZeroFlag(value == 0);
-            registers.SetNegativeFlag((sbyte)value < 0);
+            ORA(mask, registers);
+
             return 2;
+        }
+
+        private static byte ORA_IND_X(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingIndirectXWithValue(bus, registers).Value;
+            ORA(mask, registers);
+
+            return 6;
         }
 
         private static byte EOR_IMM(IBUS bus, IRegisters registers)
