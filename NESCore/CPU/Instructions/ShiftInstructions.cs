@@ -68,6 +68,14 @@
             return 2;
         }
 
+        private static byte ROL_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var result = ROL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 5;
+        }
+
         private static byte ROR(byte value, IRegisters registers)
         {
             var carryAfterShift = (value & 0x1) > 0;

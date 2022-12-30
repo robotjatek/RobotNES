@@ -183,5 +183,20 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ROL_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var rol = _instructions[Opcodes.ROL_ZERO];
+            var cycles = rol(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 8));
+
+            cycles.Should().Be(5);
+        }
     }
 }
