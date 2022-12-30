@@ -10,6 +10,7 @@
         //TODO: more LDA modes
         public const int LDX_IMM = 0xA2;
         public const int LDX_ABS = 0xAE;
+        public const int LDX_ZERO = 0xA6;
         //TODO: more ldx modes
         public const int LDY_IMM = 0xA0;
         public const int LDY_ZERO = 0xA4;

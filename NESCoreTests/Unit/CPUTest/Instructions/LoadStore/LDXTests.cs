@@ -101,5 +101,22 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Verify(r => r.SetNegativeFlag(true));
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void LDX_ZERO()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x10);
+
+            var ldx_zero = _instructions[Opcodes.LDX_ZERO];
+            var cycles = ldx_zero(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad));
+            registers.VerifySet(r => r.X = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            cycles.Should().Be(3);
+        }
     }
 }
