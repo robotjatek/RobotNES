@@ -42,6 +42,14 @@
             return 6;
         }
 
+        private static byte AND_ZERO(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingZeroWithValue(bus, registers).Value;
+            AND(mask, registers);
+
+            return 3;
+        }
+
         private static void ORA(byte value, IRegisters registers)
         {
             var result = (byte)(registers.A | value);

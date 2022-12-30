@@ -154,6 +154,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void AND_ZERO()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0xf0);
+            var and = _instructions[Opcodes.AND_ZERO];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xa0);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void BIT_ZERO_sets_negative_flag()
         {
             var registers = new Mock<IRegisters>();
