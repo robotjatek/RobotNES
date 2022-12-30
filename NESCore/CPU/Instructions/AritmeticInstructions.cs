@@ -53,16 +53,29 @@
             return 2;
         }
 
+        private static void CMP(byte value, IRegisters registers)
+        {
+            var tmp = registers.A - value;
+
+            registers.SetZeroFlag(tmp == 0);
+            registers.SetCarryFlag(registers.A >= value);
+            registers.SetNegativeFlag((tmp & 0x80) > 0);
+        }
+
         private static byte CMP_IMM(IBUS bus, IRegisters registers)
         {
             var imm = AddressingImmediate(bus, registers).Value;
-            var tmp = registers.A - imm;
-
-            registers.SetZeroFlag(tmp == 0);
-            registers.SetCarryFlag(registers.A >= imm);
-            registers.SetNegativeFlag((tmp & 0x80) > 0);
+            CMP(imm, registers);
 
             return 2;
+        }
+
+        private static byte CMP_IND_X(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingIndirectXWithValue(bus, registers).Value;
+            CMP(value, registers);
+
+            return 6;
         }
 
         private static byte CPX_IMM(IBUS bus, IRegisters registers)
