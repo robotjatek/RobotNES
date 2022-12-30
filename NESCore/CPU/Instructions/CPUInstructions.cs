@@ -165,8 +165,6 @@
             public ushort Address { get; init; }
         }
 
-        //TODO: review if *AddressOnlyFunctions are really needed
-
         private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
         {
             return new AddressingResult
