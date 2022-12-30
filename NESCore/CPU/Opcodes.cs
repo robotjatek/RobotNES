@@ -60,6 +60,7 @@
         public const int AND_IMM = 0x29;
         public const int AND_IND_X = 0x21;
         public const int AND_ZERO = 0x25;
+        public const int AND_ABS = 0x2D;
         //TODO: more AND modes
         public const int BIT_ZERO = 0x24;
         public const int BIT_ABS = 0x2C;

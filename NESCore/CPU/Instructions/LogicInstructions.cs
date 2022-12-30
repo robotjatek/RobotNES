@@ -64,6 +64,14 @@ namespace NESCore.CPU.Instructions
             return 3;
         }
 
+        private static byte AND_ABS(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingAbsoluteWithValue(bus, registers).Value;
+            AND(mask, registers);
+
+            return 4;
+        }
+
         private static void ORA(byte value, IRegisters registers)
         {
             var result = (byte)(registers.A | value);
