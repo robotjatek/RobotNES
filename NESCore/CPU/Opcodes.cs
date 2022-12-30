@@ -62,12 +62,16 @@
         public const int AND_ZERO = 0x25;
         public const int AND_ABS = 0x2D;
         //TODO: more AND modes
+        
         public const int BIT_ZERO = 0x24;
         public const int BIT_ABS = 0x2C;
+
         public const int EOR_IMM = 0x49;
         public const int EOR_IND_X = 0x41;
         public const int EOR_ZERO = 0x45;
+        public const int EOR_ABS = 0x4D;
         //TODO: more eor modes
+        
         public const int ORA_IMM = 0x09;
         public const int ORA_IND_X = 0x01;
         public const int ORA_ZERO = 0x05;

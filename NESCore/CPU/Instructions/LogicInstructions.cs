@@ -140,5 +140,12 @@ namespace NESCore.CPU.Instructions
             EOR(mask, registers);
             return 3;
         }
+
+        private static byte EOR_ABS(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingAbsoluteWithValue(bus, registers).Value;
+            EOR(mask, registers);
+            return 4;
+        }
     }
 }
