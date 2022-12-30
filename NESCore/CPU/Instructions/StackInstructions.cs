@@ -25,8 +25,8 @@
 
         private static byte PLP(IBUS bus, IRegisters registers)
         {
-            var value = Pop8(bus, registers);
-            registers.STATUS = value;
+            var value = Pop8(bus, registers) & ~FlagPositions.BREAK;
+            registers.STATUS = (byte)value;
             return 4;
         }
     }

@@ -69,6 +69,7 @@
             InstructionSet[Opcodes.LDA_ZERO] = LDA_ZERO;
             InstructionSet[Opcodes.STA_ABS] = STA_ABS;
             InstructionSet[Opcodes.LDA_IND_X] = LDA_IND_X;
+            InstructionSet[Opcodes.STA_IND_X] = STA_IND_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -124,6 +125,8 @@
             public ushort Address { get; init; }
         }
 
+        //TODO: review if *AddressOnlyFunctions are really needed
+
         private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
         {
             return new AddressingResult
@@ -172,6 +175,19 @@
             {
                 Address = address,
                 Value = value,
+            };
+        }
+
+        private static AddressingResult AddressingIndirectXAddressOnly(IBUS bus, IRegisters registers)
+        {
+            var zeropageAddress = Fetch(bus, registers) + registers.X;
+            var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));
+            var highAddress = bus.Read((UInt16)(zeropageAddress + 1 & 0xff));
+            var address = (UInt16)(highAddress << 8 | lowAddress);
+
+            return new AddressingResult
+            {
+                Address = address,
             };
         }
 

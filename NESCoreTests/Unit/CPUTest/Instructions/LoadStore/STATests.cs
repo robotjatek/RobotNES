@@ -62,5 +62,29 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void STA_indirect_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0xaa;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0x0ad) //low address
+                .Returns(0xde); // high address
+
+            var sta = _instructions[Opcodes.STA_IND_X];
+            var cycles = sta(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 0xaa), Times.Once());
+
+            cycles.Should().Be(6);
+        }
     }
 }

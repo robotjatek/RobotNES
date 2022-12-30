@@ -156,12 +156,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0xfe;
 
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(0x1ff)).Returns(unchecked((byte)-34));
+            bus.Setup(b => b.Read(0x1ff)).Returns(0xff);
 
             var plp = _instructions[Opcodes.PLP];
             var cycles = plp(bus.Object, registers.Object);
 
-            registers.Object.STATUS.Should().Be(unchecked((byte)-34));
+            registers.Object.STATUS.Should().Be(0xef); //BRK flag ignored
             registers.Object.SP.Should().Be(0xff);
 
             //All flags are set from the value of the stack

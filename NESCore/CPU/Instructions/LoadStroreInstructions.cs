@@ -91,6 +91,13 @@
             return 4;
         }
 
+        private static byte STA_IND_X(IBUS bus, IRegisters registers)
+        {
+            var address = AddressingIndirectXAddressOnly(bus, registers).Address;
+            STA(address, bus, registers);
+            return 6;
+        }
+
         private static byte STX_ZERO(IBUS bus, IRegisters registers)
         {
             var address = AddressingZeroAddressOnly(bus, registers).Address;

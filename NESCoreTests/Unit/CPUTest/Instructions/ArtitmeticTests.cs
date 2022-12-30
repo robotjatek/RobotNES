@@ -206,6 +206,54 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void ADC_bug_0x80_plus_0x7f_should_set_the_overflow_flag()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7f;
+            registers.Setup(r => r.GetNegativeFlag()).Returns(false);
+            registers.Setup(r => r.GetOverflowFlag()).Returns(true);
+            registers.Setup(r => r.GetDecimalFlag()).Returns(true);
+            registers.Setup(r => r.GetZeroFlag()).Returns(false);
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+
+            var adc = _instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff);
+
+            registers.Verify(r => r.SetNegativeFlag(true));
+            registers.Verify(r => r.SetOverflowFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(false));
+        }
+
+        [Fact]
+        public void ADC_bug_adc_does_not_set_zero_flag_correctly()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x7f;
+            registers.Setup(r => r.GetNegativeFlag()).Returns(false);
+            registers.Setup(r => r.GetOverflowFlag()).Returns(false);
+            registers.Setup(r => r.GetDecimalFlag()).Returns(true);
+            registers.Setup(r => r.GetZeroFlag()).Returns(false);
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+
+            var adc = _instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x0);
+
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetOverflowFlag(false));
+            registers.Verify(r => r.SetZeroFlag(true));
+            registers.Verify(r => r.SetCarryFlag(true));
+        }
+
+        [Fact]
         public void CMP_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
         {
             var bus = new Mock<IBUS>();
