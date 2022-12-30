@@ -87,6 +87,13 @@
             return 3;
         }
 
+        private byte SBC_ABS(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingAbsoluteWithValue(bus, registers).Value;
+            SBC(operand, registers);
+            return 4;
+        }
+
         private static void CMP(byte value, IRegisters registers)
         {
             var tmp = registers.A - value;

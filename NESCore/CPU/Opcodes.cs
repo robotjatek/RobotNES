@@ -99,6 +99,7 @@
         public const int SBC_IMM = 0xE9;
         public const int SBC_IND_X = 0xE1;
         public const int SBC_ZERO = 0xE5;
+        public const int SBC_ABS = 0xED;
         //TODO: more sbc modes
         #endregion
 
