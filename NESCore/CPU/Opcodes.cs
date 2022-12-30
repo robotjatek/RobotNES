@@ -84,6 +84,7 @@
         //TODO: cpy zero
         public const int SBC_IMM = 0xE9;
         public const int SBC_IND_X = 0xE1;
+        public const int SBC_ZERO = 0xE5;
         //TODO: more sbc modes
         #endregion
 

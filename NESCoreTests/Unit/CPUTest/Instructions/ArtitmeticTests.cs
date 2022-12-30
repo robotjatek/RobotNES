@@ -872,5 +872,26 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void SBC_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var sbc = _instructions[Opcodes.SBC_ZERO];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(10);
+            bus.Verify(b => b.Read(0x10), Times.Once());
+
+            cycles.Should().Be(3);
+        }
     }
 }

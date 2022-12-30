@@ -73,6 +73,13 @@
             return 6;
         }
 
+        private byte SBC_ZERO(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingZeroWithValue(bus, registers).Value;
+            SBC(operand, registers);
+            return 3;
+        }
+
         private static void CMP(byte value, IRegisters registers)
         {
             var tmp = registers.A - value;
