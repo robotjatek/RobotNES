@@ -86,6 +86,13 @@
             return 3;
         }
 
+        private static byte LDY_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            LDY(addressingResult.Value, registers);
+            return 4;
+        }
+
 
         private static void STA(ushort address, IBUS bus, IRegisters registers)
         {

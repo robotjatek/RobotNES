@@ -87,5 +87,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 
             cycles.Should().Be(3);
         }
+
+        [Fact]
+        public void LDY_ABS()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xaa);
+
+            var ldy = _instructions[Opcodes.LDY_ABS];
+            var cycles = ldy(bus.Object, registers.Object);
+            registers.Object.Y.Should().Be(0xaa);
+
+            cycles.Should().Be(4);
+        }
     }
 }
