@@ -42,14 +42,28 @@
             return 2;
         }
 
+        private static byte DEC(byte value, IRegisters registers)
+        {
+            var result = (byte)(value - 1);
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            return result;
+        }
+
         private static byte DEC_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroWithValue(bus, registers);
-            var result = (byte)(addressingResult.Value - 1);
-            registers.SetZeroFlag(result == 0);
-            registers.SetNegativeFlag((result & 0x80) > 0);
+            var result = DEC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
+        }
+
+        private static byte DEC_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var result = DEC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 6;
         }
 
         private static byte DEX(IBUS bus, IRegisters registers)

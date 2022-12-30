@@ -111,7 +111,7 @@
         #endregion
 
         #region Inc
-        //TODO: dec abs
+        public const int DEC_ABS = 0xCE;
         //TODO: x abs dec
         public const int DEC_ZERO = 0xC6;
         //TODO: x zero dec
