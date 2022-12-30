@@ -380,5 +380,20 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(5);
         }
+
+        [Fact]
+        public void INC_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+
+            var inc = _instructions[Opcodes.INC_ABS];
+            var cycles = inc(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xdead, 11));
+
+            cycles.Should().Be(6);
+        }
     }
 }

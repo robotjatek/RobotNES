@@ -2,14 +2,28 @@
 {
     public partial class CPUInstructions
     {
+        private static byte INC(byte value, IRegisters registers)
+        {
+            var result = (byte)(value + 1);
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            return result;
+        }
+
         private static byte INC_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroWithValue(bus, registers);
-            var result = (byte)(addressingResult.Value + 1);
-            registers.SetZeroFlag(result == 0);
-            registers.SetNegativeFlag((result & 0x80) > 0);
+            var result = INC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
+        }
+
+        private static byte INC_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var result = INC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 6;
         }
 
         private static byte INX(IBUS bus, IRegisters registers)

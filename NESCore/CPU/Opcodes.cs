@@ -117,10 +117,12 @@
         //TODO: x zero dec
         public const int DEX = 0xCA;
         public const int DEY = 0x88;
-        //TODO: inc abs
+
+        public const int INC_ABS = 0xEE;
         //TODO: x abs inc
         public const int INC_ZERO = 0xE6;
         //TODO: x zero inc
+
         public const int INX = 0xE8;
         public const int INY = 0xC8;
 
