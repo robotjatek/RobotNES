@@ -62,7 +62,7 @@
         public const int AND_ZERO = 0x25;
         //TODO: more AND modes
         public const int BIT_ZERO = 0x24;
-        //TODO: BIT abs
+        public const int BIT_ABS = 0x2C;
         public const int EOR_IMM = 0x49;
         public const int EOR_IND_X = 0x41;
         public const int EOR_ZERO = 0x45;

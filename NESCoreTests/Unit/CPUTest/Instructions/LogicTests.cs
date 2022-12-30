@@ -331,6 +331,28 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void BIT_ABS()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0);
+
+            var bit = _instructions[Opcodes.BIT_ABS];
+            var cycles = bit(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff); // does not touch register
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void EOR_IMM_does_not_change_A_when_bitmask_is_00()
         {
             var registers = new Mock<IRegisters>();

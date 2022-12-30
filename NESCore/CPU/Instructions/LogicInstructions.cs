@@ -1,11 +1,11 @@
-﻿namespace NESCore.CPU.Instructions
+﻿using Microsoft.Win32;
+
+namespace NESCore.CPU.Instructions
 {
     public partial class CPUInstructions
     {
-        private static byte BIT_ZERO(IBUS bus, IRegisters registers)
+        private static void BIT(byte value, IRegisters registers)
         {
-            var value = AddressingZeroWithValue(bus, registers).Value;
-
             var isNegative = (value & 0x80) == 0x80;
             registers.SetNegativeFlag(isNegative);
 
@@ -14,8 +14,22 @@
 
             var isZero = (value & registers.A) == 0;
             registers.SetZeroFlag(isZero);
+        }
+
+        private static byte BIT_ZERO(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingZeroWithValue(bus, registers).Value;
+            BIT(value, registers);            
 
             return 3;
+        }
+
+        private static byte BIT_ABS(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            BIT(value, registers);
+
+            return 4;
         }
 
         private static void AND(byte mask, IRegisters registers)
