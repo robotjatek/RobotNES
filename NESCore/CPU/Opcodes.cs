@@ -59,6 +59,7 @@
         //TODO: BIT abs
         public const int EOR_IMM = 0x49;
         public const int EOR_IND_X = 0x41;
+        public const int EOR_ZERO = 0x45;
         //TODO: more eor modes
         public const int ORA_IMM = 0x09;
         public const int ORA_IND_X = 0x01;

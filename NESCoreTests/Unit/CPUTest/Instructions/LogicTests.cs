@@ -474,6 +474,26 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void EOR_Zero()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(0xFF);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+
+            var eor = _instructions[Opcodes.EOR_ZERO];
+            var cycles = eor(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x55);
+            bus.Verify(b => b.Read(0x10), Times.Once());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void ORA_IMM_does_not_change_A_when_bitmask_is_00()
         {
             var registers = new Mock<IRegisters>();

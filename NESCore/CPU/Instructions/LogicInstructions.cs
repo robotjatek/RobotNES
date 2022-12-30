@@ -103,5 +103,12 @@
             EOR(mask, registers);
             return 6;
         }
+
+        private static byte EOR_ZERO(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingZeroWithValue(bus, registers).Value;
+            EOR(mask, registers);
+            return 3;
+        }
     }
 }
