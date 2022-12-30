@@ -17,6 +17,14 @@
             return 2;
         }
 
+        private static byte LSR_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var result = LSR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 5;
+        }
+
         private static byte ASL(byte value, IRegisters registers)
         {
             registers.SetCarryFlag((value & 0x80) > 0);

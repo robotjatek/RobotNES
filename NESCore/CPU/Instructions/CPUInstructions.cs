@@ -87,6 +87,7 @@
             InstructionSet[Opcodes.SBC_ZERO] = SBC_ZERO;
             InstructionSet[Opcodes.CPX_ZERO] = CPX_ZERO;
             InstructionSet[Opcodes.CPY_ZERO] = CPY_ZERO;
+            InstructionSet[Opcodes.LSR_ZERO] = LSR_ZERO;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
