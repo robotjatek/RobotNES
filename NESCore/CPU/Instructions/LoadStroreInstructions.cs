@@ -119,5 +119,12 @@
             bus.Write(address, registers.X);
             return 4; //1(opcode fetch) + 2 (2 byte fetch from memory) + 1 (1 byte write to memory)
         }
+
+        private static byte STY_ZERO(IBUS bus, IRegisters registers)
+        {
+            var address = AddressingZeroAddressOnly(bus, registers).Address;
+            bus.Write(address, registers.Y);
+            return 3;
+        }
     }
 }
