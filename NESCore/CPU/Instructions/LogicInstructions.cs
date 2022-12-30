@@ -66,14 +66,26 @@
             return 6;
         }
 
-        private static byte EOR_IMM(IBUS bus, IRegisters registers)
+        private static void EOR(byte mask, IRegisters registers)
         {
-            var mask = AddressingImmediate(bus, registers).Value;
             var value = (byte)(registers.A ^ mask);
             registers.A = value;
             registers.SetZeroFlag(value == 0);
             registers.SetNegativeFlag((sbyte)value < 0);
+        }
+
+        private static byte EOR_IMM(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingImmediate(bus, registers).Value;
+            EOR(mask, registers);
             return 2;
+        }
+
+        private static byte EOR_IND_X(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingIndirectXWithValue(bus, registers).Value;
+            EOR(mask, registers);
+            return 6;
         }
     }
 }
