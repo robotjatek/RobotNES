@@ -176,7 +176,7 @@
         }
 
         // Reads a value from an absolute address
-        private static AddressingResult AddressingAbsoluteWithValue(IBUS bus, IRegisters registers)
+        private static AddressingResult AddressingAbsolute(IBUS bus, IRegisters registers)
         {
             var address = Fetch16(bus, registers);
             var value = bus.Read(address);
@@ -187,27 +187,7 @@
             };
         }
 
-        // Fetches the address of a memory location, but doesn't fetch the value
-        private static AddressingResult AddressingAbsoulteAddressOnly(IBUS bus, IRegisters registers)
-        {
-            var address = Fetch16(bus, registers);
-            return new AddressingResult
-            {
-                Address = address,
-            };
-        }
-
-        // Fetches the address of a zero page memory location, but doesn't fetch the value
-        private static AddressingResult AddressingZeroAddressOnly(IBUS bus, IRegisters registers)
-        {
-            var address = Fetch(bus, registers);
-            return new AddressingResult
-            {
-                Address = address,
-            };
-        }
-
-        private static AddressingResult AddressingZeroWithValue(IBUS bus, IRegisters registers)
+        private static AddressingResult AddressingZero(IBUS bus, IRegisters registers)
         {
             var address = Fetch(bus, registers);
             var value = bus.Read(address);
@@ -218,20 +198,7 @@
             };
         }
 
-        private static AddressingResult AddressingIndirectXAddressOnly(IBUS bus, IRegisters registers)
-        {
-            var zeropageAddress = Fetch(bus, registers) + registers.X;
-            var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));
-            var highAddress = bus.Read((UInt16)(zeropageAddress + 1 & 0xff));
-            var address = (UInt16)(highAddress << 8 | lowAddress);
-
-            return new AddressingResult
-            {
-                Address = address,
-            };
-        }
-
-        private static AddressingResult AddressingIndirectXWithValue(IBUS bus, IRegisters registers)
+        private static AddressingResult AddressingIndirectX(IBUS bus, IRegisters registers)
         {
             var zeropageAddress = Fetch(bus, registers) + registers.X;
             var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));

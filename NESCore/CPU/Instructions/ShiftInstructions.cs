@@ -19,7 +19,7 @@
 
         private static byte LSR_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = LSR(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
@@ -27,7 +27,7 @@
 
         private static byte LSR_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = LSR(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;
@@ -50,7 +50,7 @@
 
         private static byte ASL_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = ASL(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
@@ -58,7 +58,7 @@
 
         private static byte ASL_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = ASL(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;
@@ -86,7 +86,7 @@
 
         private static byte ROL_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = ROL(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
@@ -94,7 +94,7 @@
 
         private static byte ROL_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = ROL(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;
@@ -122,14 +122,14 @@
 
         private static byte ROR_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = ROR(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
         }
         private static byte ROR_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = ROR(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;

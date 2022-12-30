@@ -12,7 +12,7 @@
 
         private static byte INC_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = INC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
@@ -20,7 +20,7 @@
 
         private static byte INC_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = INC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;
@@ -52,7 +52,7 @@
 
         private static byte DEC_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var addressingResult = AddressingZero(bus, registers);
             var result = DEC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 5;
@@ -60,7 +60,7 @@
 
         private static byte DEC_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var addressingResult = AddressingAbsolute(bus, registers);
             var result = DEC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, result);
             return 6;

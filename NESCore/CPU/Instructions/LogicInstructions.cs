@@ -18,7 +18,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte BIT_ZERO(IBUS bus, IRegisters registers)
         {
-            var value = AddressingZeroWithValue(bus, registers).Value;
+            var value = AddressingZero(bus, registers).Value;
             BIT(value, registers);            
 
             return 3;
@@ -26,7 +26,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte BIT_ABS(IBUS bus, IRegisters registers)
         {
-            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            var value = AddressingAbsolute(bus, registers).Value;
             BIT(value, registers);
 
             return 4;
@@ -50,7 +50,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte AND_IND_X(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingIndirectXWithValue(bus, registers).Value;
+            var mask = AddressingIndirectX(bus, registers).Value;
             AND(mask, registers);
 
             return 6;
@@ -58,7 +58,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte AND_ZERO(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingZeroWithValue(bus, registers).Value;
+            var mask = AddressingZero(bus, registers).Value;
             AND(mask, registers);
 
             return 3;
@@ -66,7 +66,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte AND_ABS(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingAbsoluteWithValue(bus, registers).Value;
+            var mask = AddressingAbsolute(bus, registers).Value;
             AND(mask, registers);
 
             return 4;
@@ -90,7 +90,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte ORA_ZERO(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingZeroWithValue(bus, registers).Value;
+            var mask = AddressingZero(bus, registers).Value;
             ORA(mask, registers);
 
             return 3;
@@ -98,7 +98,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte ORA_IND_X(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingIndirectXWithValue(bus, registers).Value;
+            var mask = AddressingIndirectX(bus, registers).Value;
             ORA(mask, registers);
 
             return 6;
@@ -106,7 +106,7 @@ namespace NESCore.CPU.Instructions
 
         private static byte ORA_ABS(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingAbsoluteWithValue(bus, registers).Value;
+            var mask = AddressingAbsolute(bus, registers).Value;
             ORA(mask, registers);
 
             return 4;
@@ -129,21 +129,21 @@ namespace NESCore.CPU.Instructions
 
         private static byte EOR_IND_X(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingIndirectXWithValue(bus, registers).Value;
+            var mask = AddressingIndirectX(bus, registers).Value;
             EOR(mask, registers);
             return 6;
         }
 
         private static byte EOR_ZERO(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingZeroWithValue(bus, registers).Value;
+            var mask = AddressingZero(bus, registers).Value;
             EOR(mask, registers);
             return 3;
         }
 
         private static byte EOR_ABS(IBUS bus, IRegisters registers)
         {
-            var mask = AddressingAbsoluteWithValue(bus, registers).Value;
+            var mask = AddressingAbsolute(bus, registers).Value;
             EOR(mask, registers);
             return 4;
         }

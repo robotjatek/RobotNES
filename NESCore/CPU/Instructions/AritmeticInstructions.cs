@@ -29,21 +29,21 @@
 
         private static byte ADC_IND_X(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingIndirectXWithValue(bus, registers).Value;
+            var operand = AddressingIndirectX(bus, registers).Value;
             ADC(operand, registers);
             return 6;
         }
 
         private static byte ADC_ZERO(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingZeroWithValue(bus, registers).Value;
+            var operand = AddressingZero(bus, registers).Value;
             ADC(operand, registers);
             return 3;
         }
 
         private static byte ADC_ABS(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingAbsoluteWithValue(bus, registers).Value;
+            var operand = AddressingAbsolute(bus, registers).Value;
             ADC(operand, registers);
             return 4;
         }
@@ -75,21 +75,21 @@
 
         private static byte SBC_IND_X(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingIndirectXWithValue(bus, registers).Value;
+            var operand = AddressingIndirectX(bus, registers).Value;
             SBC(operand, registers);
             return 6;
         }
 
         private byte SBC_ZERO(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingZeroWithValue(bus, registers).Value;
+            var operand = AddressingZero(bus, registers).Value;
             SBC(operand, registers);
             return 3;
         }
 
         private byte SBC_ABS(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingAbsoluteWithValue(bus, registers).Value;
+            var operand = AddressingAbsolute(bus, registers).Value;
             SBC(operand, registers);
             return 4;
         }
@@ -113,7 +113,7 @@
 
         private static byte CMP_IND_X(IBUS bus, IRegisters registers)
         {
-            var value = AddressingIndirectXWithValue(bus, registers).Value;
+            var value = AddressingIndirectX(bus, registers).Value;
             CMP(value, registers);
 
             return 6;
@@ -121,14 +121,14 @@
 
         private static byte CMP_ZERO(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingZeroWithValue(bus, registers).Value;
+            var operand = AddressingZero(bus, registers).Value;
             CMP(operand, registers);
             return 3;
         }
 
         private static byte CMP_ABS(IBUS bus, IRegisters registers)
         {
-            var operand = AddressingAbsoluteWithValue(bus, registers).Value;
+            var operand = AddressingAbsolute(bus, registers).Value;
             CMP(operand, registers);
             return 4;
         }
@@ -152,7 +152,7 @@
 
         private static byte CPX_ZERO(IBUS bus, IRegisters registers)
         {
-            var value = AddressingZeroWithValue(bus, registers).Value;
+            var value = AddressingZero(bus, registers).Value;
             CPX(value, registers);
 
             return 3;
@@ -160,7 +160,7 @@
 
         private static byte CPX_ABS(IBUS bus, IRegisters registers)
         {
-            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            var value = AddressingAbsolute(bus, registers).Value;
             CPX(value, registers);
 
             return 4;
@@ -185,7 +185,7 @@
 
         private static byte CPY_ZERO(IBUS bus, IRegisters registers)
         {
-            var value = AddressingZeroWithValue(bus, registers).Value;
+            var value = AddressingZero(bus, registers).Value;
             CPY(value, registers);
 
             return 3;
@@ -193,7 +193,7 @@
 
         private static byte CPY_ABS(IBUS bus, IRegisters registers)
         {
-            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            var value = AddressingAbsolute(bus, registers).Value;
             CPY(value, registers);
 
             return 4;
