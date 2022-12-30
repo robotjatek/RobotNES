@@ -87,5 +87,13 @@
             registers.A = ROR(registers.A, registers);
             return 2;
         }
+
+        private static byte ROR_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var result = ROR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 5;
+        }
     }
 }

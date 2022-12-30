@@ -180,5 +180,20 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ROR_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var ror = _instructions[Opcodes.ROR_ZERO];
+            var cycles = ror(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 2));
+
+            cycles.Should().Be(5);
+        }
     }
 }
