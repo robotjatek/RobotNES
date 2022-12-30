@@ -2,9 +2,8 @@
 {
     public partial class CPUInstructions
     {
-        private static byte ADC_IMM(IBUS bus, IRegisters registers)
+        private static void ADC(byte operand, IRegisters registers)
         {
-            var operand = AddressingImmediate(bus, registers).Value;
             var result = registers.A + operand;
 
             if (registers.GetCarryFlag() == true)
@@ -19,7 +18,20 @@
             registers.SetOverflowFlag(overflow);
 
             registers.A = (byte)result;
+        }
+
+        private static byte ADC_IMM(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingImmediate(bus, registers).Value;
+            ADC(operand, registers);
             return 2;
+        }
+
+        private static byte ADC_IND_X(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingIndirectXWithValue(bus, registers).Value;
+            ADC(operand, registers);
+            return 6;
         }
 
         private static byte SBC_IMM(IBUS bus, IRegisters registers)

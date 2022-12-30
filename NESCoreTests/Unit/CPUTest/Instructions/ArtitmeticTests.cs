@@ -254,6 +254,31 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void ADC_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var ora = _instructions[Opcodes.ADC_IND_X];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(30);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
         public void CMP_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
         {
             var bus = new Mock<IBUS>();

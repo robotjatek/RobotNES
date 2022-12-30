@@ -73,6 +73,7 @@
             InstructionSet[Opcodes.ORA_IND_X] = ORA_IND_X;
             InstructionSet[Opcodes.AND_IND_X] = AND_IND_X;
             InstructionSet[Opcodes.EOR_IND_X] = EOR_IND_X;
+            InstructionSet[Opcodes.ADC_IND_X] = ADC_IND_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
