@@ -695,6 +695,27 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void CPY_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var cpy = _instructions[Opcodes.CPY_ZERO];
+            var cycles = cpy(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(0x10), Times.Once());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void SBC_IMM_subtracts_two_numbers()
         {
             var bus = new Mock<IBUS>();

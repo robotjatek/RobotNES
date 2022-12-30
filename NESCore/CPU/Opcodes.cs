@@ -81,7 +81,7 @@
         //TODO: cpx abs
         public const int CPY_IMM = 0xC0;
         //TODO: cpy abs
-        //TODO: cpy zero
+        public const int CPY_ZERO = 0xC4;
         public const int SBC_IMM = 0xE9;
         public const int SBC_IND_X = 0xE1;
         public const int SBC_ZERO = 0xE5;
