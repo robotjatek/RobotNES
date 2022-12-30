@@ -70,6 +70,7 @@
         #region Aritm
         public const int ADC_IMM = 0x69;
         public const int ADC_IND_X = 0x61;
+        public const int ADC_ZERO = 0x65;
         //TODO: more adc modes
         public const int CMP_IMM = 0xC9;
         public const int CMP_IND_X = 0xC1;

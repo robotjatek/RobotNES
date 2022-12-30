@@ -34,6 +34,13 @@
             return 6;
         }
 
+        private static byte ADC_ZERO(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingZeroWithValue(bus, registers).Value;
+            ADC(operand, registers);
+            return 3;
+        }
+
         private static void SBC(byte value, IRegisters registers)
         {
             var operand = (sbyte)~value;
