@@ -48,6 +48,7 @@
         //TODO: shift instructions
         public const int ASL_A = 0x0A;
         public const int ASL_ZERO = 0x06;
+        public const int ASL_ABS = 0x0e;
         public const int LSR_A = 0x4A;
         public const int LSR_ZERO = 0x46;
         public const int LSR_ABS = 0x4E;

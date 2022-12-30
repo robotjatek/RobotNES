@@ -56,6 +56,14 @@
             return 5;
         }
 
+        private static byte ASL_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteWithValue(bus, registers);
+            var result = ASL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 6;
+        }
+
         private static byte ROL(byte value, IRegisters registers)
         {
             var carryAfterShift = (value & 0x80) > 0;
