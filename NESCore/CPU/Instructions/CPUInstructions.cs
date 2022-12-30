@@ -1,6 +1,7 @@
 ﻿namespace NESCore.CPU.Instructions
 {
     //TODO: extract cpu addressing modes to their own methods
+    //TODO: return elapsed cycles in all addressing mode functions
 
     public partial class CPUInstructions
     {
@@ -110,6 +111,7 @@
             InstructionSet[Opcodes.ROL_ABS] = ROL_ABS;
             InstructionSet[Opcodes.INC_ABS] = INC_ABS;
             InstructionSet[Opcodes.DEC_ABS] = DEC_ABS;
+            InstructionSet[Opcodes.LDA_IND_Y] = LDA_IND_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -163,6 +165,7 @@
         {
             public byte Value { get; init; }
             public ushort Address { get; init; }
+            public byte Cycles { get; init; }
         }
 
         private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
@@ -208,6 +211,29 @@
             {
                 Address = address,
                 Value = value
+            };
+        }
+
+        private static AddressingResult AddressingIndirectY(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 5;
+            var zeroPageAddress = Fetch(bus, registers);
+            var lowAddress = bus.Read((UInt16)(zeroPageAddress&0xff));
+            var highAddress = bus.Read((UInt16)((zeroPageAddress + 1) & 0xff));
+            var address = (UInt16)((highAddress << 8 | lowAddress) & 0xffff);
+            var page = address & 0xff00;
+            address += registers.Y;
+            if((address & 0xff00) != page)
+            {
+                cycles++;
+            }
+            var value = bus.Read(address);
+
+            return new AddressingResult
+            {
+                Address = address,
+                Value = value,
+                Cycles = cycles
             };
         }
     }

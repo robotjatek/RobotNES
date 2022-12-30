@@ -1,5 +1,4 @@
 ﻿using Moq;
-using NESCore.CPU.Instructions;
 using NESCore.CPU;
 using NESCore;
 using FluentAssertions;
@@ -159,6 +158,56 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void LDA_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0x0ad) //low address
+                .Returns(0xde) // high address
+                .Returns(0xaa); // value at location final location
+
+            var lda = _instructions[Opcodes.LDA_IND_Y];
+            var cycles = lda(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void LDA_indirect_Y_page_cross_penalty()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xff) //low address
+                .Returns(0x00) // high address
+                .Returns(0xaa); 
+
+            var lda = _instructions[Opcodes.LDA_IND_Y];
+            var cycles = lda(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
 
             cycles.Should().Be(6);
         }
