@@ -571,5 +571,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void ORA_ZERO()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x7f);
+            var ora = _instructions[Opcodes.ORA_ZERO];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff);
+
+            bus.Verify(b => b.Read(10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(3);
+        }
     }
 }

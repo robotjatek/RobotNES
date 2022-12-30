@@ -58,6 +58,14 @@
             return 2;
         }
 
+        private static byte ORA_ZERO(IBUS bus, IRegisters registers)
+        {
+            var mask = AddressingZeroWithValue(bus, registers).Value;
+            ORA(mask, registers);
+
+            return 3;
+        }
+
         private static byte ORA_IND_X(IBUS bus, IRegisters registers)
         {
             var mask = AddressingIndirectXWithValue(bus, registers).Value;
