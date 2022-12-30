@@ -143,8 +143,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0xAA;
 
-            var ora = _instructions[Opcodes.AND_IND_X];
-            var cycles = ora(bus.Object, registers.Object);
+            var and = _instructions[Opcodes.AND_IND_X];
+            var cycles = and(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xa0);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
@@ -445,8 +445,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0xAA;
 
-            var ora = _instructions[Opcodes.EOR_IND_X];
-            var cycles = ora(bus.Object, registers.Object);
+            var eor = _instructions[Opcodes.EOR_IND_X];
+            var cycles = eor(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x55);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());

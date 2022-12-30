@@ -268,8 +268,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var ora = _instructions[Opcodes.ADC_IND_X];
-            var cycles = ora(bus.Object, registers.Object);
+            var adc = _instructions[Opcodes.ADC_IND_X];
+            var cycles = adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
@@ -403,8 +403,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var ora = _instructions[Opcodes.CMP_IND_X];
-            var cycles = ora(bus.Object, registers.Object);
+            var cmp = _instructions[Opcodes.CMP_IND_X];
+            var cycles = cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
@@ -805,6 +805,32 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(5);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+
+            var sbc = _instructions[Opcodes.SBC_IND_X];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(15);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+
+            cycles.Should().Be(6);
         }
     }
 }

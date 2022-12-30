@@ -34,9 +34,9 @@
             return 6;
         }
 
-        private static byte SBC_IMM(IBUS bus, IRegisters registers)
+        private static void SBC(byte value, IRegisters registers)
         {
-            var operand = (sbyte)~AddressingImmediate(bus, registers).Value;
+            var operand = (sbyte)~value;
             var result = (sbyte)registers.A + operand;
             if (registers.GetCarryFlag() == true)
             {
@@ -50,7 +50,20 @@
             registers.SetOverflowFlag(overflow);
 
             registers.A = (byte)result;
+        }
+
+        private static byte SBC_IMM(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingImmediate(bus, registers).Value;
+            SBC(operand, registers);
             return 2;
+        }
+
+        private static byte SBC_IND_X(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingIndirectXWithValue(bus, registers).Value;
+            SBC(operand, registers);
+            return 6;
         }
 
         private static void CMP(byte value, IRegisters registers)
