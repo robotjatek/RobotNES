@@ -131,5 +131,20 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void ASL_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var asl = _instructions[Opcodes.ASL_ZERO];
+            var cycles = asl(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 8));
+
+            cycles.Should().Be(5);
+        }
     }
 }
