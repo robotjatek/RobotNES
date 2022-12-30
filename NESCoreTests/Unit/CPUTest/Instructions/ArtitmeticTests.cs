@@ -475,6 +475,27 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void CMP_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+
+            var cmp = _instructions[Opcodes.CMP_ABS];
+            var cycles = cmp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void CPX_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
         {
             var bus = new Mock<IBUS>();

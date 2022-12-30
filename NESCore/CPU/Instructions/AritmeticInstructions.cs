@@ -119,6 +119,13 @@
             return 3;
         }
 
+        private static byte CMP_ABS(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingAbsoluteWithValue(bus, registers).Value;
+            CMP(operand, registers);
+            return 4;
+        }
+
         private static void CPX(byte value, IRegisters registers)
         {
             var tmp = registers.X - value;
