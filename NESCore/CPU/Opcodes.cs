@@ -49,6 +49,7 @@
 
         #region Logic
         public const int AND_IMM = 0x29;
+        public const int AND_IND_X = 0x21;
         //TODO: more AND modes
         public const int BIT_ZERO = 0x24;
         //TODO: BIT abs

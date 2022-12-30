@@ -129,6 +129,31 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void AND_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xF0);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0xAA;
+
+            var ora = _instructions[Opcodes.AND_IND_X];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xa0);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
         public void BIT_ZERO_sets_negative_flag()
         {
             var registers = new Mock<IRegisters>();
