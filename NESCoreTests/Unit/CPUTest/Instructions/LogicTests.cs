@@ -649,5 +649,22 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(3);
         }
+
+        [Fact]
+        public void ORA_ABS()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x0;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0xaa);
+            var ora = _instructions[Opcodes.ORA_ABS];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(0xdead));
+
+            cycles.Should().Be(4);
+        }
     }
 }
