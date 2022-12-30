@@ -564,6 +564,27 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void CPX_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var cpx = _instructions[Opcodes.CPX_ZERO];
+            var cycles = cpx(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(0x10), Times.Once());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void CPY_IMM_sets_zero_flag_when_the_two_numbers_are_equal()
         {
             var bus = new Mock<IBUS>();

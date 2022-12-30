@@ -112,16 +112,29 @@
             return 3;
         }
 
+        private static void CPX(byte value, IRegisters registers)
+        {
+            var tmp = registers.X - value;
+
+            registers.SetZeroFlag(tmp == 0);
+            registers.SetCarryFlag(registers.X >= value);
+            registers.SetNegativeFlag((tmp & 0x80) > 0);
+        }
+
         private static byte CPX_IMM(IBUS bus, IRegisters registers)
         {
             var imm = AddressingImmediate(bus, registers).Value;
-            var tmp = registers.X - imm;
-
-            registers.SetZeroFlag(tmp == 0);
-            registers.SetCarryFlag(registers.X >= imm);
-            registers.SetNegativeFlag((tmp & 0x80) > 0);
+            CPX(imm, registers);
 
             return 2;
+        }
+
+        private static byte CPX_ZERO(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingZeroWithValue(bus, registers).Value;
+            CPX(value, registers);
+
+            return 3;
         }
 
         private static byte CPY_IMM(IBUS bus, IRegisters registers)
