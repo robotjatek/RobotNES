@@ -94,6 +94,7 @@
             InstructionSet[Opcodes.INC_ZERO] = INC_ZERO;
             InstructionSet[Opcodes.DEC_ZERO] = DEC_ZERO;
             InstructionSet[Opcodes.LDY_ABS] = LDY_ABS;
+            InstructionSet[Opcodes.STY_ABS] = STY_ABS;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

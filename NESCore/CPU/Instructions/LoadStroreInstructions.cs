@@ -140,5 +140,12 @@
             bus.Write(address, registers.Y);
             return 3;
         }
+
+        private static byte STY_ABS(IBUS bus, IRegisters registers)
+        {
+            var address = AddressingAbsoulteAddressOnly(bus, registers).Address;
+            bus.Write(address, registers.Y);
+            return 4;
+        }
     }
 }
