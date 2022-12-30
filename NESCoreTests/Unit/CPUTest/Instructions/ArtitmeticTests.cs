@@ -638,11 +638,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
-            registers.Object.A = 20;
+            registers.Object.X = 20;
 
             var cpx = _instructions[Opcodes.CPX_ABS];
             var cycles = cpx(bus.Object, registers.Object);
-            registers.Object.A.Should().Be(20);
+            registers.Object.X.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
 
             cycles.Should().Be(4);
@@ -769,14 +769,36 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
-            registers.Object.A = 20;
+            registers.Object.Y = 20;
 
             var cpy = _instructions[Opcodes.CPY_ZERO];
             var cycles = cpy(bus.Object, registers.Object);
-            registers.Object.A.Should().Be(20);
+            registers.Object.Y.Should().Be(20);
             bus.Verify(b => b.Read(0x10), Times.Once());
 
             cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void CPY_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.Y = 20;
+
+            var cpy = _instructions[Opcodes.CPY_ABS];
+            var cycles = cpy(bus.Object, registers.Object);
+            registers.Object.Y.Should().Be(20);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            cycles.Should().Be(4);
         }
 
         [Fact]

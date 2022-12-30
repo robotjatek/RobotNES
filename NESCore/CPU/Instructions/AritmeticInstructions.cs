@@ -190,5 +190,13 @@
 
             return 3;
         }
+
+        private static byte CPY_ABS(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            CPY(value, registers);
+
+            return 4;
+        }
     }
 }
