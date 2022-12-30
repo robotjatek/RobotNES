@@ -98,6 +98,13 @@
             return 6;
         }
 
+        private static byte CMP_ZERO(IBUS bus, IRegisters registers)
+        {
+            var operand = AddressingZeroWithValue(bus, registers).Value;
+            CMP(operand, registers);
+            return 3;
+        }
+
         private static byte CPX_IMM(IBUS bus, IRegisters registers)
         {
             var imm = AddressingImmediate(bus, registers).Value;

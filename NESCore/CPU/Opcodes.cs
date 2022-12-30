@@ -74,6 +74,7 @@
         //TODO: more adc modes
         public const int CMP_IMM = 0xC9;
         public const int CMP_IND_X = 0xC1;
+        public const int CMP_ZERO = 0xC5;
         //TODO: more cmp modes
         public const int CPX_IMM = 0xE0;
         //TODO: cpx abs
