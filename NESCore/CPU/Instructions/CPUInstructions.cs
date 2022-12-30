@@ -76,6 +76,7 @@
             InstructionSet[Opcodes.ADC_IND_X] = ADC_IND_X;
             InstructionSet[Opcodes.CMP_IND_X] = CMP_IND_X;
             InstructionSet[Opcodes.SBC_IND_X] = SBC_IND_X;
+            InstructionSet[Opcodes.LDY_ZERO] = LDY_ZERO;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

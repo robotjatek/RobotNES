@@ -72,6 +72,14 @@
             return 2;
         }
 
+        private static byte LDY_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            LDY(addressingResult.Value, registers);
+            return 3;
+        }
+
+
         private static void STA(ushort address, IBUS bus, IRegisters registers)
         {
             bus.Write(address, registers.A);

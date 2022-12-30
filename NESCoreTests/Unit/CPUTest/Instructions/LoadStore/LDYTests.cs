@@ -52,5 +52,40 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Verify(r => r.SetNegativeFlag(true));
             cycles.Should().Be(2);
         }
+
+        [Fact]
+        public void LDY_zero_loads_A_with_value_from_on_zero_page_address()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0) // address
+                .Returns(0xde); // value
+
+            var ldy = _instructions[Opcodes.LDY_ZERO];
+            var cycles = ldy(bus.Object, registers.Object);
+            registers.Object.Y.Should().Be(0xde);
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void LDY_zero_loads_A_with_value_from_on_zero_page_address2()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff) // address
+                .Returns(0xde); // value
+
+            var ldy = _instructions[Opcodes.LDY_ZERO];
+            var cycles = ldy(bus.Object, registers.Object);
+            registers.Object.Y.Should().Be(0xde);
+            bus.Verify(b => b.Read(0x00ff));
+
+            cycles.Should().Be(3);
+        }
     }
 }
