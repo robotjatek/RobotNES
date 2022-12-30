@@ -204,6 +204,95 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void DEC_Zero_decrements_value_memory()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(5);
+
+            var registers = new Mock<IRegisters>();
+
+            var dec = _instructions[Opcodes.DEC_ZERO];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 4));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void DEC_Zero_sets_zero_flag_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(1);
+
+            var registers = new Mock<IRegisters>();
+
+            var dec = _instructions[Opcodes.DEC_ZERO];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 0));
+            registers.Verify(r => r.SetZeroFlag(true));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void DEC_Zero_sets_zero_flag_to_false()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(0xfe);
+
+            var registers = new Mock<IRegisters>();
+
+            var dec = _instructions[Opcodes.DEC_ZERO];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 0xfd));
+            registers.Verify(r => r.SetZeroFlag(false));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void DEC_Zero_sets_negative_flag_to_false()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(0x1);
+
+            var registers = new Mock<IRegisters>();
+
+            var dec = _instructions[Opcodes.DEC_ZERO];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 0));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void DEC_Zero_sets_negative_flag_to_true()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(0x0);
+
+            var registers = new Mock<IRegisters>();
+
+            var dec = _instructions[Opcodes.DEC_ZERO];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10, 0xff));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void INC_Zero_increments_value_memory()
         {
             var bus = new Mock<IBUS>();

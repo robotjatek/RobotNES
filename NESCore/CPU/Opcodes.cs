@@ -95,7 +95,7 @@
         #region Inc
         //TODO: dec abs
         //TODO: x abs dec
-        //TODO: zero dec
+        public const int DEC_ZERO = 0xC6;
         //TODO: x zero dec
         public const int DEX = 0xCA;
         public const int DEY = 0x88;

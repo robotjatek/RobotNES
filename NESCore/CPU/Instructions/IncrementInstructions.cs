@@ -28,6 +28,16 @@
             return 2;
         }
 
+        private static byte DEC_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroWithValue(bus, registers);
+            var result = (byte)(addressingResult.Value - 1);
+            registers.SetZeroFlag(result == 0);
+            registers.SetNegativeFlag((result & 0x80) > 0);
+            bus.Write(addressingResult.Address, result);
+            return 5;
+        }
+
         private static byte DEX(IBUS bus, IRegisters registers)
         {
             registers.X--;
