@@ -158,6 +158,14 @@
             return 3;
         }
 
+        private static byte CPX_ABS(IBUS bus, IRegisters registers)
+        {
+            var value = AddressingAbsoluteWithValue(bus, registers).Value;
+            CPX(value, registers);
+
+            return 4;
+        }
+
         private static void CPY(byte value, IRegisters registers)
         {
             var tmp = registers.Y - value;

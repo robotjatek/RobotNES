@@ -92,7 +92,8 @@
         //TODO: more cmp modes
         public const int CPX_IMM = 0xE0;
         public const int CPX_ZERO = 0xE4;
-        //TODO: cpx abs
+        public const int CPX_ABS = 0xEC;
+
         public const int CPY_IMM = 0xC0;
         //TODO: cpy abs
         public const int CPY_ZERO = 0xC4;
