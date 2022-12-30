@@ -101,7 +101,7 @@
         public const int DEY = 0x88;
         //TODO: inc abs
         //TODO: x abs inc
-        //TODO: zero inc
+        public const int INC_ZERO = 0xE6;
         //TODO: x zero inc
         public const int INX = 0xE8;
         public const int INY = 0xC8;
