@@ -81,6 +81,7 @@
         public const int ORA_IND_X = 0x01;
         public const int ORA_ZERO = 0x05;
         public const int ORA_ABS = 0x0D;
+        public const int ORA_IND_Y = 0x11;
         //TODO: more ora modes
         #endregion
 
