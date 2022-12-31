@@ -140,6 +140,13 @@
             return 4;
         }
 
+        private static byte CMP_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            CMP(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void CPX(byte value, IRegisters registers)
         {
             var tmp = registers.X - value;
