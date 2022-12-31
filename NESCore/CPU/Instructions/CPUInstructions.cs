@@ -119,6 +119,7 @@
             InstructionSet[Opcodes.CMP_IND_Y] = CMP_IND_Y;
             InstructionSet[Opcodes.SBC_IND_Y] = SBC_IND_Y;
             InstructionSet[Opcodes.STA_IND_Y] = STA_IND_Y;
+            InstructionSet[Opcodes.JMP_INDIRECT] = JMP_INDIRECT;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

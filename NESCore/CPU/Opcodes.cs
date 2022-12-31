@@ -141,7 +141,7 @@
         public const int JSR_ABS = 0x20;
         public const int RTI = 0x40;
         public const int RTS = 0x60;
-        //TODO: JMP_ABS_INDIRECT
+        public const int JMP_INDIRECT = 0x6C;
         #endregion
 
         #region Branch

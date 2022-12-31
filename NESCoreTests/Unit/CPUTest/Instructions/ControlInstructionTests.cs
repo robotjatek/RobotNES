@@ -22,6 +22,42 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void JMP_INDIRECT()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(0xef).Returns(0xbe);
+
+            var jmp = _instructions[Opcodes.JMP_INDIRECT];
+            var cycles = jmp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 1), Times.Once());
+            registers.Object.PC.Should().Be(0xbeef);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void JMP_INDIRECT_DOES_NOT_INCREMENT_PAGE()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0xde).Returns(0xef).Returns(0xbe);
+
+            var jmp = _instructions[Opcodes.JMP_INDIRECT];
+            var cycles = jmp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdeff), Times.Once());
+            bus.Verify(b => b.Read(0xde00), Times.Once());
+            registers.Object.PC.Should().Be(0xbeef);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void JSR_ABS()
         {
             var registers = new Mock<IRegisters>();
