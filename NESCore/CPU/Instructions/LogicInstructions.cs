@@ -163,5 +163,12 @@ namespace NESCore.CPU.Instructions
             EOR(mask, registers);
             return 4;
         }
+
+        private static byte EOR_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            EOR(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
     }
 }
