@@ -48,6 +48,13 @@
             return 4;
         }
 
+        private static byte ADC_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            ADC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void SBC(byte value, IRegisters registers)
         {
             var operand = (sbyte)~value;
