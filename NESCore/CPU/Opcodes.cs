@@ -113,6 +113,7 @@
         public const int SBC_IND_X = 0xE1;
         public const int SBC_ZERO = 0xE5;
         public const int SBC_ABS = 0xED;
+        public const int SBC_IND_Y = 0xF1;
         //TODO: more sbc modes
         #endregion
 

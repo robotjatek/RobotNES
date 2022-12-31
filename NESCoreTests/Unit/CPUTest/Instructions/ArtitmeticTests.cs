@@ -1172,5 +1172,59 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void SBC_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 20;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0x0ad) //low address
+                .Returns(0xde) // high address
+                .Returns(10); // value at location final location
+
+            var sbc = _instructions[Opcodes.SBC_IND_Y];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(10);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void SBC_indirect_Y_page_cross_penalty()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 20;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xff) //low address
+                .Returns(0x00) // high address
+                .Returns(10);
+
+            var sbc = _instructions[Opcodes.SBC_IND_Y];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(10);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
+
+            cycles.Should().Be(6);
+        }
     }
 }

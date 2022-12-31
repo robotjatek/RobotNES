@@ -101,6 +101,13 @@
             return 4;
         }
 
+        private byte SBC_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            SBC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void CMP(byte value, IRegisters registers)
         {
             var tmp = registers.A - value;
