@@ -20,6 +20,7 @@
         public const int STA_ZERO = 0x85;
         public const int STA_ABS = 0x8D;
         public const int STA_IND_X = 0x81;
+        public const int STA_IND_Y = 0x91;
         //TODO: More STA modes
         public const int STX_ZERO = 0x86;
         public const int STX_ABS = 0x8E;
