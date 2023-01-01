@@ -17,7 +17,7 @@
         public const int LDY_IMM = 0xA0;
         public const int LDY_ZERO = 0xA4;
         public const int LDY_ABS = 0xAC;
-        public const int LDY_ABS_X = 0xB4;
+        public const int LDY_ABS_X = 0xBC;
         //TODO: more LDY modes
         public const int STA_ZERO = 0x85;
         public const int STA_ABS = 0x8D;
