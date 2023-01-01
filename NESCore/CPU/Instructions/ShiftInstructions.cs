@@ -25,6 +25,14 @@
             return 5;
         }
 
+        private static byte LSR_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            var result = LSR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
         private static byte LSR_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
