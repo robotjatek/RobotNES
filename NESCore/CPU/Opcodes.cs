@@ -153,7 +153,7 @@
         public const int INC_ABS = 0xEE;
         //TODO: x abs inc
         public const int INC_ZERO = 0xE6;
-        //TODO: x zero inc
+        public const int INC_ZERO_X = 0xF6;
 
         public const int INX = 0xE8;
         public const int INY = 0xC8;

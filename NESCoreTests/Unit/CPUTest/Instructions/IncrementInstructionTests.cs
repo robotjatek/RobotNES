@@ -410,5 +410,39 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void INC_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var inc = _instructions[Opcodes.INC_ZERO_X];
+            var cycles = inc(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xde + 5, 11));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void INC_ZERO_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var inc = _instructions[Opcodes.INC_ZERO_X];
+            var cycles = inc(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(4, 11));
+
+            cycles.Should().Be(6);
+        }
     }
 }
