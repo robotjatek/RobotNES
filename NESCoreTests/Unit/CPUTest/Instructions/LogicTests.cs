@@ -873,6 +873,46 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void ORA_ZERO_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(10).Returns(0x7f);
+            var ora = _instructions[Opcodes.ORA_ZERO_X];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff);
+
+            bus.Verify(b => b.Read(10 + 10));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void ORA_ZERO_X_wraps()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0x80;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x7f);
+            var ora = _instructions[Opcodes.ORA_ZERO_X];
+            var cycles = ora(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xff);
+
+            bus.Verify(b => b.Read(9));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void ORA_ABS()
         {
             var registers = new Mock<IRegisters>();

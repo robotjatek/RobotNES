@@ -112,6 +112,13 @@ namespace NESCore.CPU.Instructions
             return 3;
         }
 
+        private static byte ORA_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            ORA(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte ORA_IND_X(IBUS bus, IRegisters registers)
         {
             var mask = AddressingIndirectX(bus, registers).Value;
