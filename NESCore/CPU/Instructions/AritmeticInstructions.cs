@@ -108,6 +108,13 @@
             return 4;
         }
 
+        private static byte SBC_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            SBC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private byte SBC_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectY(bus, registers);
