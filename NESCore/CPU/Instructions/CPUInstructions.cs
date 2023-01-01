@@ -131,6 +131,7 @@
             InstructionSet[Opcodes.LDY_ZERO_X] = LDY_ZERO_X;
             InstructionSet[Opcodes.STY_ZERO_X] = STY_ZERO_X;
             InstructionSet[Opcodes.ORA_ZERO_X] = ORA_ZERO_X;
+            InstructionSet[Opcodes.AND_ZERO_X] = AND_ZERO_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

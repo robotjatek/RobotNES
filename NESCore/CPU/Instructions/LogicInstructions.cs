@@ -64,6 +64,14 @@ namespace NESCore.CPU.Instructions
             return 3;
         }
 
+        private static byte AND_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            AND(addressingResult.Value, registers);
+
+            return addressingResult.Cycles;
+        }
+
         private static byte AND_ABS(IBUS bus, IRegisters registers)
         {
             var mask = AddressingAbsolute(bus, registers).Value;

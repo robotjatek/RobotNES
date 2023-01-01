@@ -69,6 +69,7 @@
         public const int AND_IMM = 0x29;
         public const int AND_IND_X = 0x21;
         public const int AND_ZERO = 0x25;
+        public const int AND_ZERO_X = 0x35;
         public const int AND_ABS = 0x2D;
         public const int AND_IND_Y = 0x31;
         public const int AND_ABS_Y = 0x39;
