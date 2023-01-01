@@ -191,6 +191,25 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void AND_ZERO_X_wraps()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.X = 5;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0xf0);
+            var and = _instructions[Opcodes.AND_ZERO_X];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xa0);
+
+            bus.Verify(b => b.Read(4));
+            registers.Verify(r => r.SetNegativeFlag(true));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void AND_ABS()
         {
             var registers = new Mock<IRegisters>();
@@ -637,6 +656,48 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0x10), Times.Once());
 
             cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void EOR_Zero_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(0xFF);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.X = 5;
+
+            var eor = _instructions[Opcodes.EOR_ZERO_X];
+            var cycles = eor(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x55);
+            bus.Verify(b => b.Read(0x10 + 5), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void EOR_Zero_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0xFF);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.X = 5;
+
+            var eor = _instructions[Opcodes.EOR_ZERO_X];
+            var cycles = eor(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x55);
+            bus.Verify(b => b.Read(4), Times.Once());
+
+            cycles.Should().Be(4);
         }
 
         [Fact]

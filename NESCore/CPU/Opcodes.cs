@@ -81,6 +81,7 @@
         public const int EOR_IMM = 0x49;
         public const int EOR_IND_X = 0x41;
         public const int EOR_ZERO = 0x45;
+        public const int EOR_ZERO_X = 0x55;
         public const int EOR_ABS = 0x4D;
         public const int EOR_ABS_Y = 0x59;
         public const int EOR_IND_Y = 0x51;
