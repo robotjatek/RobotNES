@@ -5,6 +5,7 @@
         #region Load/Store
         public const int LDA_IMM = 0xA9;
         public const int LDA_ABS = 0xAD;
+        public const int LDA_ABS_Y = 0xB9;
         public const int LDA_ZERO = 0xA5;
         public const int LDA_IND_X = 0xA1;
         public const int LDA_IND_Y = 0xB1;

@@ -120,6 +120,7 @@
             InstructionSet[Opcodes.SBC_IND_Y] = SBC_IND_Y;
             InstructionSet[Opcodes.STA_IND_Y] = STA_IND_Y;
             InstructionSet[Opcodes.JMP_INDIRECT] = JMP_INDIRECT;
+            InstructionSet[Opcodes.LDA_ABS_Y] = LDA_ABS_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -193,6 +194,26 @@
             {
                 Value = value,
                 Address = address,
+            };
+        }
+
+        private static AddressingResult AddressingAbsoluteY(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 4;
+            var address = Fetch16(bus, registers);
+            var page = address & 0xff00;
+            address += registers.Y;
+            if((address & 0xff00) != page)
+            {
+                cycles++;
+            }
+
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Value = value,
+                Address = address,
+                Cycles = cycles
             };
         }
 

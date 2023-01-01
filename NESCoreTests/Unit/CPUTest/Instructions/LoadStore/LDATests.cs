@@ -103,6 +103,44 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
+        public void LDA_ABS_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 15;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
+
+            var lda_abs = _instructions[Opcodes.LDA_ABS_Y];
+            var cycles = lda_abs(bus.Object, registers.Object);
+            registers.VerifySet(r => r.A = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            bus.Verify(b => b.Read(0xdead + 15));
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void LDA_ABS_Y_penalty_on_page_boundary()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 15;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0x10);
+
+            var lda_abs = _instructions[Opcodes.LDA_ABS_Y];
+            var cycles = lda_abs(bus.Object, registers.Object);
+            registers.VerifySet(r => r.A = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            bus.Verify(b => b.Read(0x00ff + 15));
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void LDA_zero_loads_A_with_value_from_on_zero_page_address()
         {
             var registers = new Mock<IRegisters>();
