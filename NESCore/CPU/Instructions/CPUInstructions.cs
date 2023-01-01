@@ -128,6 +128,7 @@
             InstructionSet[Opcodes.CMP_ABS_Y] = CMP_ABS_Y;
             InstructionSet[Opcodes.SBC_ABS_Y] = SBC_ABS_Y;
             InstructionSet[Opcodes.STA_ABS_Y] = STA_ABS_Y;
+            InstructionSet[Opcodes.LDY_ABS_X] = LDY_ABS_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -201,6 +202,26 @@
             {
                 Value = value,
                 Address = address,
+            };
+        }
+
+        private static AddressingResult AddressingAbsoluteX(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 4;
+            var address = Fetch16(bus, registers);
+            var page = address & 0xff00;
+            address += registers.X;
+            if ((address & 0xff00) != page)
+            {
+                cycles++;
+            }
+
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Value = value,
+                Address = address,
+                Cycles = cycles
             };
         }
 
