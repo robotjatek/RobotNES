@@ -176,6 +176,13 @@
             return 3;
         }
 
+        private static byte STY_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            bus.Write(addressingResult.Address, registers.Y);
+            return addressingResult.Cycles;
+        }
+
         private static byte STY_ABS(IBUS bus, IRegisters registers)
         {
             var address = AddressingAbsolute(bus, registers).Address;

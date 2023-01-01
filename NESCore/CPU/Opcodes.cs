@@ -29,8 +29,8 @@
         public const int STX_ABS = 0x8E;
         //TODO: more stx modes
         public const int STY_ZERO = 0x84;
+        public const int STY_ZERO_X = 0x94;
         public const int STY_ABS = 0x8C;
-        //TODO: more STY modes
         #endregion
 
         #region Transfer
