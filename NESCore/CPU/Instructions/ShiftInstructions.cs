@@ -108,6 +108,14 @@
             return 5;
         }
 
+        private static byte ROL_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            var result = ROL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
         private static byte ROL_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);

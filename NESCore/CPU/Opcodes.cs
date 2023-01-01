@@ -65,6 +65,7 @@
 
         public const int ROL_A = 0x2A;
         public const int ROL_ZERO = 0x26;
+        public const int ROL_ZERO_X = 0x36;
         public const int ROL_ABS = 0x2E;
 
         public const int ROR_A = 0x6A;
