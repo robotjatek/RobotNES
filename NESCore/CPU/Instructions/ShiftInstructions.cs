@@ -64,6 +64,14 @@
             return 5;
         }
 
+        private static byte ASL_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            var result = ASL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
         private static byte ASL_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
