@@ -134,6 +134,7 @@
             InstructionSet[Opcodes.AND_ZERO_X] = AND_ZERO_X;
             InstructionSet[Opcodes.EOR_ZERO_X] = EOR_ZERO_X;
             InstructionSet[Opcodes.ADC_ZERO_X] = ADC_ZERO_X;
+            InstructionSet[Opcodes.CMP_ZERO_X] = CMP_ZERO_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

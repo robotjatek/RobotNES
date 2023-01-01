@@ -161,6 +161,13 @@
             return 3;
         }
 
+        private static byte CMP_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            CMP(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte CMP_ABS(IBUS bus, IRegisters registers)
         {
             var operand = AddressingAbsolute(bus, registers).Value;

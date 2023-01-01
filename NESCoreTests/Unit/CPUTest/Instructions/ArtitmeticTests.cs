@@ -690,6 +690,49 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void CMP_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var cmp = _instructions[Opcodes.CMP_ZERO_X];
+            var cycles = cmp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+
+        [Fact]
+        public void CMP_ZERO_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var cmp = _instructions[Opcodes.CMP_ZERO_X];
+            var cycles = cmp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(4), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void CMP_ABS()
         {
             var bus = new Mock<IBUS>();
