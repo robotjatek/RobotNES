@@ -101,6 +101,7 @@
         public const int ADC_IMM = 0x69;
         public const int ADC_IND_X = 0x61;
         public const int ADC_ZERO = 0x65;
+        public const int ADC_ZERO_X = 0x75;
         public const int ADC_ABS = 0x6D;
         public const int ADC_ABS_Y = 0x79;
         public const int ADC_IND_Y = 0x71;

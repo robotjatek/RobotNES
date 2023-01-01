@@ -41,6 +41,13 @@
             return 3;
         }
 
+        private static byte ADC_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            ADC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte ADC_ABS(IBUS bus, IRegisters registers)
         {
             var operand = AddressingAbsolute(bus, registers).Value;

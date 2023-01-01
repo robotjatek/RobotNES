@@ -299,6 +299,48 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void ADC_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0x10)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var adc = _instructions[Opcodes.ADC_ZERO_X];
+            var cycles = adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(30);
+            bus.Verify(b => b.Read(0x10 + 5), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void ADC_ZERO_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var adc = _instructions[Opcodes.ADC_ZERO_X];
+            var cycles = adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(30);
+            bus.Verify(b => b.Read(4), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void ADC_ABS()
         {
             var bus = new Mock<IBUS>();
