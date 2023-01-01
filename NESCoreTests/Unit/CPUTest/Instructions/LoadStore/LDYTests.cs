@@ -108,40 +108,22 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
-        public void LDY_ABS_X()
+        public void LDY_ZERO_X()
         {
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.X = 15;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x10);
 
-            var ldy_abs_x = _instructions[Opcodes.LDY_ABS_X];
+            var ldy_abs_x = _instructions[Opcodes.LDY_ZERO_X];
             var cycles = ldy_abs_x(bus.Object, registers.Object);
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
-            bus.Verify(b => b.Read(0xdead + 15));
+            bus.Verify(b => b.Read(0xad + 15));
             cycles.Should().Be(4);
-        }
-        [Fact]
-        public void LDY_ABS_X_page_cross_penalty()
-        {
-            var registers = new Mock<IRegisters>();
-            registers.SetupAllProperties();
-            registers.Object.X = 15;
-
-            var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0x10);
-
-            var ldy_abs_x = _instructions[Opcodes.LDY_ABS_X];
-            var cycles = ldy_abs_x(bus.Object, registers.Object);
-            registers.VerifySet(r => r.Y = 0x10);
-            registers.Verify(r => r.SetNegativeFlag(false));
-            registers.Verify(r => r.SetZeroFlag(false));
-            bus.Verify(b => b.Read(0x00ff + 15));
-            cycles.Should().Be(5);
         }
     }
 }

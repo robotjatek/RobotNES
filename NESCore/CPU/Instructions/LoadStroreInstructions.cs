@@ -107,9 +107,9 @@
             return 4;
         }
 
-        private static byte LDY_ABS_X(IBUS bus, IRegisters registers)
+        private static byte LDY_ZERO_X(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteX(bus, registers);
+            var addressingResult = AddressingZeroX(bus, registers);
             LDY(addressingResult.Value, registers);
             return addressingResult.Cycles;
         }
