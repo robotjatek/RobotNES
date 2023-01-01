@@ -37,6 +37,13 @@
             return 3;
         }
 
+        private static byte LDA_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            LDA(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte LDA_IND_X(IBUS bus, IRegisters registers)
         {
             var value = AddressingIndirectX(bus, registers).Value;

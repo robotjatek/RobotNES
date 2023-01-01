@@ -249,5 +249,43 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void LDA_ZERO_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 15;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x10);
+
+            var lda_zero_x = _instructions[Opcodes.LDA_ZERO_X];
+            var cycles = lda_zero_x(bus.Object, registers.Object);
+            registers.VerifySet(r => r.A = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            bus.Verify(b => b.Read(0xad + 15));
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void LDA_ZERO_X_wraps()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x10);
+
+            var lda_zero_x = _instructions[Opcodes.LDA_ZERO_X];
+            var cycles = lda_zero_x(bus.Object, registers.Object);
+            registers.VerifySet(r => r.A = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            bus.Verify(b => b.Read(4));
+            cycles.Should().Be(4);
+        }
     }
 }

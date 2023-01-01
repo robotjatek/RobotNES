@@ -117,8 +117,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x10);
 
-            var ldy_abs_x = _instructions[Opcodes.LDY_ZERO_X];
-            var cycles = ldy_abs_x(bus.Object, registers.Object);
+            var ldy_zero_x = _instructions[Opcodes.LDY_ZERO_X];
+            var cycles = ldy_zero_x(bus.Object, registers.Object);
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
