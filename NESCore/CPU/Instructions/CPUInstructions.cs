@@ -140,6 +140,7 @@
             InstructionSet[Opcodes.STA_ZERO_X] = STA_ZERO_X;
             InstructionSet[Opcodes.LSR_ZERO_X] = LSR_ZERO_X;
             InstructionSet[Opcodes.ASL_ZERO_X] = ASL_ZERO_X;
+            InstructionSet[Opcodes.ROR_ZERO_X] = ROR_ZERO_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

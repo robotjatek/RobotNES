@@ -197,6 +197,38 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
         }
 
         [Fact]
+        public void ROR_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var ror = _instructions[Opcodes.ROR_ZERO_X];
+            var cycles = ror(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0x10 + 5, 2));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void ROR_ZERO_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(4);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var ror = _instructions[Opcodes.ROR_ZERO_X];
+            var cycles = ror(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(4, 2));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
         public void ROR_ABS()
         {
             var bus = new Mock<IBUS>();
