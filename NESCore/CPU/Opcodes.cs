@@ -146,7 +146,7 @@
         public const int DEC_ABS = 0xCE;
         //TODO: x abs dec
         public const int DEC_ZERO = 0xC6;
-        //TODO: x zero dec
+        public const int DEC_ZERO_X = 0xD6;
         public const int DEX = 0xCA;
         public const int DEY = 0x88;
 

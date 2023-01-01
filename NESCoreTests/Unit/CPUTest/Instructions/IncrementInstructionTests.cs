@@ -308,6 +308,40 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void DEC_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var dec = _instructions[Opcodes.DEC_ZERO_X];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xde + 5, 9));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void DEC_ZERO_X_wraps()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+
+            var dec = _instructions[Opcodes.DEC_ZERO_X];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xde + 5, 9));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
         public void INC_Zero_increments_value_memory()
         {
             var bus = new Mock<IBUS>();

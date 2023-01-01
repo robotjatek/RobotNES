@@ -66,6 +66,14 @@
             return 5;
         }
 
+        private static byte DEC_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            var result = DEC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
         private static byte DEC_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
