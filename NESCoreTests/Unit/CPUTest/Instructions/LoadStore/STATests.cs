@@ -36,6 +36,44 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
+        public void STA_ZERO_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 5;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
+
+            var sta = _instructions[Opcodes.STA_ZERO_X];
+            var cycles = sta(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(0xaa + 10, 5));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void STA_ZERO_X_Wraps()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 5;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xff);
+
+            var sta = _instructions[Opcodes.STA_ZERO_X];
+            var cycles = sta(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(9, 5));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void STA_ABS()
         {
             var registers = new Mock<IRegisters>();
