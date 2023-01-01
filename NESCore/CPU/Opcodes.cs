@@ -97,6 +97,7 @@
         public const int ADC_IND_X = 0x61;
         public const int ADC_ZERO = 0x65;
         public const int ADC_ABS = 0x6D;
+        public const int ADC_ABS_Y = 0x79;
         public const int ADC_IND_Y = 0x71;
         //TODO: more adc modes
         public const int CMP_IMM = 0xC9;
