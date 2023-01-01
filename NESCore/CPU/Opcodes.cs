@@ -104,6 +104,7 @@
         public const int CMP_IND_X = 0xC1;
         public const int CMP_ZERO = 0xC5;
         public const int CMP_ABS = 0xcd;
+        public const int CMP_ABS_Y = 0xd9;
         public const int CMP_IND_Y = 0xd1;
         //TODO: more cmp modes
         

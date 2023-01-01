@@ -125,6 +125,7 @@
             InstructionSet[Opcodes.AND_ABS_Y] = AND_ABS_Y;
             InstructionSet[Opcodes.EOR_ABS_Y] = EOR_ABS_Y;
             InstructionSet[Opcodes.ADC_ABS_Y] = ADC_ABS_Y;
+            InstructionSet[Opcodes.CMP_ABS_Y] = CMP_ABS_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

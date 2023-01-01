@@ -154,6 +154,13 @@
             return 4;
         }
 
+        private static byte CMP_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            CMP(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte CMP_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectY(bus, registers);
