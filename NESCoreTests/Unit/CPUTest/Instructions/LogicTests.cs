@@ -642,6 +642,50 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void EOR_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xFF);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.Y = 10;
+
+            var eor = _instructions[Opcodes.EOR_ABS_Y];
+            var cycles = eor(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x55);
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void EOR_ABS_Y_page_cross_penalty()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(0xFF);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.Y = 10;
+
+            var eor = _instructions[Opcodes.EOR_ABS_Y];
+            var cycles = eor(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0x55);
+            bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void EOR_indirect_Y()
         {
             var registers = new Mock<IRegisters>();

@@ -123,6 +123,7 @@
             InstructionSet[Opcodes.LDA_ABS_Y] = LDA_ABS_Y;
             InstructionSet[Opcodes.ORA_ABS_Y] = ORA_ABS_Y;
             InstructionSet[Opcodes.AND_ABS_Y] = AND_ABS_Y;
+            InstructionSet[Opcodes.EOR_ABS_Y] = EOR_ABS_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
