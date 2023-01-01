@@ -127,6 +127,13 @@
             return 4;
         }
 
+        private static byte STA_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            STA(addressingResult.Address,  bus, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte STA_IND_X(IBUS bus, IRegisters registers)
         {
             var address = AddressingIndirectX(bus, registers).Address;
