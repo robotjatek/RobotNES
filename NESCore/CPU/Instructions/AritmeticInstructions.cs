@@ -108,6 +108,13 @@
             return 3;
         }
 
+        private byte SBC_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            SBC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private byte SBC_ABS(IBUS bus, IRegisters registers)
         {
             var operand = AddressingAbsolute(bus, registers).Value;
