@@ -121,6 +121,7 @@
             InstructionSet[Opcodes.STA_IND_Y] = STA_IND_Y;
             InstructionSet[Opcodes.JMP_INDIRECT] = JMP_INDIRECT;
             InstructionSet[Opcodes.LDA_ABS_Y] = LDA_ABS_Y;
+            InstructionSet[Opcodes.ORA_ABS_Y] = ORA_ABS_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
