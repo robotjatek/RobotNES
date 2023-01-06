@@ -1,6 +1,5 @@
 ﻿namespace NESCore.CPU.Instructions
 {
-    //TODO: extract cpu addressing modes to their own methods
     //TODO: return elapsed cycles in all addressing mode functions
 
     public partial class CPUInstructions
