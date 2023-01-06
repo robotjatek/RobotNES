@@ -298,6 +298,14 @@
             return (byte)(addressingResult.Cycles + 2);
         }
 
+        private static byte DCP_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 3);
+        }
+
         private static byte DCP_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);

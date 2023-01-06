@@ -1681,7 +1681,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.X = 5;
             registers.Object.A = 20;
 
             var dcp = _instructions[Opcodes.DCP_ZERO];
@@ -1707,7 +1706,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Object.X = 5;
             registers.Object.A = 20;
 
             var dcp = _instructions[Opcodes.DCP_ABS];
@@ -1720,6 +1718,35 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false));
 
             cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void DCP_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 20;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(15); // value at location final location
+
+            var dcp = _instructions[Opcodes.DCP_IND_Y];
+            var cycles = dcp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 14));
+
+            cycles.Should().Be(8);
         }
     }
 }

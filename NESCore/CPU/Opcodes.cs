@@ -167,6 +167,7 @@
         public const int DCP_IND_X = 0xC3;
         public const int DCP_ZERO = 0xC7;
         public const int DCP_ABS = 0xCF;
+        public const int DCP_IND_Y = 0xD3;
         #endregion
 
         #region Inc
