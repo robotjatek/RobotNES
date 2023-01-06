@@ -59,9 +59,10 @@
         #region Shift
         //TODO: shift instructions
         public const int ASL_A = 0x0A;
+        public const int ASL_ABS = 0x0e;
+        public const int ASL_ABS_X = 0x1e;
         public const int ASL_ZERO = 0x06;
         public const int ASL_ZERO_X = 0x16;
-        public const int ASL_ABS = 0x0e;
 
         public const int LSR_A = 0x4A;
         public const int LSR_ABS = 0x4E;
