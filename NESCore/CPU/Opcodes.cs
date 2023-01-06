@@ -127,7 +127,6 @@
         public const int CMP_ZERO_X = 0xD5;
         public const int CMP_IND_X = 0xC1;
         public const int CMP_IND_Y = 0xD1;
-        //TODO: more cmp modes
         
         public const int CPX_IMM = 0xE0;
         public const int CPX_ZERO = 0xE4;
@@ -138,13 +137,13 @@
         public const int CPY_ZERO = 0xC4;
 
         public const int SBC_IMM = 0xE9;
-        public const int SBC_IND_X = 0xE1;
+        public const int SBC_ABS = 0xED;
+        public const int SBC_ABS_X = 0xFD;
+        public const int SBC_ABS_Y = 0xF9;
         public const int SBC_ZERO = 0xE5;
         public const int SBC_ZERO_X = 0xF5;
-        public const int SBC_ABS = 0xED;
-        public const int SBC_ABS_Y = 0xF9;
+        public const int SBC_IND_X = 0xE1;
         public const int SBC_IND_Y = 0xF1;
-        //TODO: more sbc modes
         #endregion
 
         #region Inc
