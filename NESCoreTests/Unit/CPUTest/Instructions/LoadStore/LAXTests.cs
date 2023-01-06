@@ -15,7 +15,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
                 .Returns(0xad)  // param
-                .Returns(0xaa); // value at address 10
+                .Returns(0xaa);
 
             var lax = _instructions[Opcodes.LAX_ZERO];
             var cycles = lax(bus.Object, registers.Object);
@@ -25,6 +25,28 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             bus.Verify(b => b.Read(0xad), Times.Once());
 
             cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void LAX_zero_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)  // param
+                .Returns(0xaa);
+
+            var lax = _instructions[Opcodes.LAX_ZERO_Y];
+            var cycles = lax(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+            registers.Object.X.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(0xad + 10), Times.Once());
+
+            cycles.Should().Be(4);
         }
 
         [Fact]

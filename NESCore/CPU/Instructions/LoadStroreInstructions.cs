@@ -92,6 +92,13 @@
             return addressingResult.Cycles;
         }
 
+        private static byte LAX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte LAX_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
