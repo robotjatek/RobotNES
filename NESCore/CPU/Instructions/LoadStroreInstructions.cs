@@ -169,11 +169,18 @@
             return 4;
         }
 
+        private static byte STA_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            STA(addressingResult.Address, bus, registers);
+            return 5; //According to https://www.pagetable.com/c64ref/6502/?tab=3#a16,Y STA_ABS_X and STA_ABS_Y are always 5 cycles regardless of page boundary crossing
+        }
+
         private static byte STA_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
             STA(addressingResult.Address,  bus, registers);
-            return addressingResult.Cycles;
+            return 5; //According to https://www.pagetable.com/c64ref/6502/?tab=3#a16,Y STA_ABS_X and STA_ABS_Y are always 5 cycles regardless of page boundary crossing
         }
 
         private static byte STA_IND_X(IBUS bus, IRegisters registers)

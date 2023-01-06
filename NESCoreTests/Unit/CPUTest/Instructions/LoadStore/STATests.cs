@@ -102,6 +102,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
+        public void STA_ABS_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
+            var sut = _instructions[Opcodes.STA_ABS_X];
+            var cycles = sut(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xdead + 10, 10));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void STA_ABS_Y()
         {
             var registers = new Mock<IRegisters>();
@@ -114,23 +131,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var sut = _instructions[Opcodes.STA_ABS_Y];
             var cycles = sut(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead + 10, 10));
-
-            cycles.Should().Be(4);
-        }
-
-        [Fact]
-        public void STA_ABS_Y_page_cross_penalty()
-        {
-            var registers = new Mock<IRegisters>();
-            registers.SetupAllProperties();
-            registers.Object.A = 10;
-            registers.Object.Y = 10;
-
-            var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
-            var sut = _instructions[Opcodes.STA_ABS_Y];
-            var cycles = sut(bus.Object, registers.Object);
-            bus.Verify(b => b.Write(0x00ff + 10, 10));
 
             cycles.Should().Be(5);
         }

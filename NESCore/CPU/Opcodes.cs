@@ -22,14 +22,15 @@
         public const int LDY_ABS = 0xAC;
         public const int LDY_ABS_X = 0xBC;
         public const int LDY_ZERO_X = 0xB4;
-        
+
+        public const int STA_ABS = 0x8D;
+        public const int STA_ABS_X = 0x9D;
+        public const int STA_ABS_Y = 0x99;
         public const int STA_ZERO = 0x85;
         public const int STA_ZERO_X = 0x95;
-        public const int STA_ABS = 0x8D;
         public const int STA_IND_X = 0x81;
         public const int STA_IND_Y = 0x91;
-        public const int STA_ABS_Y = 0x99;
-        //TODO: More STA modes
+        
         public const int STX_ZERO = 0x86;
         public const int STX_ZERO_Y = 0x96;
         public const int STX_ABS = 0x8E;
