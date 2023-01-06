@@ -184,5 +184,13 @@
             return 6;
         }
 
+        private static byte ROR_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            var result = ROR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 7;
+        }
+
     }
 }

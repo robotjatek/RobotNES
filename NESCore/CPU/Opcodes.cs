@@ -76,9 +76,10 @@
         public const int ROL_ABS = 0x2E;
 
         public const int ROR_A = 0x6A;
+        public const int ROR_ABS = 0x6E;
+        public const int ROR_ABS_X = 0x7E;
         public const int ROR_ZERO = 0x66;
         public const int ROR_ZERO_X = 0x76;
-        public const int ROR_ABS = 0x6E;
         #endregion
 
         #region Logic
