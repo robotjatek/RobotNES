@@ -195,6 +195,7 @@
             InstructionSet[Opcodes.LAX_ABS_Y] = LAX_ABS_Y;
 
             InstructionSet[Opcodes.SAX_IND_X] = SAX_IND_X;
+            InstructionSet[Opcodes.SAX_ZERO] = SAX_ZERO;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)

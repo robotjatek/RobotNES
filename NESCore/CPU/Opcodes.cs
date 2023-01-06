@@ -48,6 +48,7 @@
         public const int LAX_IND_Y = 0xB3;
 
         public const int SAX_IND_X = 0x83;
+        public const int SAX_ZERO = 0x87;
         #endregion
 
         #region Transfer
