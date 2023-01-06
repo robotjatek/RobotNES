@@ -71,6 +71,45 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
+        public void LDX_ABS_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
+
+            var ldx_abs = _instructions[Opcodes.LDX_ABS_Y];
+            var cycles = ldx_abs(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead + 10));
+            registers.VerifySet(r => r.X = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void LDX_ABS_Y_penalty_on_page_boundary()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 15;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0x10);
+
+            var ldx_abs = _instructions[Opcodes.LDX_ABS_Y];
+            var cycles = ldx_abs(bus.Object, registers.Object);
+            registers.VerifySet(r => r.X = 0x10);
+            registers.Verify(r => r.SetNegativeFlag(false));
+            registers.Verify(r => r.SetZeroFlag(false));
+            bus.Verify(b => b.Read(0x00ff + 15));
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void LDX_ABS_sets_zero_flag()
         {
             var registers = new Mock<IRegisters>();

@@ -14,9 +14,10 @@
         
         public const int LDX_IMM = 0xA2;
         public const int LDX_ABS = 0xAE;
+        public const int LDX_ABS_Y = 0xBE;
         public const int LDX_ZERO = 0xA6;
         public const int LDX_ZERO_Y = 0xB6;
-        //TODO: more ldx modes
+        
         public const int LDY_IMM = 0xA0;
         public const int LDY_ZERO = 0xA4;
         public const int LDY_ABS = 0xAC;
