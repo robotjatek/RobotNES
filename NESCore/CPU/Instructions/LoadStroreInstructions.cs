@@ -313,6 +313,13 @@
             return addressingResult.Cycles;
         }
 
+        private static byte SAX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
+        }
+
         private static byte SAX_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);

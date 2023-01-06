@@ -49,6 +49,7 @@
 
         public const int SAX_IND_X = 0x83;
         public const int SAX_ZERO = 0x87;
+        public const int SAX_ZERO_Y = 0x97;
         public const int SAX_ABS = 0x8F;
         #endregion
 
