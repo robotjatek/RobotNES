@@ -227,6 +227,42 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void AND_ABS_X()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.X = 10;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0xf0);
+            var and = _instructions[Opcodes.AND_ABS_X];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xa0);
+
+            bus.Verify(b => b.Read(0xdead + 10));
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void AND_ABS_X_page_boundary_penalty()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xAA;
+            registers.Object.X = 10;
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0xf0);
+            var and = _instructions[Opcodes.AND_ABS_X];
+            var cycles = and(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xa0);
+
+            bus.Verify(b => b.Read(0x00ff + 10));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void AND_ABS_Y()
         {
             var registers = new Mock<IRegisters>();
