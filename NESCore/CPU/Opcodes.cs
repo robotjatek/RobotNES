@@ -207,10 +207,17 @@
         public const int NOP_7A = 0x7A;
         public const int NOP_DA = 0xDA;
         public const int NOP_FA = 0xFA;
+        public const int NOP_IMM_80 = 0x80;
         public const int NOP_ZERO_04 = 0x04;
         public const int NOP_ZERO_44 = 0x44;
         public const int NOP_ZERO_64 = 0x64;
         public const int NOP_ABS_0C = 0x0C;
+        public const int NOP_ABS_X_1C = 0x1C;
+        public const int NOP_ABS_X_3C = 0x3C;
+        public const int NOP_ABS_X_5C = 0x5C;
+        public const int NOP_ABS_X_7C = 0x7C;
+        public const int NOP_ABS_X_DC = 0xDC;
+        public const int NOP_ABS_X_FC = 0xFC;
         public const int NOP_ZERO_X_14 = 0x14;
         public const int NOP_ZERO_X_34 = 0x34;
         public const int NOP_ZERO_X_54 = 0x54;

@@ -179,11 +179,24 @@
             InstructionSet[Opcodes.NOP_7A] = NOP;
             InstructionSet[Opcodes.NOP_DA] = NOP;
             InstructionSet[Opcodes.NOP_FA] = NOP;
+            InstructionSet[Opcodes.NOP_IMM_80] = NOP_IMM;
+            InstructionSet[Opcodes.NOP_ABS_X_1C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_3C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_5C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_7C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_DC] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_FC] = NOP_ABS_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
         {
             return 2;
+        }
+
+        private static byte NOP_IMM(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingImmediate(bus, registers);
+            return addressingResult.Cycles;
         }
 
         private static byte NOP_ZERO(IBUS bus, IRegisters registers)
@@ -201,6 +214,12 @@
         private static byte NOP_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte NOP_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
             return addressingResult.Cycles;
         }
 
@@ -258,6 +277,7 @@
             return new AddressingResult
             {
                 Value = Fetch(bus, registers),
+                Cycles = 2,
             };
         }
 
