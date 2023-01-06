@@ -144,6 +144,7 @@
             InstructionSet[Opcodes.ROL_ZERO_X] = ROL_ZERO_X;
             InstructionSet[Opcodes.INC_ZERO_X] = INC_ZERO_X;
             InstructionSet[Opcodes.DEC_ZERO_X] = DEC_ZERO_X;
+            InstructionSet[Opcodes.LDX_ZERO_Y] = LDX_ZERO_Y;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -274,6 +275,18 @@
         private static AddressingResult AddressingZeroX(IBUS bus, IRegisters registers)
         {
             var address = (byte)((Fetch(bus, registers) + registers.X) & 0xFF);
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Address = address,
+                Value = value,
+                Cycles = 4,
+            };
+        }
+
+        private static AddressingResult AddressingZeroY(IBUS bus, IRegisters registers)
+        {
+            var address = (byte)((Fetch(bus, registers) + registers.Y) & 0xFF);
             var value = bus.Read(address);
             return new AddressingResult
             {

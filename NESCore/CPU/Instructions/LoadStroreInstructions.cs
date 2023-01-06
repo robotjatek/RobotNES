@@ -86,6 +86,13 @@
             return 3;
         }
 
+        private static byte LDX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            LDX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void LDY(byte value, IRegisters registers)
         {
             registers.Y = value;
