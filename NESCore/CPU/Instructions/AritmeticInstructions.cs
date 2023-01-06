@@ -303,7 +303,7 @@
             var addressingResult = AddressingIndirectY(bus, registers);
             DCP(addressingResult, bus, registers);
 
-            return (byte)(addressingResult.Cycles + 3);
+            return 8; //8 regardless of page crossing
         }
 
         private static byte DCP_ZERO(IBUS bus, IRegisters registers)
@@ -328,6 +328,14 @@
             DCP(addressingResult, bus, registers);
 
             return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte DCP_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return 7; // 7 regardless of boundary cross
         }
 
         private static byte DCP_ABS_Y(IBUS bus, IRegisters registers)
