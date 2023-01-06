@@ -8,7 +8,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
     public class NOPTests : InstructionTestBase
     {
         [Fact]
-        public void NOP_Zero_0x04()
+        public void NOP_ZERO_0x04()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
@@ -23,7 +23,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
-        public void NOP_Zero_0x44()
+        public void NOP_ZERO_0x44()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
@@ -38,7 +38,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
-        public void NOP_Zero_0x64()
+        public void NOP_ZERO_0x64()
         {
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
@@ -50,6 +50,21 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xde), Times.Once());
 
             cycles.Should().Be(3);
+        }
+
+        [Fact]
+        public void NOP_ABS_0x0C()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_ABS_0C];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            cycles.Should().Be(4);
         }
     }
 }

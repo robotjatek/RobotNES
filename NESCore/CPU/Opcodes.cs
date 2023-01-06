@@ -204,5 +204,6 @@
         public const int NOP_ZERO_04 = 0x04;
         public const int NOP_ZERO_44 = 0x44;
         public const int NOP_ZERO_64 = 0x64;
+        public const int NOP_ABS_0C = 0x0C;
     }
 }
