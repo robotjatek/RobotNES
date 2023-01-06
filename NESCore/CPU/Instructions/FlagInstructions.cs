@@ -20,6 +20,12 @@
             return 2;
         }
 
+        private static byte CLI(IBUS bus, IRegisters registers)
+        {
+            registers.SetInterruptDisableFlag(false);
+            return 2;
+        }
+
         private static byte SEC(IBUS bus, IRegisters registers)
         {
             registers.SetCarryFlag(true);

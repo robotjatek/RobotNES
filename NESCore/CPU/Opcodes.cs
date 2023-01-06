@@ -193,7 +193,7 @@
         #region Flags
         public const int CLC = 0x18;
         public const int CLD = 0xD8;
-        //TODO: CLI
+        public const int CLI = 0x58;
         public const int CLV = 0xB8;
         public const int SEC = 0x38;
         public const int SED = 0xF8;

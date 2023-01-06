@@ -162,6 +162,7 @@
             InstructionSet[Opcodes.INC_ABS_X] = INC_ABS_X;
             InstructionSet[Opcodes.DEC_ABS_X] = DEC_ABS_X;
             InstructionSet[Opcodes.LDX_ABS_Y] = LDX_ABS_Y;
+            InstructionSet[Opcodes.CLI] = CLI;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
