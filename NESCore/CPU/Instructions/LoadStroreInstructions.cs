@@ -65,6 +65,19 @@
             return addressingResult.Cycles;
         }
 
+        private static void LAX(byte value, IRegisters registers)
+        {
+            LDA(value, registers);
+            LDX(value, registers);
+        }
+
+        private static byte LAX_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;

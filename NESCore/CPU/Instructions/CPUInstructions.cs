@@ -186,6 +186,8 @@
             InstructionSet[Opcodes.NOP_ABS_X_7C] = NOP_ABS_X;
             InstructionSet[Opcodes.NOP_ABS_X_DC] = NOP_ABS_X;
             InstructionSet[Opcodes.NOP_ABS_X_FC] = NOP_ABS_X;
+
+            InstructionSet[Opcodes.LAX_IND_X] = LAX_IND_X;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)
@@ -346,7 +348,8 @@
             return new AddressingResult
             {
                 Address = address,
-                Value = value
+                Value = value,
+                Cycles = 6,
             };
         }
 

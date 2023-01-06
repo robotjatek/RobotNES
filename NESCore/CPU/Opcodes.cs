@@ -39,6 +39,8 @@
         public const int STY_ZERO = 0x84;
         public const int STY_ZERO_X = 0x94;
         public const int STY_ABS = 0x8C;
+
+        public const int LAX_IND_X = 0xA3;
         #endregion
 
         #region Transfer
@@ -200,6 +202,7 @@
         public const int SEI = 0x78;
         #endregion
 
+        #region NOP
         public const int NOP = 0xEA;
         public const int NOP_1A = 0x1A;
         public const int NOP_3A = 0x3A;
@@ -224,5 +227,6 @@
         public const int NOP_ZERO_X_74 = 0x74;
         public const int NOP_ZERO_X_D4 = 0xD4;
         public const int NOP_ZERO_X_F4 = 0xF4;
+        #endregion
     }
 }
