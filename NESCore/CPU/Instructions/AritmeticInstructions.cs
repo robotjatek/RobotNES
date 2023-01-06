@@ -314,6 +314,14 @@
             return (byte)(addressingResult.Cycles + 2);
         }
 
+        private static byte DCP_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
         private static byte DCP_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
