@@ -293,5 +293,17 @@
             bus.Write(address, registers.Y);
             return 4;
         }
+
+        private static byte SAX(byte value1, byte value2)
+        {
+            return (byte)(value1 & value2);
+        }
+
+        private static byte SAX_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
+        }
     }
 }

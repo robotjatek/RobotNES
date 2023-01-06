@@ -193,6 +193,8 @@
             InstructionSet[Opcodes.LAX_IND_Y] = LAX_IND_Y;
             InstructionSet[Opcodes.LAX_ZERO_Y] = LAX_ZERO_Y;
             InstructionSet[Opcodes.LAX_ABS_Y] = LAX_ABS_Y;
+
+            InstructionSet[Opcodes.SAX_IND_X] = SAX_IND_X;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)

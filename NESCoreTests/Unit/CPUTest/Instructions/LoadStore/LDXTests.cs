@@ -4,7 +4,7 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LDXTests : InstructionsetTests
+    public class LDXTests : InstructionTestBase
     {
         [Fact]
         public void LDX_IMM()
