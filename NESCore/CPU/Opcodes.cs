@@ -44,6 +44,7 @@
         public const int LAX_ZERO = 0xA7;
         public const int LAX_ZERO_Y = 0xB7;
         public const int LAX_ABS = 0xAF;
+        public const int LAX_ABS_Y = 0xBF;
         public const int LAX_IND_Y = 0xB3;
         #endregion
 

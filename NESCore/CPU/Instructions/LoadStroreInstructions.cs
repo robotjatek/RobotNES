@@ -106,6 +106,13 @@
             return addressingResult.Cycles;
         }
 
+        private static byte LAX_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;
