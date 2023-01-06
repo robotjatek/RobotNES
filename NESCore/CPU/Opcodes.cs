@@ -201,6 +201,8 @@
         #endregion
 
         public const int NOP = 0xEA;
+        public const int NOP_1A = 0x1A;
+        public const int NOP_3A = 0x3A;
         public const int NOP_ZERO_04 = 0x04;
         public const int NOP_ZERO_44 = 0x44;
         public const int NOP_ZERO_64 = 0x64;

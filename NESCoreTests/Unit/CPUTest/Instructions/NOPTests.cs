@@ -8,6 +8,48 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
     public class NOPTests : InstructionTestBase
     {
         [Fact]
+        public void NOP()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void NOP_1A()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_1A];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void NOP_3A()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_3A];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void NOP_ZERO_0x04()
         {
             var bus = new Mock<IBUS>();
