@@ -5,12 +5,13 @@
         #region Load/Store
         public const int LDA_IMM = 0xA9;
         public const int LDA_ABS = 0xAD;
+        public const int LDA_ABS_X = 0xBD;
         public const int LDA_ABS_Y = 0xB9;
         public const int LDA_ZERO = 0xA5;
         public const int LDA_ZERO_X = 0xB5;
         public const int LDA_IND_X = 0xA1;
         public const int LDA_IND_Y = 0xB1;
-        //TODO: more LDA modes
+        
         public const int LDX_IMM = 0xA2;
         public const int LDX_ABS = 0xAE;
         public const int LDX_ZERO = 0xA6;
