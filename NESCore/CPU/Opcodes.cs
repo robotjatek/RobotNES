@@ -64,9 +64,10 @@
         public const int ASL_ABS = 0x0e;
 
         public const int LSR_A = 0x4A;
+        public const int LSR_ABS = 0x4E;
+        public const int LSR_ABS_X = 0x5E;
         public const int LSR_ZERO = 0x46;
         public const int LSR_ZERO_X = 0x56;
-        public const int LSR_ABS = 0x4E;
 
         public const int ROL_A = 0x2A;
         public const int ROL_ZERO = 0x26;
