@@ -207,5 +207,6 @@
         public const int NOP_ABS_0C = 0x0C;
         public const int NOP_ZERO_X_14 = 0x14;
         public const int NOP_ZERO_X_34 = 0x34;
+        public const int NOP_ZERO_X_54 = 0x54;
     }
 }
