@@ -160,6 +160,7 @@
             InstructionSet[Opcodes.ROR_ABS_X] = ROR_ABS_X;
             InstructionSet[Opcodes.ROL_ABS_X] = ROL_ABS_X;
             InstructionSet[Opcodes.INC_ABS_X] = INC_ABS_X;
+            InstructionSet[Opcodes.DEC_ABS_X] = DEC_ABS_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
