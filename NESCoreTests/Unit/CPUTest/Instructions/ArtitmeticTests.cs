@@ -362,6 +362,50 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void ADC_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var adc = _instructions[Opcodes.ADC_ABS_X];
+            var cycles = adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(30);
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void ADC_ABS_X_page_cross_penalty()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var adc = _instructions[Opcodes.ADC_ABS_X];
+            var cycles = adc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(30);
+            bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
         public void ADC_ABS_Y()
         {
             var bus = new Mock<IBUS>();
@@ -751,6 +795,50 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead), Times.Once());
 
             cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void CMP_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var cmp = _instructions[Opcodes.CMP_ABS_X];
+            var cycles = cmp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void CMP_ABS_X_page_cross_penalty()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var cmp = _instructions[Opcodes.CMP_ABS_X];
+            var cycles = cmp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+            bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
+
+            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1388,6 +1476,52 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead), Times.Once());
 
             cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void SBC_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var sbc = _instructions[Opcodes.SBC_ABS_X];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(10);
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
+        public void SBC_ABS_X_page_cross_penalty()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var sbc = _instructions[Opcodes.SBC_ABS_X];
+            var cycles = sbc(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(10);
+            bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
+
+            cycles.Should().Be(5);
         }
 
         [Fact]

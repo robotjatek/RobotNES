@@ -1,6 +1,5 @@
 ﻿namespace NESCore.CPU.Instructions
 {
-    //TODO: extract cpu addressing modes to their own methods
     //TODO: return elapsed cycles in all addressing mode functions
 
     public partial class CPUInstructions
@@ -144,6 +143,25 @@
             InstructionSet[Opcodes.ROL_ZERO_X] = ROL_ZERO_X;
             InstructionSet[Opcodes.INC_ZERO_X] = INC_ZERO_X;
             InstructionSet[Opcodes.DEC_ZERO_X] = DEC_ZERO_X;
+            InstructionSet[Opcodes.LDX_ZERO_Y] = LDX_ZERO_Y;
+            InstructionSet[Opcodes.STX_ZERO_Y] = STX_ZERO_Y;
+            InstructionSet[Opcodes.LDY_ABS_X] = LDY_ABS_X;
+            InstructionSet[Opcodes.ORA_ABS_X] = ORA_ABS_X;
+            InstructionSet[Opcodes.AND_ABS_X] = AND_ABS_X;
+            InstructionSet[Opcodes.EOR_ABS_X] = EOR_ABS_X;
+            InstructionSet[Opcodes.ADC_ABS_X] = ADC_ABS_X;
+            InstructionSet[Opcodes.CMP_ABS_X] = CMP_ABS_X;
+            InstructionSet[Opcodes.SBC_ABS_X] = SBC_ABS_X;
+            InstructionSet[Opcodes.LDA_ABS_X] = LDA_ABS_X;
+            InstructionSet[Opcodes.STA_ABS_X] = STA_ABS_X;
+            InstructionSet[Opcodes.LSR_ABS_X] = LSR_ABS_X;
+            InstructionSet[Opcodes.ASL_ABS_X] = ASL_ABS_X;
+            InstructionSet[Opcodes.ROR_ABS_X] = ROR_ABS_X;
+            InstructionSet[Opcodes.ROL_ABS_X] = ROL_ABS_X;
+            InstructionSet[Opcodes.INC_ABS_X] = INC_ABS_X;
+            InstructionSet[Opcodes.DEC_ABS_X] = DEC_ABS_X;
+            InstructionSet[Opcodes.LDX_ABS_Y] = LDX_ABS_Y;
+            InstructionSet[Opcodes.CLI] = CLI;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -274,6 +292,18 @@
         private static AddressingResult AddressingZeroX(IBUS bus, IRegisters registers)
         {
             var address = (byte)((Fetch(bus, registers) + registers.X) & 0xFF);
+            var value = bus.Read(address);
+            return new AddressingResult
+            {
+                Address = address,
+                Value = value,
+                Cycles = 4,
+            };
+        }
+
+        private static AddressingResult AddressingZeroY(IBUS bus, IRegisters registers)
+        {
+            var address = (byte)((Fetch(bus, registers) + registers.Y) & 0xFF);
             var value = bus.Read(address);
             return new AddressingResult
             {

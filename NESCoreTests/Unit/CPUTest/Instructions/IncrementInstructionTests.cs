@@ -308,6 +308,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void DEC_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 10;
+
+            var dec = _instructions[Opcodes.DEC_ABS_X];
+            var cycles = dec(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xdead + 10, 9));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
         public void DEC_ZERO_X()
         {
             var bus = new Mock<IBUS>();
@@ -443,6 +460,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Write(0xdead, 11));
 
             cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void INC_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(10);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 10;
+
+            var inc = _instructions[Opcodes.INC_ABS_X];
+            var cycles = inc(bus.Object, registers.Object);
+            bus.Verify(b => b.Write(0xdead + 10, 11));
+
+            cycles.Should().Be(7);
         }
 
         [Fact]

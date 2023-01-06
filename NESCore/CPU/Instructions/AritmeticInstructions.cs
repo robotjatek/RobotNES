@@ -55,6 +55,13 @@
             return 4;
         }
 
+        private static byte ADC_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            ADC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte ADC_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
@@ -122,6 +129,13 @@
             return 4;
         }
 
+        private static byte SBC_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            SBC(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte SBC_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
@@ -180,6 +194,13 @@
             var operand = AddressingAbsolute(bus, registers).Value;
             CMP(operand, registers);
             return 4;
+        }
+
+        private static byte CMP_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            CMP(addressingResult.Value, registers);
+            return addressingResult.Cycles;
         }
 
         private static byte CMP_ABS_Y(IBUS bus, IRegisters registers)

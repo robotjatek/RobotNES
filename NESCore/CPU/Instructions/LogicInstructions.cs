@@ -80,6 +80,14 @@ namespace NESCore.CPU.Instructions
             return 4;
         }
 
+        private static byte AND_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            AND(addressingResult.Value, registers);
+
+            return addressingResult.Cycles;
+        }
+
         private static byte AND_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
@@ -143,6 +151,14 @@ namespace NESCore.CPU.Instructions
             return 4;
         }
 
+        private static byte ORA_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            ORA(addressingResult.Value, registers);
+
+            return addressingResult.Cycles;
+        }
+
         private static byte ORA_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
@@ -200,6 +216,13 @@ namespace NESCore.CPU.Instructions
             var mask = AddressingAbsolute(bus, registers).Value;
             EOR(mask, registers);
             return 4;
+        }
+
+        private static byte EOR_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            EOR(addressingResult.Value, registers);
+            return addressingResult.Cycles;
         }
 
         private static byte EOR_ABS_Y(IBUS bus, IRegisters registers)

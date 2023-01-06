@@ -85,6 +85,31 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void CLI()
+        {
+            var registers = new Mock<IRegisters>();
+            var bus = new Mock<IBUS>();
+            var cli = _instructions[Opcodes.CLI];
+            var cycles = cli(bus.Object, registers.Object);
+
+            registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Once());
+
+            //Everything else never happens
+            registers.Verify(r => r.SetCarryFlag(true), Times.Never());
+            registers.Verify(r => r.SetCarryFlag(false), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(true), Times.Never());
+            registers.Verify(r => r.SetZeroFlag(false), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(true), Times.Never());
+            registers.Verify(r => r.SetDecimalFlag(false), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
+            registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(true), Times.Never());
+            registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void SEC()
         {
             var bus = new Mock<IBUS>();

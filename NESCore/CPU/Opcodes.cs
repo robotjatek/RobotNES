@@ -5,31 +5,37 @@
         #region Load/Store
         public const int LDA_IMM = 0xA9;
         public const int LDA_ABS = 0xAD;
+        public const int LDA_ABS_X = 0xBD;
         public const int LDA_ABS_Y = 0xB9;
         public const int LDA_ZERO = 0xA5;
         public const int LDA_ZERO_X = 0xB5;
         public const int LDA_IND_X = 0xA1;
         public const int LDA_IND_Y = 0xB1;
-        //TODO: more LDA modes
+        
         public const int LDX_IMM = 0xA2;
         public const int LDX_ABS = 0xAE;
+        public const int LDX_ABS_Y = 0xBE;
         public const int LDX_ZERO = 0xA6;
-        //TODO: more ldx modes
+        public const int LDX_ZERO_Y = 0xB6;
+        
         public const int LDY_IMM = 0xA0;
         public const int LDY_ZERO = 0xA4;
         public const int LDY_ABS = 0xAC;
+        public const int LDY_ABS_X = 0xBC;
         public const int LDY_ZERO_X = 0xB4;
-        //TODO: more LDY modes
+
+        public const int STA_ABS = 0x8D;
+        public const int STA_ABS_X = 0x9D;
+        public const int STA_ABS_Y = 0x99;
         public const int STA_ZERO = 0x85;
         public const int STA_ZERO_X = 0x95;
-        public const int STA_ABS = 0x8D;
         public const int STA_IND_X = 0x81;
         public const int STA_IND_Y = 0x91;
-        public const int STA_ABS_Y = 0x99;
-        //TODO: More STA modes
+        
         public const int STX_ZERO = 0x86;
+        public const int STX_ZERO_Y = 0x96;
         public const int STX_ABS = 0x8E;
-        //TODO: more stx modes
+        
         public const int STY_ZERO = 0x84;
         public const int STY_ZERO_X = 0x94;
         public const int STY_ABS = 0x8C;
@@ -52,77 +58,81 @@
         #endregion
 
         #region Shift
-        //TODO: shift instructions
         public const int ASL_A = 0x0A;
+        public const int ASL_ABS = 0x0e;
+        public const int ASL_ABS_X = 0x1e;
         public const int ASL_ZERO = 0x06;
         public const int ASL_ZERO_X = 0x16;
-        public const int ASL_ABS = 0x0e;
 
         public const int LSR_A = 0x4A;
+        public const int LSR_ABS = 0x4E;
+        public const int LSR_ABS_X = 0x5E;
         public const int LSR_ZERO = 0x46;
         public const int LSR_ZERO_X = 0x56;
-        public const int LSR_ABS = 0x4E;
 
         public const int ROL_A = 0x2A;
+        public const int ROL_ABS = 0x2E;
+        public const int ROL_ABS_X = 0x3E;
         public const int ROL_ZERO = 0x26;
         public const int ROL_ZERO_X = 0x36;
-        public const int ROL_ABS = 0x2E;
 
         public const int ROR_A = 0x6A;
+        public const int ROR_ABS = 0x6E;
+        public const int ROR_ABS_X = 0x7E;
         public const int ROR_ZERO = 0x66;
         public const int ROR_ZERO_X = 0x76;
-        public const int ROR_ABS = 0x6E;
         #endregion
 
         #region Logic
         public const int AND_IMM = 0x29;
-        public const int AND_IND_X = 0x21;
+        public const int AND_ABS = 0x2D;
+        public const int AND_ABS_X = 0x3D;
+        public const int AND_ABS_Y = 0x39;
         public const int AND_ZERO = 0x25;
         public const int AND_ZERO_X = 0x35;
-        public const int AND_ABS = 0x2D;
+        public const int AND_IND_X = 0x21;
         public const int AND_IND_Y = 0x31;
-        public const int AND_ABS_Y = 0x39;
-        //TODO: more AND modes
         
         public const int BIT_ZERO = 0x24;
         public const int BIT_ABS = 0x2C;
 
         public const int EOR_IMM = 0x49;
-        public const int EOR_IND_X = 0x41;
+        public const int EOR_ABS = 0x4D;
+        public const int EOR_ABS_X = 0x5D;
+        public const int EOR_ABS_Y = 0x59;
         public const int EOR_ZERO = 0x45;
         public const int EOR_ZERO_X = 0x55;
-        public const int EOR_ABS = 0x4D;
-        public const int EOR_ABS_Y = 0x59;
+        public const int EOR_IND_X = 0x41;
         public const int EOR_IND_Y = 0x51;
-        //TODO: more eor modes
         
         public const int ORA_IMM = 0x09;
-        public const int ORA_IND_X = 0x01;
+        public const int ORA_ABS = 0x0D;
+        public const int ORA_ABS_X = 0x1D;
+        public const int ORA_ABS_Y = 0x19;
         public const int ORA_ZERO = 0x05;
         public const int ORA_ZERO_X = 0x15;
-        public const int ORA_ABS = 0x0D;
+        public const int ORA_IND_X = 0x01;
         public const int ORA_IND_Y = 0x11;
-        public const int ORA_ABS_Y = 0x19;
-        //TODO: more ora modes
         #endregion
 
         #region Aritm
         public const int ADC_IMM = 0x69;
-        public const int ADC_IND_X = 0x61;
+        public const int ADC_ABS = 0x6D;
+        public const int ADC_ABS_X = 0x7D;
+        public const int ADC_ABS_Y = 0x79;
         public const int ADC_ZERO = 0x65;
         public const int ADC_ZERO_X = 0x75;
-        public const int ADC_ABS = 0x6D;
-        public const int ADC_ABS_Y = 0x79;
+        public const int ADC_IND_X = 0x61;
         public const int ADC_IND_Y = 0x71;
-        //TODO: more adc modes
+        
         public const int CMP_IMM = 0xC9;
-        public const int CMP_IND_X = 0xC1;
+        public const int CMP_ABS = 0xCD;
+        public const int CMP_ABS_X = 0xDD;
+        public const int CMP_ABS_Y = 0xD9;
         public const int CMP_ZERO = 0xC5;
         public const int CMP_ZERO_X = 0xD5;
-        public const int CMP_ABS = 0xcd;
-        public const int CMP_ABS_Y = 0xd9;
-        public const int CMP_IND_Y = 0xd1;
-        //TODO: more cmp modes
+        public const int CMP_IND_X = 0xC1;
+        public const int CMP_IND_Y = 0xD1;
         
         public const int CPX_IMM = 0xE0;
         public const int CPX_ZERO = 0xE4;
@@ -133,25 +143,26 @@
         public const int CPY_ZERO = 0xC4;
 
         public const int SBC_IMM = 0xE9;
-        public const int SBC_IND_X = 0xE1;
+        public const int SBC_ABS = 0xED;
+        public const int SBC_ABS_X = 0xFD;
+        public const int SBC_ABS_Y = 0xF9;
         public const int SBC_ZERO = 0xE5;
         public const int SBC_ZERO_X = 0xF5;
-        public const int SBC_ABS = 0xED;
-        public const int SBC_ABS_Y = 0xF9;
+        public const int SBC_IND_X = 0xE1;
         public const int SBC_IND_Y = 0xF1;
-        //TODO: more sbc modes
         #endregion
 
         #region Inc
         public const int DEC_ABS = 0xCE;
-        //TODO: x abs dec
+        public const int DEC_ABS_X = 0xDE;
         public const int DEC_ZERO = 0xC6;
         public const int DEC_ZERO_X = 0xD6;
+
         public const int DEX = 0xCA;
         public const int DEY = 0x88;
 
         public const int INC_ABS = 0xEE;
-        //TODO: x abs inc
+        public const int INC_ABS_X = 0xFE;
         public const int INC_ZERO = 0xE6;
         public const int INC_ZERO_X = 0xF6;
 
@@ -182,7 +193,7 @@
         #region Flags
         public const int CLC = 0x18;
         public const int CLD = 0xD8;
-        //TODO: CLI
+        public const int CLI = 0x58;
         public const int CLV = 0xB8;
         public const int SEC = 0x38;
         public const int SED = 0xF8;
