@@ -175,6 +175,10 @@
             InstructionSet[Opcodes.NOP_ZERO_X_F4] = NOP_ZERO_X;
             InstructionSet[Opcodes.NOP_1A] = NOP;
             InstructionSet[Opcodes.NOP_3A] = NOP;
+            InstructionSet[Opcodes.NOP_5A] = NOP;
+            InstructionSet[Opcodes.NOP_7A] = NOP;
+            InstructionSet[Opcodes.NOP_DA] = NOP;
+            InstructionSet[Opcodes.NOP_FA] = NOP;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)

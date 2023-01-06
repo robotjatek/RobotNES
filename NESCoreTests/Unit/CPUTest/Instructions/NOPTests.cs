@@ -50,6 +50,62 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void NOP_5A()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_5A];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void NOP_7A()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_7A];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void NOP_DA()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_DA];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void NOP_FA()
+        {
+            var bus = new Mock<IBUS>();
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_FA];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void NOP_ZERO_0x04()
         {
             var bus = new Mock<IBUS>();
