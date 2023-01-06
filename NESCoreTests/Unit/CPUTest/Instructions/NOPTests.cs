@@ -70,6 +70,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void NOP_ZERO_X_0x34()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 10;
+
+            var nop = _instructions[Opcodes.NOP_ZERO_X_34];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(0xad + 10), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void NOP_ABS_0x0C()
         {
             var bus = new Mock<IBUS>();
