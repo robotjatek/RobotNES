@@ -167,6 +167,7 @@
             InstructionSet[Opcodes.NOP_ZERO_44] = NOP_ZERO;
             InstructionSet[Opcodes.NOP_ZERO_64] = NOP_ZERO;
             InstructionSet[Opcodes.NOP_ABS_0C] = NOP_ABS;
+            InstructionSet[Opcodes.NOP_ZERO_X_14] = NOP_ZERO_X;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
@@ -177,6 +178,12 @@
         private static byte NOP_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte NOP_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
             return addressingResult.Cycles;
         }
 
