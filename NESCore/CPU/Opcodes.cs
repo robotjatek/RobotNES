@@ -163,6 +163,8 @@
         public const int SBC_IND_X = 0xE1;
         public const int SBC_IND_Y = 0xF1;
         public const int SBC_IMM_EB = 0xEB;
+
+        public const int DCP_IND_X = 0xC3;
         #endregion
 
         #region Inc

@@ -282,5 +282,15 @@
 
             return 4;
         }
+
+        private static byte DCP_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            var decResult = DEC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, decResult);
+            CMP(decResult, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
     }
 }
