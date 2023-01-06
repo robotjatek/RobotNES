@@ -104,9 +104,9 @@
         public const int ORA_ZERO = 0x05;
         public const int ORA_ZERO_X = 0x15;
         public const int ORA_ABS = 0x0D;
+        public const int ORA_ABS_X = 0x1D;
         public const int ORA_IND_Y = 0x11;
         public const int ORA_ABS_Y = 0x19;
-        //TODO: more ora modes
         #endregion
 
         #region Aritm

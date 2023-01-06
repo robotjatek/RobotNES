@@ -143,6 +143,14 @@ namespace NESCore.CPU.Instructions
             return 4;
         }
 
+        private static byte ORA_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            ORA(addressingResult.Value, registers);
+
+            return addressingResult.Cycles;
+        }
+
         private static byte ORA_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
