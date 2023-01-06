@@ -36,5 +36,20 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(3);
         }
+
+        [Fact]
+        public void NOP_Zero_0x64()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+
+            var registers = new Mock<IRegisters>();
+
+            var nop = _instructions[Opcodes.NOP_ZERO_64];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(0xde), Times.Once());
+
+            cycles.Should().Be(3);
+        }
     }
 }
