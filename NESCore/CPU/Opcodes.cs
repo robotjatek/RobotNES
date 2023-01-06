@@ -160,7 +160,7 @@
         public const int DEY = 0x88;
 
         public const int INC_ABS = 0xEE;
-        //TODO: x abs inc
+        public const int INC_ABS_X = 0xFE;
         public const int INC_ZERO = 0xE6;
         public const int INC_ZERO_X = 0xF6;
 

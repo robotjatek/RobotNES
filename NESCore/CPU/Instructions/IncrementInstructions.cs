@@ -34,6 +34,14 @@
             return 6;
         }
 
+        private static byte INC_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            var result = INC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, result);
+            return 7;
+        }
+
         private static byte INX(IBUS bus, IRegisters registers)
         {
             registers.X++;
