@@ -78,6 +78,13 @@
             return addressingResult.Cycles;
         }
 
+        private static byte LAX_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;

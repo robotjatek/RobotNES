@@ -41,6 +41,7 @@
         public const int STY_ABS = 0x8C;
 
         public const int LAX_IND_X = 0xA3;
+        public const int LAX_ZERO = 0xA7;
         #endregion
 
         #region Transfer

@@ -7,6 +7,27 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
     public class LAXTests : InstructionTestBase
     {
         [Fact]
+        public void LAX_zero()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)  // param
+                .Returns(0xaa); // value at address 10
+
+            var lax = _instructions[Opcodes.LAX_ZERO];
+            var cycles = lax(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+            registers.Object.X.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+
+            cycles.Should().Be(3);
+        }
+
+        [Fact]
         public void LAX_indirect_X()
         {
             var registers = new Mock<IRegisters>();
