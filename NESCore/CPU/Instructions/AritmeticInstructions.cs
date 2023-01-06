@@ -283,14 +283,28 @@
             return 4;
         }
 
-        private static byte DCP_IND_X(IBUS bus, IRegisters registers)
+        private static void DCP(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingIndirectX(bus, registers);
             var decResult = DEC(addressingResult.Value, registers);
             bus.Write(addressingResult.Address, decResult);
             CMP(decResult, registers);
+        }
+
+        private static byte DCP_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            DCP(addressingResult, bus, registers);
 
             return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte DCP_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+
         }
     }
 }

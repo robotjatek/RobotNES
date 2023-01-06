@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
@@ -1670,6 +1669,31 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false));
 
             cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void DCP_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var dcp = _instructions[Opcodes.DCP_ZERO];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(5);
         }
     }
 }
