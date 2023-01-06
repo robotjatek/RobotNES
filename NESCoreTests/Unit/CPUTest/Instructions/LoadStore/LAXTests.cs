@@ -28,6 +28,28 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
         }
 
         [Fact]
+        public void LAX_abs()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(0xaa); // value at address 10
+
+            var lax = _instructions[Opcodes.LAX_ABS];
+            var cycles = lax(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xaa);
+            registers.Object.X.Should().Be(0xaa);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            cycles.Should().Be(4);
+        }
+
+        [Fact]
         public void LAX_indirect_X()
         {
             var registers = new Mock<IRegisters>();
