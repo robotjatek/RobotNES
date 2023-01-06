@@ -201,5 +201,6 @@
         #endregion
 
         public const int NOP = 0xEA;
+        public const int NOP_ZERO_04 = 0x04;
     }
 }

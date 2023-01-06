@@ -162,11 +162,19 @@
             InstructionSet[Opcodes.DEC_ABS_X] = DEC_ABS_X;
             InstructionSet[Opcodes.LDX_ABS_Y] = LDX_ABS_Y;
             InstructionSet[Opcodes.CLI] = CLI;
+
+            InstructionSet[Opcodes.NOP_ZERO_04] = NOP_ZERO;
         }
 
         private static byte NOP(IBUS bus, IRegisters registers)
         {
             return 2;
+        }
+
+        private static byte NOP_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            return addressingResult.Cycles;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)
@@ -286,6 +294,7 @@
             {
                 Address = address,
                 Value = value,
+                Cycles = 3,
             };
         }
 
