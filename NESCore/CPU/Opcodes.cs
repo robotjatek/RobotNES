@@ -120,12 +120,13 @@
         public const int ADC_IND_Y = 0x71;
         
         public const int CMP_IMM = 0xC9;
-        public const int CMP_IND_X = 0xC1;
+        public const int CMP_ABS = 0xCD;
+        public const int CMP_ABS_X = 0xDD;
+        public const int CMP_ABS_Y = 0xD9;
         public const int CMP_ZERO = 0xC5;
         public const int CMP_ZERO_X = 0xD5;
-        public const int CMP_ABS = 0xcd;
-        public const int CMP_ABS_Y = 0xd9;
-        public const int CMP_IND_Y = 0xd1;
+        public const int CMP_IND_X = 0xC1;
+        public const int CMP_IND_Y = 0xD1;
         //TODO: more cmp modes
         
         public const int CPX_IMM = 0xE0;

@@ -1,6 +1,4 @@
-﻿using System.Net.WebSockets;
-
-namespace NESCore.CPU.Instructions
+﻿namespace NESCore.CPU.Instructions
 {
     public partial class CPUInstructions
     {
