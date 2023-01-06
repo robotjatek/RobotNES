@@ -68,5 +68,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 
             cycles.Should().Be(4);
         }
+
+        [Fact]
+        public void STX_ZERO_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 15;
+            registers.Object.X = 10;
+
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
+
+            var stx_zero_y = _instructions[Opcodes.STX_ZERO_Y];
+            var cycles = stx_zero_y(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Write(0xad + 15, 10));
+
+            cycles.Should().Be(4);
+        }
     }
 }

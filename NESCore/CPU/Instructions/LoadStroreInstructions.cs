@@ -1,4 +1,6 @@
-﻿namespace NESCore.CPU.Instructions
+﻿using System.Net.WebSockets;
+
+namespace NESCore.CPU.Instructions
 {
     public partial class CPUInstructions
     {
@@ -181,6 +183,13 @@
             var address = AddressingZero(bus, registers).Address;
             bus.Write(address, registers.X);
             return 3; //1(opcode fetch) + 1 (1 byte fetch from memory) + 1 (1 byte write to memory)
+        }
+
+        private static byte STX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            bus.Write(addressingResult.Address, registers.X);
+            return addressingResult.Cycles;
         }
 
         private static byte STX_ABS(IBUS bus, IRegisters registers)
