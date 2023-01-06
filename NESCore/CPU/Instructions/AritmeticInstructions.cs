@@ -328,7 +328,14 @@
             DCP(addressingResult, bus, registers);
 
             return (byte)(addressingResult.Cycles + 2);
+        }
 
+        private static byte DCP_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return 7; // 7 regardless of boundary cross
         }
     }
 }
