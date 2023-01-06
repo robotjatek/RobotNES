@@ -162,6 +162,7 @@
         public const int SBC_ZERO_X = 0xF5;
         public const int SBC_IND_X = 0xE1;
         public const int SBC_IND_Y = 0xF1;
+        public const int SBC_IMM_EB = 0xEB;
         #endregion
 
         #region Inc

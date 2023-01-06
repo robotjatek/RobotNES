@@ -1210,6 +1210,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void SBC_IMM_EB()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(5);
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+
+            var sub = _instructions[Opcodes.SBC_IMM_EB];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(5);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void SBC_IMM_subtracts_carry_from_result()
         {
             var bus = new Mock<IBUS>();
