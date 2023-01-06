@@ -1695,5 +1695,31 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(5);
         }
+
+        [Fact]
+        public void DCP_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var dcp = _instructions[Opcodes.DCP_ABS];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
+        }
     }
 }

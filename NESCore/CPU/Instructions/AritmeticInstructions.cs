@@ -304,6 +304,14 @@
             DCP(addressingResult, bus, registers);
 
             return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte DCP_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            DCP(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
 
         }
     }
