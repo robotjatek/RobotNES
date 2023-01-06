@@ -91,22 +91,22 @@
         public const int BIT_ABS = 0x2C;
 
         public const int EOR_IMM = 0x49;
-        public const int EOR_IND_X = 0x41;
+        public const int EOR_ABS = 0x4D;
+        public const int EOR_ABS_X = 0x5D;
+        public const int EOR_ABS_Y = 0x59;
         public const int EOR_ZERO = 0x45;
         public const int EOR_ZERO_X = 0x55;
-        public const int EOR_ABS = 0x4D;
-        public const int EOR_ABS_Y = 0x59;
+        public const int EOR_IND_X = 0x41;
         public const int EOR_IND_Y = 0x51;
-        //TODO: more eor modes
         
         public const int ORA_IMM = 0x09;
-        public const int ORA_IND_X = 0x01;
-        public const int ORA_ZERO = 0x05;
-        public const int ORA_ZERO_X = 0x15;
         public const int ORA_ABS = 0x0D;
         public const int ORA_ABS_X = 0x1D;
-        public const int ORA_IND_Y = 0x11;
         public const int ORA_ABS_Y = 0x19;
+        public const int ORA_ZERO = 0x05;
+        public const int ORA_ZERO_X = 0x15;
+        public const int ORA_IND_X = 0x01;
+        public const int ORA_IND_Y = 0x11;
         #endregion
 
         #region Aritm
