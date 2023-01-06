@@ -78,6 +78,13 @@
             return addressingResult.Cycles;
         }
 
+        private static byte LAX_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static byte LAX_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
