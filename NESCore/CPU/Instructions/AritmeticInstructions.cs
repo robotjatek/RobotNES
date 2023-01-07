@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 
 namespace NESCore.CPU.Instructions
 {
@@ -409,6 +410,21 @@ namespace NESCore.CPU.Instructions
             ISB(addressingResult, bus, registers);
 
             return 7; //7 regardless of page crossing
+        }
+
+        private static void SLO(AddressingResult addressingResult, IBUS bus, IRegisters registers)
+        {
+            var aslResult = ASL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, aslResult);
+            ORA(aslResult, registers);
+        }
+
+        private static byte SLO_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            SLO(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
         }
     }
 }

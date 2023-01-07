@@ -179,6 +179,8 @@
         public const int ISB_ZERO_X = 0xF7;
         public const int ISB_ABS_Y = 0xFB;
         public const int ISB_ABS_X = 0xFF;
+
+        public const int SLO_IND_X = 0x03;
         #endregion
 
         #region Inc
