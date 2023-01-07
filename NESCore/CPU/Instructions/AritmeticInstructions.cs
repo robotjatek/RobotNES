@@ -80,14 +80,14 @@ namespace NESCore.CPU.Instructions
 
         private static void SBC(byte value, IRegisters registers)
         {
-            var operand = (sbyte)~value;
-            var result = (sbyte)registers.A + operand;
+            var operand = ~value;
+            var result = registers.A + operand;
             if (registers.GetCarryFlag() == true)
             {
                 result++;
             }
 
-            registers.SetCarryFlag((sbyte)result >= 0);
+            registers.SetCarryFlag(result >= 0);
             registers.SetZeroFlag(((byte)result) == 0);
             registers.SetNegativeFlag((result & 0x80) > 0);
             var overflow = ((registers.A ^ result) & (operand ^ result) & 0x80) > 0;

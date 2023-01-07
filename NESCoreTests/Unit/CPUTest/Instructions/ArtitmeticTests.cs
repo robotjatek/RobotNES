@@ -1857,5 +1857,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(8);
         }
+
+        [Fact]
+        public void SBC_CARRY_BUG()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xec);
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+            registers.SetupAllProperties();
+            registers.Object.A = 64;
+
+            var sbc = _instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0x53);
+            registers.Verify(r => r.SetCarryFlag(false));
+        }
     }
 }
