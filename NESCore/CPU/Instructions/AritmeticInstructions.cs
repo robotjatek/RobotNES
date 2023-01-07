@@ -434,5 +434,13 @@ namespace NESCore.CPU.Instructions
 
             return (byte)(addressingResult.Cycles + 2);
         }
+
+        private static byte SLO_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            SLO(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
     }
 }

@@ -2091,14 +2091,38 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0;
 
-            var isb = _instructions[Opcodes.SLO_ZERO];
-            var cycles = isb(bus.Object, registers.Object);
+            var slo = _instructions[Opcodes.SLO_ZERO];
+            var cycles = slo(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 16));
             registers.Object.A.Should().Be(16);
 
             cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void SLO_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var slo = _instructions[Opcodes.SLO_ABS];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 16));
+
+
+            cycles.Should().Be(6);
         }
     }
 }
