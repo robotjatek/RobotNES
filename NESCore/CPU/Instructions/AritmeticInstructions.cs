@@ -597,5 +597,68 @@
 
             return 7; //7 regardless of page cross
         }
+
+        private static void RRA(AddressingResult addressingResult, IBUS bus, IRegisters registers)
+        {
+            var rorResult = ROR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, rorResult);
+            ADC(rorResult, registers);
+        }
+
+        private static byte RRA_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RRA_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RRA_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RRA_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return 8; //8 regardless of page cross
+        }
+
+        private static byte RRA_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RRA_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
+
+        private static byte RRA_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            RRA(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
     }
 }
