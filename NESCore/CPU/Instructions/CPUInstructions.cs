@@ -210,6 +210,8 @@
             InstructionSet[Opcodes.DCP_ABS_X] = DCP_ABS_X;
 
             InstructionSet[Opcodes.ISB_IND_X] = ISB_IND_X;
+            InstructionSet[Opcodes.ISB_ZERO] = ISB_ZERO;
+            InstructionSet[Opcodes.ISB_ABS] = ISB_ABS;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)

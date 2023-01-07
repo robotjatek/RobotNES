@@ -1383,6 +1383,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void SBC_CARRY_BUG()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xec);
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+            registers.SetupAllProperties();
+            registers.Object.A = 64;
+
+            var sbc = _instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0x53);
+            registers.Verify(r => r.SetCarryFlag(false));
+        }
+
+        [Fact]
         public void SBC_IND_X()
         {
             var bus = new Mock<IBUS>();
@@ -1853,27 +1871,64 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A.Should().Be(4);
 
             registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
 
             cycles.Should().Be(8);
         }
 
         [Fact]
-        public void SBC_CARRY_BUG()
+        public void ISB_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xec);
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
 
             var registers = new Mock<IRegisters>();
-            registers.Setup(r => r.GetCarryFlag()).Returns(false);
             registers.SetupAllProperties();
-            registers.Object.A = 64;
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
 
-            var sbc = _instructions[Opcodes.SBC_IMM];
-            sbc(bus.Object, registers.Object);
+            var isb = _instructions[Opcodes.ISB_ZERO];
+            var cycles = isb(bus.Object, registers.Object);
 
-            registers.Object.A.Should().Be(0x53);
-            registers.Verify(r => r.SetCarryFlag(false));
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 16));
+            registers.Object.A.Should().Be(4);
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void ISB_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var isb = _instructions[Opcodes.ISB_ABS];
+            var cycles = isb(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
         }
     }
 }
