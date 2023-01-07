@@ -31,7 +31,7 @@ namespace NESCore
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
-            _cpu = new CPU.CPU(_bus, instructions);
+            _cpu = new CPU.CPU(_bus, instructions, _logger);
         }
 
         public void Run()
@@ -65,7 +65,11 @@ namespace NESCore
         private static ILogger CreateLogger()
         {
             var logger = new LoggerConfiguration()
-                .WriteTo.Console().CreateLogger();
+                .MinimumLevel.Debug()
+                .WriteTo
+                .Console()
+                .WriteTo.File("instructionlog.txt")
+                .CreateLogger();
 
             return logger;
         }

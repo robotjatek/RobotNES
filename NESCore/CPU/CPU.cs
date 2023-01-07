@@ -1,14 +1,17 @@
-﻿namespace NESCore.CPU
+﻿using Serilog;
+
+namespace NESCore.CPU
 {
     public class CPU : ICPU
     {
         private readonly IBUS _bus;
         private readonly IRegisters _registers = new Registers();
         private readonly Func<IBUS, IRegisters, byte>[] _instructions;
-        private readonly System.IO.StreamWriter _wr = new StreamWriter("instlog.txt");
+        private readonly ILogger _logger;
 
-        public CPU(IBUS bus, Func<IBUS, IRegisters, byte>[] instuctions)
+        public CPU(IBUS bus, Func<IBUS, IRegisters, byte>[] instuctions, ILogger logger)
         {
+            _logger = logger;
             _bus = bus;
             _instructions = instuctions;
             _registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc));
@@ -26,11 +29,11 @@
 
             if (instruction == null)
             {
-                _wr.Close();
                 throw new NotImplementedException($"0x{instructionCode:X}@0x{_registers.PC - 1:X2}");
             }
 
-            _wr.WriteLine($"{_registers.PC - 1:X4} {instructionCode:X2}");
+            _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
+
             var elapsedCycles = instruction(_bus, _registers);
             return elapsedCycles;
         }
