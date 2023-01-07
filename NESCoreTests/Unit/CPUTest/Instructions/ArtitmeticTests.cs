@@ -2063,7 +2063,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
-            registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.X = 5;
             registers.Object.A = 0;
 
@@ -2078,6 +2077,28 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A.Should().Be(16);
 
             cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void SLO_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var isb = _instructions[Opcodes.SLO_ZERO];
+            var cycles = isb(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 16));
+            registers.Object.A.Should().Be(16);
+
+            cycles.Should().Be(5);
         }
     }
 }

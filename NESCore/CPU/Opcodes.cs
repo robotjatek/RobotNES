@@ -181,6 +181,7 @@
         public const int ISB_ABS_X = 0xFF;
 
         public const int SLO_IND_X = 0x03;
+        public const int SLO_ZERO = 0x07;
         #endregion
 
         #region Inc
