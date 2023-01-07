@@ -65,6 +65,54 @@
             return addressingResult.Cycles;
         }
 
+        private static void LAX(byte value, IRegisters registers)
+        {
+            LDA(value, registers);
+            LDX(value, registers);
+        }
+
+        private static byte LAX_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte LAX_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte LAX_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte LAX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte LAX_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            LAX(addressingResult.Value , registers);
+            return addressingResult.Cycles;
+        }
+
+        private static byte LAX_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            LAX(addressingResult.Value, registers);
+            return addressingResult.Cycles;
+        }
+
         private static void LDX(byte value, IRegisters registers)
         {
             registers.X = value;
@@ -244,6 +292,39 @@
             var address = AddressingAbsolute(bus, registers).Address;
             bus.Write(address, registers.Y);
             return 4;
+        }
+
+        private static byte SAX(byte value1, byte value2)
+        {
+            return (byte)(value1 & value2);
+        }
+
+        private static byte SAX_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
+        }
+
+        private static byte SAX_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
+        }
+
+        private static byte SAX_ZERO_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroY(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
+        }
+
+        private static byte SAX_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
+            return addressingResult.Cycles;
         }
     }
 }

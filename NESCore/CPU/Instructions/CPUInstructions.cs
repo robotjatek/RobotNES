@@ -10,7 +10,7 @@
 
         public CPUInstructions()
         {
-            InstructionSet = new Func<IBUS, IRegisters, byte>[255];
+            InstructionSet = new Func<IBUS, IRegisters, byte>[256];
 
             InstructionSet[Opcodes.JMP_ABS] = JMP_ABS;
             InstructionSet[Opcodes.LDX_IMM] = LDX_IMM;
@@ -162,11 +162,92 @@
             InstructionSet[Opcodes.DEC_ABS_X] = DEC_ABS_X;
             InstructionSet[Opcodes.LDX_ABS_Y] = LDX_ABS_Y;
             InstructionSet[Opcodes.CLI] = CLI;
-        }
 
-        private static byte NOP(IBUS bus, IRegisters registers)
-        {
-            return 2;
+            InstructionSet[Opcodes.NOP_ZERO_04] = NOP_ZERO;
+            InstructionSet[Opcodes.NOP_ZERO_44] = NOP_ZERO;
+            InstructionSet[Opcodes.NOP_ZERO_64] = NOP_ZERO;
+            InstructionSet[Opcodes.NOP_ABS_0C] = NOP_ABS;
+            InstructionSet[Opcodes.NOP_ZERO_X_14] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_ZERO_X_34] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_ZERO_X_54] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_ZERO_X_74] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_ZERO_X_D4] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_ZERO_X_F4] = NOP_ZERO_X;
+            InstructionSet[Opcodes.NOP_1A] = NOP;
+            InstructionSet[Opcodes.NOP_3A] = NOP;
+            InstructionSet[Opcodes.NOP_5A] = NOP;
+            InstructionSet[Opcodes.NOP_7A] = NOP;
+            InstructionSet[Opcodes.NOP_DA] = NOP;
+            InstructionSet[Opcodes.NOP_FA] = NOP;
+            InstructionSet[Opcodes.NOP_IMM_80] = NOP_IMM;
+            InstructionSet[Opcodes.NOP_ABS_X_1C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_3C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_5C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_7C] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_DC] = NOP_ABS_X;
+            InstructionSet[Opcodes.NOP_ABS_X_FC] = NOP_ABS_X;
+
+            InstructionSet[Opcodes.LAX_IND_X] = LAX_IND_X;
+            InstructionSet[Opcodes.LAX_ZERO] = LAX_ZERO;
+            InstructionSet[Opcodes.LAX_ABS] = LAX_ABS;
+            InstructionSet[Opcodes.LAX_IND_Y] = LAX_IND_Y;
+            InstructionSet[Opcodes.LAX_ZERO_Y] = LAX_ZERO_Y;
+            InstructionSet[Opcodes.LAX_ABS_Y] = LAX_ABS_Y;
+
+            InstructionSet[Opcodes.SAX_IND_X] = SAX_IND_X;
+            InstructionSet[Opcodes.SAX_ZERO] = SAX_ZERO;
+            InstructionSet[Opcodes.SAX_ABS] = SAX_ABS;
+            InstructionSet[Opcodes.SAX_ZERO_Y] = SAX_ZERO_Y;
+
+            InstructionSet[Opcodes.SBC_IMM_EB] = SBC_IMM;
+
+            InstructionSet[Opcodes.DCP_IND_X] = DCP_IND_X;
+            InstructionSet[Opcodes.DCP_ZERO] = DCP_ZERO;
+            InstructionSet[Opcodes.DCP_ABS] = DCP_ABS;
+            InstructionSet[Opcodes.DCP_IND_Y] = DCP_IND_Y;
+            InstructionSet[Opcodes.DCP_ZERO_X] = DCP_ZERO_X;
+            InstructionSet[Opcodes.DCP_ABS_Y] = DCP_ABS_Y;
+            InstructionSet[Opcodes.DCP_ABS_X] = DCP_ABS_X;
+
+            InstructionSet[Opcodes.ISB_IND_X] = ISB_IND_X;
+            InstructionSet[Opcodes.ISB_ZERO] = ISB_ZERO;
+            InstructionSet[Opcodes.ISB_ABS] = ISB_ABS;
+            InstructionSet[Opcodes.ISB_IND_Y] = ISB_IND_Y;
+            InstructionSet[Opcodes.ISB_ZERO_X] = ISB_ZERO_X;
+            InstructionSet[Opcodes.ISB_ABS_Y] = ISB_ABS_Y;
+            InstructionSet[Opcodes.ISB_ABS_X] = ISB_ABS_X;
+
+            InstructionSet[Opcodes.SLO_IND_X] = SLO_IND_X;
+            InstructionSet[Opcodes.SLO_ZERO] = SLO_ZERO;
+            InstructionSet[Opcodes.SLO_ABS] = SLO_ABS;
+            InstructionSet[Opcodes.SLO_IND_Y] = SLO_IND_Y;
+            InstructionSet[Opcodes.SLO_ZERO_X] = SLO_ZERO_X;
+            InstructionSet[Opcodes.SLO_ABS_Y] = SLO_ABS_Y;
+            InstructionSet[Opcodes.SLO_ABS_X] = SLO_ABS_X;
+
+            InstructionSet[Opcodes.RLA_IND_X] = RLA_IND_X;
+            InstructionSet[Opcodes.RLA_ZERO] = RLA_ZERO;
+            InstructionSet[Opcodes.RLA_ABS] = RLA_ABS;
+            InstructionSet[Opcodes.RLA_IND_Y] = RLA_IND_Y;
+            InstructionSet[Opcodes.RLA_ZERO_X] = RLA_ZERO_X;
+            InstructionSet[Opcodes.RLA_ABS_Y] = RLA_ABS_Y;
+            InstructionSet[Opcodes.RLA_ABS_X] = RLA_ABS_X;
+
+            InstructionSet[Opcodes.SRE_IND_X] = SRE_IND_X;
+            InstructionSet[Opcodes.SRE_ZERO] = SRE_ZERO;
+            InstructionSet[Opcodes.SRE_ABS] = SRE_ABS;
+            InstructionSet[Opcodes.SRE_IND_Y] = SRE_IND_Y;
+            InstructionSet[Opcodes.SRE_ZERO_X] = SRE_ZERO_X;
+            InstructionSet[Opcodes.SRE_ABS_Y] = SRE_ABS_Y;
+            InstructionSet[Opcodes.SRE_ABS_X] = SRE_ABS_X;
+
+            InstructionSet[Opcodes.RRA_IND_X] = RRA_IND_X;
+            InstructionSet[Opcodes.RRA_ZERO] = RRA_ZERO;
+            InstructionSet[Opcodes.RRA_ABS] = RRA_ABS;
+            InstructionSet[Opcodes.RRA_IND_Y] = RRA_IND_Y;
+            InstructionSet[Opcodes.RRA_ZERO_X] = RRA_ZERO_X;
+            InstructionSet[Opcodes.RRA_ABS_Y] = RRA_ABS_Y;
+            InstructionSet[Opcodes.RRA_ABS_X] = RRA_ABS_X;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)
@@ -223,6 +304,7 @@
             return new AddressingResult
             {
                 Value = Fetch(bus, registers),
+                Cycles = 2,
             };
         }
 
@@ -235,6 +317,7 @@
             {
                 Value = value,
                 Address = address,
+                Cycles = 4,
             };
         }
 
@@ -286,6 +369,7 @@
             {
                 Address = address,
                 Value = value,
+                Cycles = 3,
             };
         }
 
@@ -324,7 +408,8 @@
             return new AddressingResult
             {
                 Address = address,
-                Value = value
+                Value = value,
+                Cycles = 6,
             };
         }
 

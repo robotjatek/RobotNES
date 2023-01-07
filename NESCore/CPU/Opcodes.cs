@@ -39,6 +39,18 @@
         public const int STY_ZERO = 0x84;
         public const int STY_ZERO_X = 0x94;
         public const int STY_ABS = 0x8C;
+
+        public const int LAX_IND_X = 0xA3;
+        public const int LAX_ZERO = 0xA7;
+        public const int LAX_ZERO_Y = 0xB7;
+        public const int LAX_ABS = 0xAF;
+        public const int LAX_ABS_Y = 0xBF;
+        public const int LAX_IND_Y = 0xB3;
+
+        public const int SAX_IND_X = 0x83;
+        public const int SAX_ZERO = 0x87;
+        public const int SAX_ZERO_Y = 0x97;
+        public const int SAX_ABS = 0x8F;
         #endregion
 
         #region Transfer
@@ -150,6 +162,55 @@
         public const int SBC_ZERO_X = 0xF5;
         public const int SBC_IND_X = 0xE1;
         public const int SBC_IND_Y = 0xF1;
+        public const int SBC_IMM_EB = 0xEB;
+
+        public const int DCP_IND_X = 0xC3;
+        public const int DCP_ZERO = 0xC7;
+        public const int DCP_ABS = 0xCF;
+        public const int DCP_IND_Y = 0xD3;
+        public const int DCP_ZERO_X = 0xD7;
+        public const int DCP_ABS_Y = 0xDB;
+        public const int DCP_ABS_X = 0xDF;
+
+        public const int ISB_IND_X = 0xE3;
+        public const int ISB_ZERO = 0xE7;
+        public const int ISB_ABS = 0xEF;
+        public const int ISB_IND_Y = 0xF3;
+        public const int ISB_ZERO_X = 0xF7;
+        public const int ISB_ABS_Y = 0xFB;
+        public const int ISB_ABS_X = 0xFF;
+
+        public const int SLO_IND_X = 0x03;
+        public const int SLO_ZERO = 0x07;
+        public const int SLO_ABS = 0x0F;
+        public const int SLO_IND_Y = 0x13;
+        public const int SLO_ZERO_X = 0x17;
+        public const int SLO_ABS_Y = 0x1B;
+        public const int SLO_ABS_X = 0x1F;
+
+        public const int RLA_IND_X = 0x23;
+        public const int RLA_ZERO = 0x27;
+        public const int RLA_ABS = 0x2F;
+        public const int RLA_IND_Y = 0x33;
+        public const int RLA_ZERO_X = 0x37;
+        public const int RLA_ABS_Y = 0x3B;
+        public const int RLA_ABS_X = 0x3F;
+
+        public const int SRE_IND_X = 0x43;
+        public const int SRE_ZERO = 0x47;
+        public const int SRE_ABS = 0x4F;
+        public const int SRE_IND_Y = 0x53;
+        public const int SRE_ZERO_X = 0x57;
+        public const int SRE_ABS_Y = 0x5B;
+        public const int SRE_ABS_X = 0x5F;
+
+        public const int RRA_IND_X = 0x63;
+        public const int RRA_ZERO = 0x67;
+        public const int RRA_ABS = 0x6F;
+        public const int RRA_IND_Y = 0x73;
+        public const int RRA_ZERO_X = 0x77;
+        public const int RRA_ABS_Y = 0x7B;
+        public const int RRA_ABS_X = 0x7F;
         #endregion
 
         #region Inc
@@ -200,6 +261,31 @@
         public const int SEI = 0x78;
         #endregion
 
+        #region NOP
         public const int NOP = 0xEA;
+        public const int NOP_1A = 0x1A;
+        public const int NOP_3A = 0x3A;
+        public const int NOP_5A = 0x5A;
+        public const int NOP_7A = 0x7A;
+        public const int NOP_DA = 0xDA;
+        public const int NOP_FA = 0xFA;
+        public const int NOP_IMM_80 = 0x80;
+        public const int NOP_ZERO_04 = 0x04;
+        public const int NOP_ZERO_44 = 0x44;
+        public const int NOP_ZERO_64 = 0x64;
+        public const int NOP_ABS_0C = 0x0C;
+        public const int NOP_ABS_X_1C = 0x1C;
+        public const int NOP_ABS_X_3C = 0x3C;
+        public const int NOP_ABS_X_5C = 0x5C;
+        public const int NOP_ABS_X_7C = 0x7C;
+        public const int NOP_ABS_X_DC = 0xDC;
+        public const int NOP_ABS_X_FC = 0xFC;
+        public const int NOP_ZERO_X_14 = 0x14;
+        public const int NOP_ZERO_X_34 = 0x34;
+        public const int NOP_ZERO_X_54 = 0x54;
+        public const int NOP_ZERO_X_74 = 0x74;
+        public const int NOP_ZERO_X_D4 = 0xD4;
+        public const int NOP_ZERO_X_F4 = 0xF4;
+        #endregion
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
@@ -1210,6 +1209,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void SBC_IMM_EB()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(5);
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 10;
+
+            var sub = _instructions[Opcodes.SBC_IMM_EB];
+            var cycles = sub(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(5);
+
+            cycles.Should().Be(2);
+        }
+
+        [Fact]
         public void SBC_IMM_subtracts_carry_from_result()
         {
             var bus = new Mock<IBUS>();
@@ -1363,6 +1380,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
 
             cycles.Should().Be(2);
+        }
+
+        [Fact]
+        public void SBC_CARRY_BUG()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xec);
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(false);
+            registers.SetupAllProperties();
+            registers.Object.A = 64;
+
+            var sbc = _instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
+
+            registers.Object.A.Should().Be(0x53);
+            registers.Verify(r => r.SetCarryFlag(false));
         }
 
         [Fact]
@@ -1622,6 +1657,1090 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
 
             cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void DCP_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var dcp = _instructions[Opcodes.DCP_IND_X];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void DCP_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+
+            var dcp = _instructions[Opcodes.DCP_ZERO];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void DCP_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var dcp = _instructions[Opcodes.DCP_ZERO_X];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void DCP_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+
+            var dcp = _instructions[Opcodes.DCP_ABS];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void DCP_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var dcp = _instructions[Opcodes.DCP_ABS_X];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void DCP_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.Y = 10;
+
+            var dcp = _instructions[Opcodes.DCP_ABS_Y];
+            var cycles = dcp(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 14));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void DCP_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 20;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(15); // value at location final location
+
+            var dcp = _instructions[Opcodes.DCP_IND_Y];
+            var cycles = dcp(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(20);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 14));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void ISB_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var isb = _instructions[Opcodes.ISB_IND_X];
+            var cycles = isb(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 16));
+            registers.Object.A.Should().Be(4);
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void ISB_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var isb = _instructions[Opcodes.ISB_ZERO];
+            var cycles = isb(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 16));
+            registers.Object.A.Should().Be(4);
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void ISB_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.A = 20;
+
+            var isb = _instructions[Opcodes.ISB_ABS];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void ISB_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 20;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(15); // value at location final location
+
+            var isb = _instructions[Opcodes.ISB_IND_Y];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void ISB_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(15); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 5;
+
+            var isb = _instructions[Opcodes.ISB_ZERO_X];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void ISB_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.Y = 10;
+
+            var isb = _instructions[Opcodes.ISB_ABS_Y];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void ISB_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var isb = _instructions[Opcodes.ISB_ABS_X];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void SLO_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0;
+
+            var slo = _instructions[Opcodes.SLO_IND_X];
+            var cycles = slo(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 16));
+            registers.Object.A.Should().Be(16);
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void SLO_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var slo = _instructions[Opcodes.SLO_ZERO];
+            var cycles = slo(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 16));
+            registers.Object.A.Should().Be(16);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void SLO_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var slo = _instructions[Opcodes.SLO_ABS];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 16));
+
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void SLO_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 0;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(8); // value at location final location
+
+            var slo = _instructions[Opcodes.SLO_IND_Y];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 16));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void SLO_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.X = 5;
+
+            var slo = _instructions[Opcodes.SLO_ZERO_X];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 16));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void SLO_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.Y = 10;
+
+            var slo = _instructions[Opcodes.SLO_ABS_Y];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void SLO_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.X = 10;
+
+            var slo = _instructions[Opcodes.SLO_ABS_X];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void RLA_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0xff;
+
+            var rla = _instructions[Opcodes.RLA_IND_X];
+            var cycles = rla(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 16));
+            registers.Object.A.Should().Be(16);
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void RLA_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+
+            var rla = _instructions[Opcodes.RLA_ZERO];
+            var cycles = rla(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 16));
+            registers.Object.A.Should().Be(16);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void RLA_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+
+            var rla = _instructions[Opcodes.RLA_ABS];
+            var cycles = rla(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 16));
+
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RLA_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 0xff;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(8); // value at location final location
+
+            var rla = _instructions[Opcodes.RLA_IND_Y];
+            var cycles = rla(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 16));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void RLA_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 5;
+
+            var rla = _instructions[Opcodes.RLA_ZERO_X];
+            var cycles = rla(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 16));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RLA_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.Y = 10;
+
+            var rla = _instructions[Opcodes.RLA_ABS_Y];
+            var cycles = rla(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void RLA_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 10;
+
+            var rla = _instructions[Opcodes.RLA_ABS_X];
+            var cycles = rla(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void SRE_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0xff;
+
+            var sre = _instructions[Opcodes.SRE_IND_X];
+            var cycles = sre(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 4));
+            registers.Object.A.Should().Be(0xfb);
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void SRE_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+
+            var sre = _instructions[Opcodes.SRE_ZERO];
+            var cycles = sre(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 4));
+            registers.Object.A.Should().Be(0xfb);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void SRE_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+
+            var sre = _instructions[Opcodes.SRE_ABS];
+            var cycles = sre(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfb);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 4));
+
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void SRE_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 0xff;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(8); // value at location final location
+
+            var sre = _instructions[Opcodes.SRE_IND_Y];
+            var cycles = sre(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfb);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 4));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void SRE_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 5;
+
+            var sre = _instructions[Opcodes.SRE_ZERO_X];
+            var cycles = sre(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfb);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 4));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void SRE_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.Y = 10;
+
+            var sre = _instructions[Opcodes.SRE_ABS_Y];
+            var cycles = sre(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfb);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 4));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void SRE_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0xff;
+            registers.Object.X = 10;
+
+            var sre = _instructions[Opcodes.SRE_ABS_X];
+            var cycles = sre(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(0xfb);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 4));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void RRA_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.X = 5;
+            registers.Object.A = 0;
+
+            var rra = _instructions[Opcodes.RRA_IND_X];
+            var cycles = rra(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 4));
+            registers.Object.A.Should().Be(4);
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void RRA_ZERO()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var rra = _instructions[Opcodes.RRA_ZERO];
+            var cycles = rra(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(0xad), Times.Once());
+            bus.Verify(b => b.Write(0xad, 4));
+            registers.Object.A.Should().Be(4);
+
+            cycles.Should().Be(5);
+        }
+
+        [Fact]
+        public void RRA_ABS()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+
+            var rra = _instructions[Opcodes.RRA_ABS];
+            var cycles = rra(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+            bus.Verify(b => b.Write(0xdead, 4));
+
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RRA_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 0;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(8); // value at location final location
+
+            var rra = _instructions[Opcodes.RRA_IND_Y];
+            var cycles = rra(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 4));
+
+            cycles.Should().Be(8);
+        }
+
+        [Fact]
+        public void RRA_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.X = 5;
+
+            var rra = _instructions[Opcodes.RRA_ZERO_X];
+            var cycles = rra(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 4));
+
+            cycles.Should().Be(6);
+        }
+
+        [Fact]
+        public void RRA_ABS_Y()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.Y = 10;
+
+            var rra = _instructions[Opcodes.RRA_ABS_Y];
+            var cycles = rra(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 4));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void RRA_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(8); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.X = 10;
+
+            var rra = _instructions[Opcodes.RRA_ABS_X];
+            var cycles = rra(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 4));
+
+            cycles.Should().Be(7);
         }
     }
 }

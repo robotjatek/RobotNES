@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using NESCore.CPU;
 
-namespace NESCoreTests.Unit.CPUTest.Instructions
+namespace NESCoreTests.Unit.CPUTest
 {
     public class RegisterTests
     {
