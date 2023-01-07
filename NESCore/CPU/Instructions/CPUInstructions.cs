@@ -12,6 +12,15 @@
         {
             InstructionSet = new Func<IBUS, IRegisters, byte>[256];
 
+            for(int i = 0; i < InstructionSet.Length; i++)
+            {
+                //Sets up the instructionset to throw on an unknown instruction
+                InstructionSet[i] = (IBUS bus, IRegisters registers) =>
+                {
+                    throw new NotImplementedException($"0x{i:X}@0x{registers.PC - 1:X2}");
+                };
+            }
+
             InstructionSet[Opcodes.JMP_ABS] = JMP_ABS;
             InstructionSet[Opcodes.LDX_IMM] = LDX_IMM;
             InstructionSet[Opcodes.LDY_IMM] = LDY_IMM;

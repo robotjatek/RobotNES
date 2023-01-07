@@ -22,9 +22,9 @@ namespace NESCore
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
 
-        public NesSystem(string cartridgePath)
+        public NesSystem(string cartridgePath, ILogger logger)
         {
-            _logger = CreateLogger(); //TODO: move logger creation out of this class
+            _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
             _memory = new Memory();
             _bus = new Bus(_cartridge, _memory, _logger);
@@ -60,18 +60,6 @@ namespace NESCore
             }
 
             _cpu.Cycle();
-        }
-
-        private static ILogger CreateLogger()
-        {
-            var logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo
-                .Console()
-                .WriteTo.File("RobotNES.log")
-                .CreateLogger();
-
-            return logger;
         }
 
         private ICartridge LoadCartridge(string path)

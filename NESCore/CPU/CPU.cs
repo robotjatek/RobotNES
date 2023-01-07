@@ -27,11 +27,6 @@ namespace NESCore.CPU
             var instructionCode = Fetch();
             var instruction = _instructions[instructionCode];
 
-            if (instruction == null)
-            {
-                throw new NotImplementedException($"0x{instructionCode:X}@0x{_registers.PC - 1:X2}");
-            }
-
             _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
 
             var elapsedCycles = instruction(_bus, _registers);
