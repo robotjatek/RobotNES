@@ -220,6 +220,7 @@
             InstructionSet[Opcodes.SLO_IND_X] = SLO_IND_X;
             InstructionSet[Opcodes.SLO_ZERO] = SLO_ZERO;
             InstructionSet[Opcodes.SLO_ABS] = SLO_ABS;
+            InstructionSet[Opcodes.SLO_IND_Y] = SLO_IND_Y;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)

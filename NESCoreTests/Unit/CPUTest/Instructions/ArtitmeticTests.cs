@@ -2124,5 +2124,33 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void SLO_indirect_Y()
+        {
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.Y = 5;
+            registers.Object.A = 0;
+
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)  // param
+                .Returns(0xad) //low address
+                .Returns(0xde) // high address
+                .Returns(8); // value at location final location
+
+            var slo = _instructions[Opcodes.SLO_IND_Y];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(10), Times.Once());
+            bus.Verify(b => b.Read(10 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead + 5, 16));
+
+            cycles.Should().Be(8);
+        }
     }
 }
