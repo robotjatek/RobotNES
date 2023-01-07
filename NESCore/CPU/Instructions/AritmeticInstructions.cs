@@ -386,5 +386,13 @@ namespace NESCore.CPU.Instructions
 
             return 8; //8 regardless of page crossing
         }
+
+        private static byte ISB_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            ISB(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
     }
 }
