@@ -1,7 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
-
-namespace NESCore.CPU.Instructions
+﻿namespace NESCore.CPU.Instructions
 {
     public partial class CPUInstructions
     {
@@ -534,6 +531,69 @@ namespace NESCore.CPU.Instructions
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
             RLA(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
+
+        private static void SRE(AddressingResult addressingResult, IBUS bus, IRegisters registers)
+        {
+            var rlaResult = LSR(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, rlaResult);
+            EOR(rlaResult, registers);
+        }
+
+        private static byte SRE_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte SRE_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte SRE_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte SRE_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return 8; //8 regardless of page cross
+        }
+
+        private static byte SRE_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte SRE_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            SRE(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
+
+        private static byte SRE_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            SRE(addressingResult, bus, registers);
 
             return 7; //7 regardless of page cross
         }

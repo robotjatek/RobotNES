@@ -195,6 +195,14 @@
         public const int RLA_ZERO_X = 0x37;
         public const int RLA_ABS_Y = 0x3B;
         public const int RLA_ABS_X = 0x3F;
+
+        public const int SRE_IND_X = 0x43;
+        public const int SRE_ZERO = 0x47;
+        public const int SRE_ABS = 0x4F;
+        public const int SRE_IND_Y = 0x53;
+        public const int SRE_ZERO_X = 0x57;
+        public const int SRE_ABS_Y = 0x5B;
+        public const int SRE_ABS_X = 0x5F;
         #endregion
 
         #region Inc
