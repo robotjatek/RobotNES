@@ -466,5 +466,13 @@ namespace NESCore.CPU.Instructions
 
             return 7; //7 regardless of page cross
         }
+
+        private static byte SLO_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            SLO(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
     }
 }
