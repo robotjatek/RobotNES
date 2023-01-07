@@ -450,5 +450,13 @@ namespace NESCore.CPU.Instructions
 
             return 8; //8 regardless of page cross
         }
+
+        private static byte SLO_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            SLO(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
     }
 }

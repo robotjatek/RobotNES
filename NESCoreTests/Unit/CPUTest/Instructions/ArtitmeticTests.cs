@@ -2152,5 +2152,28 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(8);
         }
+
+        [Fact]
+        public void SLO_ZERO_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(8); //value at 0xad
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.A = 0;
+            registers.Object.X = 5;
+
+            var slo = _instructions[Opcodes.SLO_ZERO_X];
+            var cycles = slo(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(16);
+
+            bus.Verify(b => b.Read(0xad + 5), Times.Once());
+            bus.Verify(b => b.Write(0xad + 5, 16));
+
+            cycles.Should().Be(6);
+        }
     }
 }
