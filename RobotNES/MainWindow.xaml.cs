@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,11 @@ namespace RobotNES
         public MainWindow()
         {
             InitializeComponent();
+
+            if(File.Exists("RobotNES.log"))
+            {
+                File.Delete("RobotNES.log");
+            }
 
             _nesSystem = new NesSystem("nestest.nes");
         }

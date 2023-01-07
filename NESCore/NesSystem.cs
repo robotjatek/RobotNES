@@ -68,7 +68,7 @@ namespace NESCore
                 .MinimumLevel.Debug()
                 .WriteTo
                 .Console()
-                .WriteTo.File("instructionlog.txt")
+                .WriteTo.File("RobotNES.log")
                 .CreateLogger();
 
             return logger;

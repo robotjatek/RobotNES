@@ -34,6 +34,7 @@ namespace NESCore
                 return _cartridge.Read(address);
             }
 
+            _logger.Warning($"Unsupported read from 0x{address:X4}");
             throw new NotImplementedException();
         }
 
@@ -49,6 +50,7 @@ namespace NESCore
             }
             else
             {
+                _logger.Warning($"Unsupported write to 0x{address:X4}");
                 throw new NotImplementedException();
             }
         }
