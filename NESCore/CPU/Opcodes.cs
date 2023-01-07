@@ -185,6 +185,7 @@
         public const int SLO_ABS = 0x0F;
         public const int SLO_IND_Y = 0x13;
         public const int SLO_ZERO_X = 0x17;
+        public const int SLO_ABS_Y = 0x1B;
         #endregion
 
         #region Inc

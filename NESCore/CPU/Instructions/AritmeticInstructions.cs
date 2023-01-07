@@ -458,5 +458,13 @@ namespace NESCore.CPU.Instructions
 
             return (byte)(addressingResult.Cycles + 2);
         }
+
+        private static byte SLO_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            SLO(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
     }
 }
