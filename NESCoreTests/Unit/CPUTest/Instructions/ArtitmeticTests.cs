@@ -2016,6 +2016,36 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(7);
+        }
+
+        [Fact]
+        public void ISB_ABS_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.SetupAllProperties();
+            registers.Object.A = 20;
+            registers.Object.X = 10;
+
+            var isb = _instructions[Opcodes.ISB_ABS_X];
+            var cycles = isb(bus.Object, registers.Object);
+            registers.Object.A.Should().Be(4);
+
+            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Write(0xdead + 10, 16));
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
 
             cycles.Should().Be(7);
