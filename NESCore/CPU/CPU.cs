@@ -12,8 +12,7 @@
         {
             _bus = bus;
             _instructions = instuctions;
-            //_registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc)); // Reset vector //TODO: uncomment this after instructionset implementation
-            _registers.PC = 0xc000; //nestest.nes start //TODO: delete this after instructionset implementation
+            _registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc));
         }
 
         public void Cycle()
