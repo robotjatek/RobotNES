@@ -474,5 +474,68 @@ namespace NESCore.CPU.Instructions
 
             return 7; //7 regardless of page cross
         }
+
+        private static void RLA(AddressingResult addressingResult, IBUS bus, IRegisters registers)
+        {
+            var rlaResult = ROL(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, rlaResult);
+            AND(rlaResult, registers);
+        }
+
+        private static byte RLA_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RLA_ZERO(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZero(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RLA_ABS(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsolute(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RLA_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return 8; //8 regardless of page cross
+        }
+
+        private static byte RLA_ZERO_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingZeroX(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
+        }
+
+        private static byte RLA_ABS_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteY(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
+
+        private static byte RLA_ABS_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteX(bus, registers);
+            RLA(addressingResult, bus, registers);
+
+            return 7; //7 regardless of page cross
+        }
     }
 }

@@ -224,6 +224,14 @@
             InstructionSet[Opcodes.SLO_ZERO_X] = SLO_ZERO_X;
             InstructionSet[Opcodes.SLO_ABS_Y] = SLO_ABS_Y;
             InstructionSet[Opcodes.SLO_ABS_X] = SLO_ABS_X;
+
+            InstructionSet[Opcodes.RLA_IND_X] = RLA_IND_X;
+            InstructionSet[Opcodes.RLA_ZERO] = RLA_ZERO;
+            InstructionSet[Opcodes.RLA_ABS] = RLA_ABS;
+            InstructionSet[Opcodes.RLA_IND_Y] = RLA_IND_Y;
+            InstructionSet[Opcodes.RLA_ZERO_X] = RLA_ZERO_X;
+            InstructionSet[Opcodes.RLA_ABS_Y] = RLA_ABS_Y;
+            InstructionSet[Opcodes.RLA_ABS_X] = RLA_ABS_X;
         }
 
         private static ushort Fetch16(IBUS bus, IRegisters registers)
