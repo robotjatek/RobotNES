@@ -1825,5 +1825,37 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(8);
         }
+
+        [Fact]
+        public void ISB_IND_X()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+                .Returns(10)
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(15); //value at 0xdead
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.GetCarryFlag()).Returns(true);
+            registers.Object.X = 5;
+            registers.Object.A = 20;
+
+            var isb = _instructions[Opcodes.ISB_IND_X];
+            var cycles = isb(bus.Object, registers.Object);
+
+            bus.Verify(b => b.Read(10 + 5), Times.Once());
+            bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
+            bus.Verify(b => b.Read(0xdead), Times.Once());
+
+            bus.Verify(b => b.Write(0xdead, 16));
+            registers.Object.A.Should().Be(4);
+
+            registers.Verify(r => r.SetZeroFlag(false));
+            registers.Verify(r => r.SetNegativeFlag(false));
+
+            cycles.Should().Be(8);
+        }
     }
 }

@@ -171,6 +171,8 @@
         public const int DCP_ZERO_X = 0xD7;
         public const int DCP_ABS_Y = 0xDB;
         public const int DCP_ABS_X = 0xDF;
+
+        public const int ISB_IND_X = 0xE3;
         #endregion
 
         #region Inc

@@ -1,4 +1,6 @@
-﻿namespace NESCore.CPU.Instructions
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace NESCore.CPU.Instructions
 {
     public partial class CPUInstructions
     {
@@ -344,6 +346,21 @@
             DCP(addressingResult, bus, registers);
 
             return 7; // 7 regardless of boundary cross
+        }
+
+        private static void ISB(AddressingResult addressingResult, IBUS bus, IRegisters registers)
+        {
+            var incResult = INC(addressingResult.Value, registers);
+            bus.Write(addressingResult.Address, incResult);
+            SBC(incResult, registers);
+        }
+
+        private static byte ISB_IND_X(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectX(bus, registers);
+            ISB(addressingResult, bus, registers);
+
+            return (byte)(addressingResult.Cycles + 2);
         }
     }
 }
