@@ -378,5 +378,13 @@ namespace NESCore.CPU.Instructions
 
             return (byte)(addressingResult.Cycles + 2);
         }
+
+        private static byte ISB_IND_Y(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingIndirectY(bus, registers);
+            ISB(addressingResult, bus, registers);
+
+            return 8; //8 regardless of page crossing
+        }
     }
 }
