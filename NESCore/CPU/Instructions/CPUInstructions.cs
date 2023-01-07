@@ -10,7 +10,7 @@
 
         public CPUInstructions()
         {
-            InstructionSet = new Func<IBUS, IRegisters, byte>[255];
+            InstructionSet = new Func<IBUS, IRegisters, byte>[256];
 
             InstructionSet[Opcodes.JMP_ABS] = JMP_ABS;
             InstructionSet[Opcodes.LDX_IMM] = LDX_IMM;
