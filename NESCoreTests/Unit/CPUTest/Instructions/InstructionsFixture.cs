@@ -15,7 +15,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
     }
 
     [CollectionDefinition(nameof(InstructionsFixture))]
-    public class InstructionsCollextion : ICollectionFixture<InstructionsFixture>
+    public class InstructionsCollection : ICollectionFixture<InstructionsFixture>
     {
     }
 }
