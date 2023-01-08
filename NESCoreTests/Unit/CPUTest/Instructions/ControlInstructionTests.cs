@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class ControlInstructionTests : InstructionTestBase
     {
+        public ControlInstructionTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void JMP_ABS()
         {

@@ -6,6 +6,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class LDATests : InstructionTestBase
     {
+        public LDATests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void LDA_IMM()
         {

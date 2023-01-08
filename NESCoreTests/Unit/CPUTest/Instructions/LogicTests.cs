@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class LogicTests : InstructionTestBase
     {
+        public LogicTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void AND_IMM_does_not_change_A_when_bitmask_is_FF()
         {

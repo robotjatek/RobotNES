@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Moq;
+﻿using Moq;
 using NESCore.CPU;
 using NESCore;
 
@@ -7,6 +6,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 {
     public class ASLTests : InstructionTestBase
     {
+        public ASLTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void ASL_A_shifts_A_by_one_to_the_left()
         {

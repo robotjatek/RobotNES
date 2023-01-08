@@ -6,10 +6,10 @@ namespace NESCore.CPU
     {
         private readonly IBUS _bus;
         private readonly IRegisters _registers = new Registers();
-        private readonly Func<IBUS, IRegisters, byte>[] _instructions;
+        private readonly IReadOnlyList<Func<IBUS, IRegisters, byte>> _instructions;
         private readonly ILogger _logger;
 
-        public CPU(IBUS bus, Func<IBUS, IRegisters, byte>[] instuctions, ILogger logger)
+        public CPU(IBUS bus, IReadOnlyList<Func<IBUS, IRegisters, byte>> instuctions, ILogger logger)
         {
             _logger = logger;
             _bus = bus;

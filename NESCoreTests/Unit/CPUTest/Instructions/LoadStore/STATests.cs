@@ -6,6 +6,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class STATests : InstructionTestBase
     {
+        public STATests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void STA_ZERO()
         {
