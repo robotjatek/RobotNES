@@ -1,6 +1,5 @@
 ﻿using NESCore.Mappers;
 using NESCore;
-using FluentAssertions;
 using Moq;
 using NESCore.Cartridge;
 

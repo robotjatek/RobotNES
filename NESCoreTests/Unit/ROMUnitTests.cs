@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-
-using NESCore;
+﻿using NESCore;
 
 namespace NESCoreTests.Unit
 {

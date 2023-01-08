@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-
-using Moq;
+﻿using Moq;
 
 using NESCore;
 using NESCore.Mappers;
