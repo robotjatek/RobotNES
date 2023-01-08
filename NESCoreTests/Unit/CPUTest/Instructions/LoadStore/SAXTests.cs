@@ -7,6 +7,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class SAXTests : InstructionTestBase
     {
+        public SAXTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void SAX_IND_X()
         {

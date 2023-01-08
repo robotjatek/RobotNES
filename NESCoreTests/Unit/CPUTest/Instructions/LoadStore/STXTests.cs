@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class STXTests : InstructionTestBase
     {
+        public STXTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void STX_ZERO()
         {

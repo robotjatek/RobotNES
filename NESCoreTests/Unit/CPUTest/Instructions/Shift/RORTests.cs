@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-
-using Moq;
+﻿using Moq;
 
 using NESCore;
 using NESCore.CPU;
@@ -9,6 +7,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 {
     public class RORTests : InstructionTestBase
     {
+        public RORTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void ROR_A_shifts_value_right_by_one()
         {

@@ -22,16 +22,16 @@ namespace NESCore
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
 
-        public NesSystem(string cartridgePath)
+        public NesSystem(string cartridgePath, ILogger logger)
         {
-            _logger = CreateLogger(); //TODO: move logger creation out of this class
+            _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
             _memory = new Memory();
             _bus = new Bus(_cartridge, _memory, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
-            _cpu = new CPU.CPU(_bus, instructions);
+            _cpu = new CPU.CPU(_bus, instructions, _logger);
         }
 
         public void Run()
@@ -60,14 +60,6 @@ namespace NESCore
             }
 
             _cpu.Cycle();
-        }
-
-        private static ILogger CreateLogger()
-        {
-            var logger = new LoggerConfiguration()
-                .WriteTo.Console().CreateLogger();
-
-            return logger;
         }
 
         private ICartridge LoadCartridge(string path)

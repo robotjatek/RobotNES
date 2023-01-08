@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class LDYTests : InstructionTestBase
     {
+        public LDYTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void LDY_IMM()
         {

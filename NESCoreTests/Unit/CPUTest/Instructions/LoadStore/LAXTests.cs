@@ -6,6 +6,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
     public class LAXTests : InstructionTestBase
     {
+        public LAXTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void LAX_zero()
         {

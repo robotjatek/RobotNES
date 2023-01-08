@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class IncrementInstructionTests : InstructionTestBase
     {
+        public IncrementInstructionTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void DEX_decrements_Y()
         {

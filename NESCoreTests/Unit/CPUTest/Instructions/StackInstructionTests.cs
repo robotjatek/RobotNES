@@ -1,12 +1,15 @@
 ﻿using Moq;
 using NESCore.CPU;
 using NESCore;
-using FluentAssertions;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class StackInstructionTests : InstructionTestBase
     {
+        public StackInstructionTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void PHA()
         {

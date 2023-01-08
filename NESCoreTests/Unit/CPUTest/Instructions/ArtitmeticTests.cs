@@ -6,6 +6,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class ArtitmeticTests : InstructionTestBase
     {
+        public ArtitmeticTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void ADC_IMM_adds_two_numbers()
         {

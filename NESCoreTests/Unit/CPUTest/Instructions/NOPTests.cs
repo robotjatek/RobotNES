@@ -7,6 +7,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class NOPTests : InstructionTestBase
     {
+        public NOPTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void NOP()
         {

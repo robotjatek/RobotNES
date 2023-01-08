@@ -2,12 +2,14 @@
 using NESCore.CPU;
 using NESCore;
 
-using FluentAssertions;
-
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class BranchInstructionTests : InstructionTestBase
     {
+        public BranchInstructionTests(InstructionsFixture fixture) : base(fixture)
+        {
+        }
+
         [Fact]
         public void BCC_doesNotTakeTheBranch()
         {

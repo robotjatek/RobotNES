@@ -8,10 +8,13 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Button Click="Start_Click" Grid.Row="0">Start</Button>
-        <Button Click="Stop_Click" Grid.Row="1">Stop</Button>
+
+        <Image Grid.Row="0"/>
+        <Button Click="Start_Click" Grid.Row="1">Start</Button>
+        <Button Click="Stop_Click" Grid.Row="2">Stop</Button>
     </Grid>
 </Window>

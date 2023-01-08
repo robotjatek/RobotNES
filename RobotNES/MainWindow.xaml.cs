@@ -1,7 +1,10 @@
 ﻿using NESCore;
 
+using Serilog;
+
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,22 +23,50 @@ namespace RobotNES
     public partial class MainWindow : Window
     {
         private readonly NesSystem _nesSystem;
+        private readonly ILogger _logger;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _nesSystem = new NesSystem("nestest.nes");
+            if(File.Exists("RobotNES.log"))
+            {
+                File.Delete("RobotNES.log");
+            }
+
+            _logger = CreateLogger();
+
+            _nesSystem = new NesSystem("nestest.nes", _logger);
         }
 
         private async void Start_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => _nesSystem.Run());
+            try
+            {
+                await Task.Run(() => _nesSystem.Run());
+            }
+            catch(Exception ex)
+            {
+                // log any uncatched errors
+                _logger.Fatal(ex, "Unhandled error.");
+            }
         }
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => _nesSystem.Stop());
+        }
+
+        private static ILogger CreateLogger()
+        {
+            var logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo
+                .Console()
+                .WriteTo.File("RobotNES.log")
+                .CreateLogger();
+
+            return logger;
         }
     }
 }
