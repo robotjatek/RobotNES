@@ -2,14 +2,12 @@
 using NESCore.CPU;
 using NESCore.CPU.Instructions;
 using NESCore.Mappers;
+using NESCore.PPU;
 
 using Serilog;
 
 namespace NESCore
 {
-    interface IPPU { }
-
-
     public class NesSystem
     {
         private bool _running = false;
@@ -27,7 +25,8 @@ namespace NESCore
             _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
             _memory = new Memory();
-            _bus = new Bus(_cartridge, _memory, _logger);
+            _ppu = new PPU.PPU();
+            _bus = new Bus(_cartridge, _memory, _ppu, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;

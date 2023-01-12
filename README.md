@@ -2,7 +2,7 @@
 
 Yet another Nintendo Entertainment System emulator written in C#.
 
-Project skeleton only with partially implemented bus and memory systems. The basics of the CPU emulation without most of the instruction emulation.
+Project skeleton only with partially implemented bus and memory systems.
 
 ## Partially implemented
 

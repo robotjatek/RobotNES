@@ -3,6 +3,8 @@
 using NESCore;
 using NESCore.Cartridge;
 using NESCore.CPU;
+using NESCore.PPU;
+
 using Serilog;
 
 namespace NESCoreTests
@@ -11,12 +13,14 @@ namespace NESCoreTests
     {
         protected ILogger _logger;
         protected Mock<ICartridge> _mockCartridge;
+        protected IPPU _mockPPU;
         protected Func<IBUS, IRegisters, byte>[] _instructions = new Func<IBUS, IRegisters, byte>[255];
 
         public TestBase()
         {
             _logger = Mock.Of<ILogger>();
             _mockCartridge = new Mock<ICartridge>();
+            _mockPPU = Mock.Of<IPPU>();
         }
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
