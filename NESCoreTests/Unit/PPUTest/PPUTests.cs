@@ -1,4 +1,8 @@
-﻿using NESCore.PPU;
+﻿using Moq;
+
+using NESCore.PPU;
+
+using Serilog;
 
 namespace NESCoreTests.Unit.PPUTest
 {
@@ -122,6 +126,55 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(20 * 341);
 
             registers.GetSpriteZeroHitFlag().Should().BeFalse();
+        }
+
+        [Fact]
+        public void WriteToControlRegister()
+        {
+            var registers = new PPURegisters
+            {
+                Control = 0
+            };
+
+            var ppu = new PPU(registers, _logger);
+            ppu.Write(0x2000, 0xff);
+
+            registers.Control.Should().Be(0xff);
+        }
+
+        [Fact]
+        public void ReadFromControlRegisterLogs()
+        {
+            var registers = new PPURegisters();
+            var logger = new Mock<ILogger>();
+            var ppu = new PPU(registers, logger.Object);
+            ppu.Read(0x2000);
+
+            logger.Verify(l => l.Warning(It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void WriteToMaskRegister()
+        {
+            var registers = new PPURegisters
+            {
+                Mask = 0
+            };
+            var ppu = new PPU(registers, _logger);
+            ppu.Write(0x2001, 0xff);
+
+            registers.Mask.Should().Be(0xff);
+        }
+
+        [Fact]
+        public void ReadFromMaskRegisterLogs()
+        {
+            var registers = new PPURegisters();
+            var logger = new Mock<ILogger>();
+            var ppu = new PPU(registers, logger.Object);
+            ppu.Read(0x2001);
+
+            logger.Verify(l => l.Warning(It.IsAny<string>()));
         }
     }
 }
