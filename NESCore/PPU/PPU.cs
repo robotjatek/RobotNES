@@ -86,7 +86,10 @@ namespace NESCore.PPU
                 if(_scanlines == 241 && _scanlineCycles == 1)
                 {
                     _registers.SetVBlankFlag(true);
-                    NMIEvent?.Invoke();
+                    if (_registers.GetEnableNMI())
+                    {
+                        NMIEvent?.Invoke();
+                    }
                 }
             }
             else if(_scanlines == 261)
