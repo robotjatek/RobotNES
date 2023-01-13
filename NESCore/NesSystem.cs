@@ -39,6 +39,7 @@ namespace NESCore
             _running = true;
             while (_running)
             {
+                //TODO: catch-up mechanism instead: run the cpu up until the ppu is accessed or a vblank happens then catch up with the ppu (run the cpu in a per instruction basis instead of a per cycle basis)
                 _cycle += _cpu.RunInstruction();
                 if(_cycle > 133) //TODO: this is a temporary hack to get the ppu running
                 {
@@ -51,18 +52,6 @@ namespace NESCore
         public void Stop()
         {
             _running = false;
-        }
-
-        //Runs one internal cycle
-        private void Cycle()
-        {
-            //TODO: catch-up mechanism instead: run the cpu up until the ppu is accessed or a vblank happens then catch up with the ppu (run the cpu in a per instruction basis instead of a per cycle basis)
-            unchecked
-            {
-                _cycle++;
-            }
-
-            _cpu.Cycle();
         }
 
         private ICartridge LoadCartridge(string path)

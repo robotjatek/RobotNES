@@ -18,11 +18,6 @@ namespace NESCore.CPU
             _registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc));
         }
 
-        public void Cycle()
-        {
-            throw new NotImplementedException();
-        }
-
         public void HandleNMI()
         {
             _nmi = true;

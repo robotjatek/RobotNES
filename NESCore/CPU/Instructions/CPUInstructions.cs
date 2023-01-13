@@ -1,9 +1,5 @@
-﻿using System.Runtime.InteropServices;
-
-namespace NESCore.CPU.Instructions
+﻿namespace NESCore.CPU.Instructions
 {
-    //TODO: return elapsed cycles in all addressing mode functions
-
     public partial class CPUInstructions
     {
         //Instructions for the CPU. All instructions return with the elapsed cycles.

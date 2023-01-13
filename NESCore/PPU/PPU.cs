@@ -23,14 +23,11 @@ namespace NESCore.PPU
             //TODO: replace this branching with an indexed array (_ppuMemory[address & 0x7])
             if (address == 0x2000)
             {
-                //Control register
                 _logger.Warning("PPU control register read 0x2000");
                 return _registers.Control;
             }
             else if (address == 0x2001)
             {
-                //TODO: mask read why?
-                //TODO: mask register
                 _logger.Warning("PPU mask register read 0x2001");
                 return 0;
             }
