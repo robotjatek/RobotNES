@@ -58,10 +58,11 @@ namespace NESCoreTests.Unit.CPUTest
             var cpu = new CPU(bus.Object, registers.Object, _instructions, _logger);
             
             cpu.HandleNMI();
-            cpu.RunInstruction();
+            var cycles = cpu.RunInstruction();
 
             writeArgs.Should().ContainInConsecutiveOrder(new byte[] {0xde, 0xad, 0xee});
             registers.Object.PC.Should().Be(0xbeef);
+            cycles.Should().Be(7);
         }
     }
 }

@@ -5,7 +5,7 @@
         private static byte BRK(IBUS bus, IRegisters registers)
         {
             Push16(bus, registers, registers.PC); //TODO: push PC+1 instead?
-            Push8(bus, registers, (byte)(registers.STATUS | FlagPositions.BREAK));
+            Push8(bus, registers, (byte)(registers.STATUS | FlagPositions.BREAK)); //Push to the stack with brk flag enabled but dont change the value of the register
             registers.PC = (UInt16)((bus.Read(0xFFFF) << 8) | bus.Read(0xFFFE));
             return 7;
         }

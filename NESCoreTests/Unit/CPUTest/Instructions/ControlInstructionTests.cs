@@ -123,5 +123,29 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             cycles.Should().Be(6);
         }
+
+        [Fact]
+        public void BRK()
+        {
+            var writeArgs = new List<byte>();
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Write(It.IsAny<UInt16>(), Capture.In(writeArgs)));
+            //BRK vector:
+            bus.Setup(b => b.Read(0xffff)).Returns(0xbe);
+            bus.Setup(b => b.Read(0xfffe)).Returns(0xef);
+
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+            registers.Object.STATUS = 0xee;
+            registers.Object.PC = 0xdead;
+
+            var brk = _instructions[Opcodes.BRK];
+
+            var cycles = brk(bus.Object, registers.Object);
+
+            writeArgs.Should().ContainInConsecutiveOrder(new byte[] { 0xde, 0xad, 0xee | FlagPositions.BREAK });
+            registers.Object.PC.Should().Be(0xbeef);
+            cycles.Should().Be(7);
+        }
     }
 }
