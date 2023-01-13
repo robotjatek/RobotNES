@@ -40,15 +40,33 @@ namespace NESCoreTests.Unit.PPUTest
             using var eventMonitor = ppu.Monitor();
 
             var beforeVBlank =
-                341 * 240 //Visible screen
-                + 341; //post render scanline
+                341 * 240 // Visible screen
+                + 341; // Post render scanline
 
             ppu.Run(beforeVBlank);
             registers.GetVBlankFlag().Should().BeFalse();
-            ppu.Run(2); //set the vblank flag on the first cycle of the vblank lines
+            ppu.Run(2); // set the vblank flag on the first cycle of the vblank lines
 
             registers.GetVBlankFlag().Should().BeTrue();
             eventMonitor.Should().Raise(nameof(ppu.NMIEvent));
+        }
+
+        [Fact]
+        public void SetsVBlankFlagAndSendsNMIMultipleTimes()
+        {
+            var registers = new PPURegisters();
+            var ppu = new PPU(registers, _logger);
+            using var eventMonitor = ppu.Monitor();
+
+            for (int i = 0; i < 3; i++) // Three times a charm!
+            {
+                var frameCycles = 341 * 261; // Visible screen
+                ppu.Run(frameCycles);
+
+                registers.GetVBlankFlag().Should().BeTrue();
+            }
+
+            eventMonitor.OccurredEvents.Should().HaveCount(3);
         }
 
         [Fact]
@@ -61,7 +79,7 @@ namespace NESCoreTests.Unit.PPUTest
                 + 341
                 + 2;
             ppu.Run(beforePrerender);
-            registers.GetVBlankFlag().Should().BeTrue(); //Double check if vblank is set
+            registers.GetVBlankFlag().Should().BeTrue(); // Double check if vblank is set
 
             ppu.Run(20 * 341);
 
