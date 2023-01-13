@@ -11,17 +11,11 @@ namespace NESCoreTests
 {
     public abstract class TestBase
     {
-        protected ILogger _logger;
-        protected Mock<ICartridge> _mockCartridge;
-        protected IPPU _mockPPU;
+        protected ILogger _logger = Mock.Of<ILogger>();
+        protected Mock<ICartridge> _mockCartridge = new();
+        protected IPPU _mockPPU = Mock.Of<IPPU>();
         protected Func<IBUS, IRegisters, byte>[] _instructions = new Func<IBUS, IRegisters, byte>[255];
-
-        public TestBase()
-        {
-            _logger = Mock.Of<ILogger>();
-            _mockCartridge = new Mock<ICartridge>();
-            _mockPPU = Mock.Of<IPPU>();
-        }
+        protected Mock<IRegisters> _registers = new();
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
         {

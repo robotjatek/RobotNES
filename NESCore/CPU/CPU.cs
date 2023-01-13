@@ -5,16 +5,17 @@ namespace NESCore.CPU
     public class CPU : ICPU
     {
         private readonly IBUS _bus;
-        private readonly IRegisters _registers = new Registers();
+        private readonly IRegisters _registers;
         private readonly IReadOnlyList<Func<IBUS, IRegisters, byte>> _instructions;
         private readonly ILogger _logger;
         private bool _nmi = false;
 
-        public CPU(IBUS bus, IReadOnlyList<Func<IBUS, IRegisters, byte>> instuctions, ILogger logger)
+        public CPU(IBUS bus, IRegisters registers, IReadOnlyList<Func<IBUS, IRegisters, byte>> instructions, ILogger logger)
         {
             _logger = logger;
             _bus = bus;
-            _instructions = instuctions;
+            _registers = registers;
+            _instructions = instructions;
             _registers.PC = (UInt16)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc));
         }
 

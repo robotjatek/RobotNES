@@ -30,7 +30,8 @@ namespace NESCore
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
-            _cpu = new CPU.CPU(_bus, instructions, _logger);
+            var registers = new Registers();
+            _cpu = new CPU.CPU(_bus, registers, instructions, _logger);
             _ppu.NMIEvent += _cpu.HandleNMI;
         }
 
