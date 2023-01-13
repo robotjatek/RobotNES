@@ -233,6 +233,7 @@
         #endregion
 
         #region Control
+        public const int BRK = 0x00;
         public const int JMP_ABS = 0x4C;
         public const int JSR_ABS = 0x20;
         public const int RTI = 0x40;

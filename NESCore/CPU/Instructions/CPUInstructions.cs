@@ -1,4 +1,6 @@
-﻿namespace NESCore.CPU.Instructions
+﻿using System.Runtime.InteropServices;
+
+namespace NESCore.CPU.Instructions
 {
     //TODO: return elapsed cycles in all addressing mode functions
 
@@ -22,6 +24,7 @@
                 };
             }
 
+            instructions[Opcodes.BRK] = BRK;
             instructions[Opcodes.JMP_ABS] = JMP_ABS;
             instructions[Opcodes.LDX_IMM] = LDX_IMM;
             instructions[Opcodes.LDY_IMM] = LDY_IMM;
@@ -304,9 +307,15 @@
 
         class AddressingResult
         {
-            public byte Value { get; init; }
+            public byte Value { get; set; }
             public ushort Address { get; init; }
             public byte Cycles { get; init; }
+
+            public AddressingResult WithValueFromMemory(IBUS bus)
+            {
+                Value = bus.Read(Address);
+                return this;
+            }
         }
 
         private static AddressingResult AddressingImmediate(IBUS bus, IRegisters registers)
@@ -321,17 +330,27 @@
         // Reads a value from an absolute address
         private static AddressingResult AddressingAbsolute(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingAbsoluteAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingAbsoluteAddressOnly(IBUS bus, IRegisters registers)
+        {
             var address = Fetch16(bus, registers);
-            var value = bus.Read(address);
             return new AddressingResult
             {
-                Value = value,
                 Address = address,
                 Cycles = 4,
             };
         }
 
         private static AddressingResult AddressingAbsoluteX(IBUS bus, IRegisters registers)
+        {
+            var addressingResult = AddressingAbsoluteXAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingAbsoluteXAddressOnly(IBUS bus, IRegisters registers)
         {
             byte cycles = 4;
             var address = Fetch16(bus, registers);
@@ -342,10 +361,8 @@
                 cycles++;
             }
 
-            var value = bus.Read(address);
             return new AddressingResult
             {
-                Value = value,
                 Address = address,
                 Cycles = cycles
             };
@@ -353,19 +370,23 @@
 
         private static AddressingResult AddressingAbsoluteY(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingAbsoluteYAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingAbsoluteYAddressOnly(IBUS bus, IRegisters registers)
+        {
             byte cycles = 4;
             var address = Fetch16(bus, registers);
             var page = address & 0xff00;
             address += registers.Y;
-            if((address & 0xff00) != page)
+            if ((address & 0xff00) != page)
             {
                 cycles++;
             }
 
-            var value = bus.Read(address);
             return new AddressingResult
             {
-                Value = value,
                 Address = address,
                 Cycles = cycles
             };
@@ -373,77 +394,97 @@
 
         private static AddressingResult AddressingZero(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingZeroAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingZeroAddressOnly(IBUS bus, IRegisters registers)
+        {
             var address = Fetch(bus, registers);
-            var value = bus.Read(address);
             return new AddressingResult
             {
                 Address = address,
-                Value = value,
                 Cycles = 3,
             };
         }
 
         private static AddressingResult AddressingZeroX(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingZeroXAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingZeroXAddressOnly(IBUS bus, IRegisters registers)
+        {
             var address = (byte)((Fetch(bus, registers) + registers.X) & 0xFF);
-            var value = bus.Read(address);
             return new AddressingResult
             {
                 Address = address,
-                Value = value,
                 Cycles = 4,
             };
         }
 
         private static AddressingResult AddressingZeroY(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingZeroYAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingZeroYAddressOnly(IBUS bus, IRegisters registers)
+        {
             var address = (byte)((Fetch(bus, registers) + registers.Y) & 0xFF);
-            var value = bus.Read(address);
             return new AddressingResult
             {
                 Address = address,
-                Value = value,
                 Cycles = 4,
             };
         }
 
         private static AddressingResult AddressingIndirectX(IBUS bus, IRegisters registers)
         {
+            var addressingResult = AddressingIndirectXAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
+        }
+
+        private static AddressingResult AddressingIndirectXAddressOnly(IBUS bus, IRegisters registers)
+        {
             var zeropageAddress = Fetch(bus, registers) + registers.X;
             var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));
             var highAddress = bus.Read((UInt16)(zeropageAddress + 1 & 0xff));
             var address = (UInt16)(highAddress << 8 | lowAddress);
-            var value = bus.Read(address);
 
             return new AddressingResult
             {
                 Address = address,
-                Value = value,
                 Cycles = 6,
+            };
+        }
+
+        private static AddressingResult AddressingIndirectYAddressOnly(IBUS bus, IRegisters registers)
+        {
+            byte cycles = 5;
+            var zeroPageAddress = Fetch(bus, registers);
+            var lowAddress = bus.Read((UInt16)(zeroPageAddress & 0xff));
+            var highAddress = bus.Read((UInt16)((zeroPageAddress + 1) & 0xff));
+            var address = (UInt16)((highAddress << 8 | lowAddress) & 0xffff);
+            var page = address & 0xff00;
+            address += registers.Y;
+            if ((address & 0xff00) != page)
+            {
+                cycles++;
+            }
+
+            return new AddressingResult
+            {
+                Address = address,
+                Cycles = cycles
             };
         }
 
         private static AddressingResult AddressingIndirectY(IBUS bus, IRegisters registers)
         {
-            byte cycles = 5;
-            var zeroPageAddress = Fetch(bus, registers);
-            var lowAddress = bus.Read((UInt16)(zeroPageAddress&0xff));
-            var highAddress = bus.Read((UInt16)((zeroPageAddress + 1) & 0xff));
-            var address = (UInt16)((highAddress << 8 | lowAddress) & 0xffff);
-            var page = address & 0xff00;
-            address += registers.Y;
-            if((address & 0xff00) != page)
-            {
-                cycles++;
-            }
-            var value = bus.Read(address);
-
-            return new AddressingResult
-            {
-                Address = address,
-                Value = value,
-                Cycles = cycles
-            };
+            var addressingResult = AddressingIndirectYAddressOnly(bus, registers).WithValueFromMemory(bus);
+            return addressingResult;
         }
     }
 }

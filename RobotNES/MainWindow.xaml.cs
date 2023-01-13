@@ -44,7 +44,7 @@ namespace RobotNES
             }
 
             var logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                .MinimumLevel.Information()
                 .WriteTo
                 .Console()
                 .WriteTo.File("RobotNES.log")

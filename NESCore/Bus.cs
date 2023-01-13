@@ -12,7 +12,6 @@ namespace NESCore
         private readonly IPPU _ppu;
         private readonly ILogger _logger;
 
-        //TODO: PPU
         //TODO: APU (0x4000-0x4020)
 
         public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, ILogger logger)
