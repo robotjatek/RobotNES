@@ -33,10 +33,12 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsVBlankFlag()
+        public void SetsVBlankFlagAndSendsNMI()
         {
             var registers = new PPURegisters();
             var ppu = new PPU(registers, _logger);
+            using var eventMonitor = ppu.Monitor();
+
             var beforeVBlank =
                 341 * 240 //Visible screen
                 + 341; //post render scanline
@@ -46,6 +48,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(2); //set the vblank flag on the first cycle of the vblank lines
 
             registers.GetVBlankFlag().Should().BeTrue();
+            eventMonitor.Should().Raise(nameof(ppu.NMIEvent));
         }
 
         [Fact]
