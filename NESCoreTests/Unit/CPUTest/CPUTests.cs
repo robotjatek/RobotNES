@@ -26,7 +26,10 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffd))).Returns(0xde);
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffc))).Returns(0xad);
 
-            var sut = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+            var registers = new Mock<IRegisters>();
+            registers.SetupAllProperties();
+
+            var sut = new CPU(bus.Object, registers.Object, _instructions, _logger);
             try
             {
                 sut.RunInstruction();

@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using NESCore.CPU;
+﻿using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest
 {
@@ -114,6 +113,73 @@ namespace NESCoreTests.Unit.CPUTest
             var sut = new Registers();
             sut.STATUS = 0;
             sut.STATUS.Should().Be(0x20);
+        }
+
+        [Fact]
+        public void GetCarryFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b00000001;
+            registers.GetCarryFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetCarryFlag().Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetZeroFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b00000010;
+            registers.GetZeroFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetZeroFlag().Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetInterruptDisableFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b00000100;
+            registers.GetInterruptDisableFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetInterruptDisableFlag().Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetDecimalFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b00001000;
+            registers.GetDecimalFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetDecimalFlag().Should().BeFalse();
+        }
+
+
+        [Fact]
+        public void GetOverflowFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b01000000;
+            registers.GetOverflowFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetOverflowFlag().Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetNegativeFlag()
+        {
+            var registers = new Registers();
+            registers.STATUS = 0b10000000;
+            registers.GetNegativeFlag().Should().BeTrue();
+
+            registers.STATUS = 0x00;
+            registers.GetNegativeFlag().Should().BeFalse();
         }
     }
 }
