@@ -233,6 +233,47 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
+        public void WriteToVRAMIncrementsAddressByOne()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+
+            var registers = new PPURegisters();
+            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3c); // Upper byte first
+            ppu.Write(0x2006, 0x0f); // Lower byte second
+
+            ppu.Write(0x2007, 0xaa);
+            ppu.Write(0x2007, 0xab);
+            ppu.Write(0x2007, 0xac);
+
+            ppuMemory.Verify(m => m.Write(0x3c0f, 0xaa), Times.Once());
+            ppuMemory.Verify(m => m.Write(0x3c10, 0xab), Times.Once());
+            ppuMemory.Verify(m => m.Write(0x3c11, 0xac), Times.Once());
+        }
+
+        [Fact]
+        public void WriteToVRAMIncrementsAddressBy32()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+            
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.VRAMIncrement()).Returns(32);
+
+            var ppu = new PPU(registers.Object, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3c); // Upper byte first
+            ppu.Write(0x2006, 0x0f); // Lower byte second
+
+            ppu.Write(0x2007, 0xaa);
+            ppu.Write(0x2007, 0xab);
+            ppu.Write(0x2007, 0xac);
+
+            ppuMemory.Verify(m => m.Write(0x3c0f, 0xaa), Times.Once());
+            ppuMemory.Verify(m => m.Write(0x3c2f, 0xab), Times.Once());
+            ppuMemory.Verify(m => m.Write(0x3c4f, 0xac), Times.Once());
+        }
+
+        [Fact]
         public void ReadFromVRAM()
         {
             var ppuMemory = new Mock<IPPUMemory>();
@@ -242,13 +283,78 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new PPU(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
-            var result = ppu.Read(0x2007); // Data byte
+            
+            var result = ppu.Read(0x2007); //First result is the previously buffered data
+            result = ppu.Read(0x2007); // real data byte
 
             result.Should().Be(0xaa);
             ppuMemory.Verify(m => m.Read(0x3c0f), Times.Once());
         }
 
-        // TODO: address increment test
+        [Fact]
+        public void ReadFromVRAMIncrementsAddressByOne()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+            ppuMemory.Setup(m => m.Read(0x3c0e)).Returns(0x00);
+            ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
+            ppuMemory.Setup(m => m.Read(0x3c10)).Returns(0xab);
+            ppuMemory.Setup(m => m.Read(0x3c11)).Returns(0xac);
+
+            var registers = new PPURegisters();
+            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3c); // Upper byte first
+            ppu.Write(0x2006, 0x0f); // Lower byte second
+
+            var result = ppu.Read(0x2007); //First read should be discared because of the buffering
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xaa);
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xab);
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xac);
+
+            ppuMemory.Verify(m => m.Read(0x3c0f), Times.Once());
+            ppuMemory.Verify(m => m.Read(0x3c10), Times.Once());
+            ppuMemory.Verify(m => m.Read(0x3c11), Times.Once());
+        }
+
+        [Fact]
+        public void ReadFromVRAMIncrementsAddressBy32()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+            ppuMemory.Setup(m => m.Read(0x3c0e)).Returns(0x00);
+            ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
+            ppuMemory.Setup(m => m.Read(0x3c2f)).Returns(0xab);
+            ppuMemory.Setup(m => m.Read(0x3c4f)).Returns(0xac);
+
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+            registers.Setup(r => r.VRAMIncrement()).Returns(32);
+
+            var ppu = new PPU(registers.Object, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3c); // Upper byte first
+            ppu.Write(0x2006, 0x0f); // Lower byte second
+
+            var result = ppu.Read(0x2007); //First read should be discared because of the buffering
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xaa);
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xab);
+
+            result = ppu.Read(0x2007);
+            result.Should().Be(0xac);
+
+            ppuMemory.Verify(m => m.Read(0x3c0f), Times.Once());
+            ppuMemory.Verify(m => m.Read(0x3c2f), Times.Once());
+            ppuMemory.Verify(m => m.Read(0x3c4f), Times.Once());
+        }
+
+        // TODO: palette access isnt buffered
         // TODO: address latch reset test
     }
 }
