@@ -57,10 +57,19 @@ namespace NESCore.PPU
             }
             else if(address == 0x2007)
             {
-                var result = _dataBuffer;
-                _dataBuffer = _ppuMemory.Read(_ppuAddress);
-                _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
-                return result;
+                if (_ppuAddress < 0x3f00)
+                {
+                    var result = _dataBuffer;
+                    _dataBuffer = _ppuMemory.Read(_ppuAddress);
+                    _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    return result;
+                }
+                else
+                {
+                    var result = _ppuMemory.Read(_ppuAddress);
+                    _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    return result;
+                }
             }
 
             _logger.Error($"Unsupported PPU read from: 0x{address:X4}");

@@ -292,6 +292,23 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
+        public void ReadFromVRAMPaletteIsNotBuffered()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+            ppuMemory.Setup(m => m.Read(0x3f00)).Returns(0xaa);
+
+            var registers = new PPURegisters();
+            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3f); // Upper byte first
+            ppu.Write(0x2006, 0x00); // Lower byte second
+
+            var result = ppu.Read(0x2007); // Pallette access is not buffered
+
+            result.Should().Be(0xaa);
+            ppuMemory.Verify(m => m.Read(0x3f00), Times.Once());
+        }
+
+        [Fact]
         public void ReadFromVRAMIncrementsAddressByOne()
         {
             var ppuMemory = new Mock<IPPUMemory>();
@@ -354,7 +371,6 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Verify(m => m.Read(0x3c4f), Times.Once());
         }
 
-        // TODO: palette access isnt buffered
         // TODO: address latch reset test
     }
 }
