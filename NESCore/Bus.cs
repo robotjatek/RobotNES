@@ -12,7 +12,11 @@ namespace NESCore
         private readonly IPPU _ppu;
         private readonly ILogger _logger;
 
-        //TODO: APU (0x4000-0x4020)
+        //TODO: APU (0x4000-0x4013)
+        //TODO: OAM DMA (0x4014)
+        //TODO: Sound channel enable (0x4015)
+        //TODO: JOY1 (0x4016)
+        //TODO: JOY2 (0x4017)
 
         public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, ILogger logger)
         {

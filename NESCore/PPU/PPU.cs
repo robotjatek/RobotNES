@@ -6,16 +6,22 @@ namespace NESCore.PPU
     {
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
+        private readonly IPPUMemory _ppuMemory;
+
         private int _cycles = 0;
         private int _scanlines = 0;
         private int _scanlineCycles = 0;
 
+        private UInt16 _address = 0;
+        private bool _addressLatch = false;
+
         public event NMIEventHandler? NMIEvent;
 
-        public PPU(IPPURegisters registers, ILogger logger)
+        public PPU(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
         {
             _logger = logger;
             _registers = registers;
+            _ppuMemory = ppuMemory;
         }
 
         public byte Read(ushort address)
@@ -38,6 +44,16 @@ namespace NESCore.PPU
                 //TODO: also clear address latch (used by PPU addr & ppu scroll)
                 return data;
             }
+            else if(address == 0x2005)
+            {
+                _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen.");
+                return _registers.Scroll;
+            }
+            else if (address == 0x2006)
+            {
+                _logger.Warning("PPU address register read 0x2006. Normally this should not happen.");
+                return _registers.Address;
+            }
 
             _logger.Error($"Unsupported PPU read from: 0x{address:X4}");
             throw new NotImplementedException();
@@ -53,6 +69,27 @@ namespace NESCore.PPU
             else if(address == 0x2001)
             {
                 _registers.Mask = value;
+            }
+            else if(address == 0x2005)
+            {
+                _registers.Scroll = value;
+            }
+            else if(address == 0x2006)
+            {
+                _registers.Address = value;
+                if(_addressLatch == false)
+                {
+                    _address |= (UInt16)(value << 8);
+                }
+                else
+                {
+                    _address |= value;
+                }
+                _addressLatch = !_addressLatch;
+            }
+            else if(address == 0x2007)
+            {
+                _ppuMemory.Write(_address, value);
             }
             else
             {

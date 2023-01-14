@@ -25,7 +25,9 @@ namespace NESCore
             _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
             _memory = new Memory();
-            _ppu = new PPU.PPU(new PPURegisters(), _logger);
+
+            _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(), _logger);
+
             _bus = new Bus(_cartridge, _memory, _ppu, _logger);
 
             //TODO: Move this CPU creation block to a factory

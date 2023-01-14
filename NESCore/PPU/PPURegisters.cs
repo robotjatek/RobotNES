@@ -35,6 +35,8 @@
         public byte Status { get; set; } = 0;
         public byte Control { get; set; } = 0;
         public byte Mask { get; set; } = 0;
+        public byte Scroll { get; set; } = 0; //TODO: proper handling of scroll writes (x first, then y)
+        public byte Address { get; set; } = 0;
 
         #region STATUS_REGISTER
         public void SetVBlankFlag(bool value)
