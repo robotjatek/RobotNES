@@ -232,6 +232,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Verify(m => m.Write(0x3c0f, 0xaa), Times.Once());
         }
 
+        [Fact]
+        public void ReadFromVRAM()
+        {
+            var ppuMemory = new Mock<IPPUMemory>();
+            ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
+
+            var registers = new PPURegisters();
+            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            ppu.Write(0x2006, 0x3c); // Upper byte first
+            ppu.Write(0x2006, 0x0f); // Lower byte second
+            var result = ppu.Read(0x2007); // Data byte
+
+            result.Should().Be(0xaa);
+            ppuMemory.Verify(m => m.Read(0x3c0f), Times.Once());
+        }
+
+        // TODO: address increment test
         // TODO: address latch reset test
     }
 }

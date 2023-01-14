@@ -12,7 +12,7 @@ namespace NESCore.PPU
         private int _scanlines = 0;
         private int _scanlineCycles = 0;
 
-        private UInt16 _address = 0;
+        private UInt16 _ppuAddress = 0;
         private bool _addressLatch = false;
 
         public event NMIEventHandler? NMIEvent;
@@ -54,6 +54,10 @@ namespace NESCore.PPU
                 _logger.Warning("PPU address register read 0x2006. Normally this should not happen.");
                 return _registers.Address;
             }
+            else if(address == 0x2007)
+            {
+                return _ppuMemory.Read(_ppuAddress);
+            }
 
             _logger.Error($"Unsupported PPU read from: 0x{address:X4}");
             throw new NotImplementedException();
@@ -79,17 +83,17 @@ namespace NESCore.PPU
                 _registers.Address = value;
                 if(_addressLatch == false)
                 {
-                    _address |= (UInt16)(value << 8);
+                    _ppuAddress |= (UInt16)(value << 8);
                 }
                 else
                 {
-                    _address |= value;
+                    _ppuAddress |= value;
                 }
                 _addressLatch = !_addressLatch;
             }
             else if(address == 0x2007)
             {
-                _ppuMemory.Write(_address, value);
+                _ppuMemory.Write(_ppuAddress, value);
             }
             else
             {
