@@ -45,6 +45,11 @@ namespace NESCore.PPU
                 _addressLatch = false;
                 return data;
             }
+            else if(address == 0x2003)
+            {
+                _logger.Warning("PPU OAM address register read 0x2003. Normally this should not happen.");
+                return _registers.OAMAddress;
+            }
             else if(address == 0x2005)
             {
                 _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen.");
@@ -86,6 +91,10 @@ namespace NESCore.PPU
             else if(address == 0x2001)
             {
                 _registers.Mask = value;
+            }
+            else if(address == 0x2003)
+            {
+                _registers.OAMAddress = value;
             }
             else if(address == 0x2005)
             {

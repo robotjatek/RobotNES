@@ -302,7 +302,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Write(0x2006, 0x3f); // Upper byte first
             ppu.Write(0x2006, 0x00); // Lower byte second
 
-            var result = ppu.Read(0x2007); // Pallette access is not buffered
+            var result = ppu.Read(0x2007); // Palette access is not buffered
 
             result.Should().Be(0xaa);
             ppuMemory.Verify(m => m.Read(0x3f00), Times.Once());
@@ -371,6 +371,30 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Verify(m => m.Read(0x3c4f), Times.Once());
         }
 
-        // TODO: address latch reset test
+        [Fact]
+        public void ReadFromOAMAddressLogs()
+        {
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+
+            var logger = new Mock<ILogger>();
+
+            var ppu = new PPU(registers.Object, _ppuMemory.Object, logger.Object);
+            ppu.Read(0x2003);
+            logger.Verify(l => l.Warning(It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void WriteToOAMAddress()
+        {
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+
+            var logger = new Mock<ILogger>();
+
+            var ppu = new PPU(registers.Object, _ppuMemory.Object, logger.Object);
+            ppu.Write(0x2003, 0xaa);
+            registers.Object.OAMAddress.Should().Be(0xaa);
+        }
     }
 }

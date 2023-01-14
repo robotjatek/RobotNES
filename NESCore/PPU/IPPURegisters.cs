@@ -11,7 +11,7 @@
         byte Status { get; set; }
         byte Control { get; set; }
         byte Mask { get; set; }
-        //TODO: OAM address register (0x2003)
+        byte OAMAddress { get; set; }
         //TODO: OAM data register (0x2004)
         byte Scroll { get; set; }
         byte Address { get; set; }
