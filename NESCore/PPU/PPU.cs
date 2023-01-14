@@ -42,7 +42,7 @@ namespace NESCore.PPU
             {
                 var data = (byte)(_registers.Status & 0xE0);  //TODO: openbus behaviour. Return previous data from the ppu databuffer on the lower bits
                 _registers.SetVBlankFlag(false);
-                //TODO: also clear address latch (used by PPU addr & ppu scroll)
+                _addressLatch = false;
                 return data;
             }
             else if(address == 0x2005)

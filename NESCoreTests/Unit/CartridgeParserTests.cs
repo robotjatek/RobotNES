@@ -36,15 +36,6 @@ namespace NESCoreTests.Unit
             }
         }
 
-        private const string NESTEST_ROM_PATH = "TestROMs/nestest.nes";
-        private const string MARIO_BROS_ROM_PATH = "TestROMs/mario.nes";
-        private const string SUPER_MARIO_ROM_PATH = "TestROMs/smario.nes";
-        private const string DONKEY_KONG_ROM_PATH = "TestROMs/dk.nes";
-        private const string DRAGON_WARRIOR_ROM_PATH = "TestROMs/dragon_warrior.nes";
-        private const string RAD_RACER_II_ROM_PATH = "TestROMs/rad_racer_2.nes";
-        private const string DEATHBOTS_ROM_PATH = "TestROMs/deathbots.nes";
-        private const string DUCKTALESROM_PATH = "TestROMs/ducktales.nes";
-
         [Fact]
         public void HeaderBeginsWithMagicString()
         {

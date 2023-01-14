@@ -26,7 +26,7 @@ namespace NESCore
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
             _memory = new Memory();
 
-            _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(), _logger);
+            _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(_cartridge, _logger), _logger);
 
             _bus = new Bus(_cartridge, _memory, _ppu, _logger);
 

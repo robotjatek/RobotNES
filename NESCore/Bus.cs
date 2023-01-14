@@ -26,7 +26,6 @@ namespace NESCore
             _ppu = ppu;
         }
 
-        //TODO: ha a felső 3 bit 0 => RAM, 001 => I/O
         //TODO: 0x6000-0x7FFF cartridge ram (battery ram/mapper dependent ram)
         //TODO: 0x4000-0x4020 APU IO memory
         public byte Read(ushort address)
