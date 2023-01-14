@@ -229,5 +229,181 @@ namespace NESCoreTests.Unit.PPUTest
 
             registers.GetEnableNMI().Should().BeTrue();
         }
+
+        [Fact]
+        public void GrayScaleFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.IsGrayScale().Should().BeFalse();
+        }
+
+        [Fact]
+        public void GrayScaleTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 1
+            };
+
+            registers.IsGrayScale().Should().BeTrue();
+        }
+
+        [Fact]
+        public void ShowBackgroundInLeftColumnFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.ShowBackgroundInLeftColumn().Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShowBackgroundInLeftColumnTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 2
+            };
+
+            registers.ShowBackgroundInLeftColumn().Should().BeTrue();
+        }
+
+        [Fact]
+        public void ShowSpritesInLeftColumnFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.ShowSpritesInLeftColumn().Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShowSpritesInLeftColumnTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 4
+            };
+
+            registers.ShowSpritesInLeftColumn().Should().BeTrue();
+        }
+
+        [Fact]
+        public void ShowBackgroundFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.ShowBackground().Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShowBackgroundTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 8
+            };
+
+            registers.ShowBackground().Should().BeTrue();
+        }
+
+        [Fact]
+        public void ShowSpritesFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.ShowSprites().Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShowSpritesTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 16
+            };
+
+            registers.ShowSprites().Should().BeTrue();
+        }
+
+        [Fact]
+        public void EmphasizeRedFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.EmphasizeRed().Should().BeFalse();
+        }
+
+        [Fact]
+        public void EmphasizeRedTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 32
+            };
+
+            registers.EmphasizeRed().Should().BeTrue();
+        }
+
+        [Fact]
+        public void EmphasizeGreenFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.EmphasizeGreen().Should().BeFalse();
+        }
+
+        [Fact]
+        public void EmphasizeGreenTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 64
+            };
+
+            registers.EmphasizeGreen().Should().BeTrue();
+        }
+
+        [Fact]
+        public void EmphasizeBlueFalse()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 0
+            };
+
+            registers.EmphasizeBlue().Should().BeFalse();
+        }
+
+        [Fact]
+        public void EmphasizeBlueTrue()
+        {
+            var registers = new PPURegisters()
+            {
+                Mask = 128
+            };
+
+            registers.EmphasizeBlue().Should().BeTrue();
+        }
     }
 }
