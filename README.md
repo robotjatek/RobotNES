@@ -12,6 +12,10 @@ Project skeleton only with partially implemented bus and memory systems.
 - CPU emulation architecture
 - All official instructions are implemented
 - Unofficial opcodes from `nestest.nes` are implemented
+- PPU registers
+- PPU outputs noise every frame
+- Fake APU implementation (disregards any reads or writes)
+- Fake controller implementation
 
 Currently working on the PPU implementation.
 

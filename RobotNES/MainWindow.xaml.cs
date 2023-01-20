@@ -4,6 +4,7 @@ using Serilog;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -23,10 +24,14 @@ namespace RobotNES
 {
     public partial class MainWindow : Window
     {
+        private readonly Stopwatch _stopwatch = new();
+        private int _frameIndex = 0;
+        private readonly double[] _frameTimes = new double[60];
+
         private NesSystem? _nesSystem;
         private readonly ILogger _logger;
-        private readonly WriteableBitmap _bitmap = new WriteableBitmap(256, 240, 96.0, 96.0, PixelFormats.Bgr24, null);
-        private readonly Int32Rect bitmapRect = new Int32Rect(0, 0, 256, 240);
+        private readonly WriteableBitmap _bitmap = new(256, 240, 96.0, 96.0, PixelFormats.Bgr24, null);
+        private readonly Int32Rect bitmapRect = new(0, 0, 256, 240);
 
         public MainWindow()
         {
@@ -62,7 +67,7 @@ namespace RobotNES
         {
             try
             {
-                var file = (NesFile)(((ListViewItem)sender).Content);
+                var file = (NesFile)((ListViewItem)sender).Content;
                 _nesSystem = new NesSystem(file.Path, _logger);
                 _nesSystem.FrameBufferReady += RenderFrame;
 
@@ -70,6 +75,7 @@ namespace RobotNES
 
                 this.contentPanel.Children.Remove(this.fileListView);
                 this.contentPanel.Children.Add(image);
+                _stopwatch.Start();
                 await Task.Run(() => _nesSystem?.Run());
             }
             catch (Exception ex)
@@ -88,7 +94,22 @@ namespace RobotNES
                 var pixels = _bitmap.BackBuffer;
                 Marshal.Copy(frameBuffer, 0, pixels, frameBuffer.Length);
                 _bitmap.Unlock();
+
+                CountFPS();
             });
+        }
+
+        private void CountFPS()
+        {
+            _stopwatch.Stop();
+            var frametime = _stopwatch.Elapsed.TotalMilliseconds;
+            _frameTimes[_frameIndex] = frametime;
+            _frameIndex = (_frameIndex + 1) % _frameTimes.Length;
+
+
+            var fps = 1000 / _frameTimes.Average();
+            Title = $"RobotNES | {fps} FPS";
+            _stopwatch.Restart();
         }
     }
 }
