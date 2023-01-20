@@ -12,6 +12,8 @@ namespace NESCore
         private readonly ICartridge _cartridge;
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
+        private readonly IController _controller1;
+        private readonly IController _controller2;
         private readonly ILogger _logger;
 
         //TODO: APU (0x4000-0x4013)
@@ -19,12 +21,14 @@ namespace NESCore
         //TODO: JOY1 (0x4016)
         //TODO: JOY2 (0x4017)
 
-        public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, ILogger logger)
+        public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, IController controller1, IController controller2, ILogger logger)
         {
             _logger = logger;
             _cartridge = cartridge;
             _memory = memory;
             _ppu = ppu;
+            _controller1 = controller1;
+            _controller2 = controller2;
         }
 
         //TODO: 0x6000-0x7FFF cartridge ram (battery ram/mapper dependent ram)
@@ -42,6 +46,14 @@ namespace NESCore
             else if(IsInPPUArea(address))
             {
                 return PPURead(address);
+            }
+            else if (address == 0x4016)
+            {
+                return _controller1.ReadNextButton();
+            }
+            else if (address == 0x4017)
+            {
+                return _controller2.ReadNextButton();
             }
 
             _logger.Warning($"Unsupported read from 0x{address:X4}");
@@ -65,6 +77,14 @@ namespace NESCore
             else if(address == 0x4014)
             {
                 OAMDMAEvent?.Invoke(data);
+            }
+            else if(address == 0x4016)
+            {
+                _controller1.Reset();
+            }
+            else if(address == 0x4017)
+            {
+                _controller2.Reset();
             }
             else
             {

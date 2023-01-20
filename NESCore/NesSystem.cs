@@ -24,16 +24,20 @@ namespace NESCore
         private readonly ICPU _cpu;
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
+        private readonly IController _contoller1;
+        private readonly IController _contoller2;
 
         public NesSystem(string cartridgePath, ILogger logger)
         {
             _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
+            
+            _contoller1 = new Controller(_logger);
+            _contoller2 = new Controller(_logger);
+
             _memory = new Memory();
-
             _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(_cartridge, _logger), _logger);
-
-            _bus = new Bus(_cartridge, _memory, _ppu, _logger);
+            _bus = new Bus(_cartridge, _memory, _ppu, _contoller1, _contoller2, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
