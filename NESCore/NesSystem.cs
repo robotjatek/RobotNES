@@ -1,4 +1,5 @@
-﻿using NESCore.Cartridge;
+﻿using NESCore.APU;
+using NESCore.Cartridge;
 using NESCore.CPU;
 using NESCore.CPU.Instructions;
 using NESCore.Mappers;
@@ -6,8 +7,6 @@ using NESCore.PPU;
 
 using Serilog;
 
-//TODO: make fake apu
-//TODO: make fake controllers
 //TODO: output fake noise from ppu
 //TODO: cycle correct run: (3 ppu.cycle, 1 cpu.cycle [cpu: 1st cycle: fetch intruction code&determine length, execute instruction on the last cycle only])
 
@@ -26,6 +25,7 @@ namespace NESCore
         private readonly IPPU _ppu;
         private readonly IController _contoller1;
         private readonly IController _contoller2;
+        private readonly IAPU _apu;
 
         public NesSystem(string cartridgePath, ILogger logger)
         {
@@ -34,10 +34,11 @@ namespace NESCore
             
             _contoller1 = new Controller(_logger);
             _contoller2 = new Controller(_logger);
+            _apu = new APU.APU(_logger);
 
             _memory = new Memory();
             _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(_cartridge, _logger), _logger);
-            _bus = new Bus(_cartridge, _memory, _ppu, _contoller1, _contoller2, _logger);
+            _bus = new Bus(_cartridge, _memory, _ppu, _contoller1, _contoller2, _apu, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
