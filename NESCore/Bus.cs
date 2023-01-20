@@ -7,13 +7,14 @@ namespace NESCore
 {
     public class Bus : IBUS
     {
+        public event OAMDMAEventHandler? OAMDMAEvent;
+
         private readonly ICartridge _cartridge;
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
         private readonly ILogger _logger;
 
         //TODO: APU (0x4000-0x4013)
-        //TODO: OAM DMA (0x4014)
         //TODO: Sound channel enable (0x4015)
         //TODO: JOY1 (0x4016)
         //TODO: JOY2 (0x4017)
@@ -60,6 +61,10 @@ namespace NESCore
             else if(IsInPPUArea(address))
             {
                 PPUWrite(address, data);
+            }
+            else if(address == 0x4014)
+            {
+                OAMDMAEvent?.Invoke(data);
             }
             else
             {

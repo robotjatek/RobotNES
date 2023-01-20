@@ -6,6 +6,11 @@ using NESCore.PPU;
 
 using Serilog;
 
+//TODO: make fake apu
+//TODO: make fake controllers
+//TODO: output fake noise from ppu
+//TODO: cycle correct run: (3 ppu.cycle, 1 cpu.cycle [cpu: 1st cycle: fetch intruction code&determine length, execute instruction on the last cycle only])
+
 namespace NESCore
 {
     public class NesSystem
@@ -35,6 +40,7 @@ namespace NESCore
             var registers = new Registers();
             _cpu = new CPU.CPU(_bus, registers, instructions, _logger);
             _ppu.NMIEvent += _cpu.HandleNMI;
+            _bus.OAMDMAEvent += _cpu.HandleDMA;
         }
 
         public void Run()

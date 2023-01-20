@@ -1,6 +1,5 @@
 ﻿using Serilog;
 
-//TODO: OAM DMA (0x4014)
 //TODO: OAMADDR set to 0 on prerender (257-320)
 
 namespace NESCore.PPU

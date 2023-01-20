@@ -67,5 +67,39 @@ namespace NESCoreTests.Unit.CPUTest
             registers.Object.PC.Should().Be(0xbeef);
             cycles.Should().Be(7);
         }
+
+        [Fact]
+        public void CpuHandlesDMA()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+
+            var cpu = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+
+            cpu.HandleDMA(0);
+            var cycles = cpu.RunInstruction();
+            for (byte i = 0; i < 0xff; i++)
+            {
+                bus.Verify(b => b.Read((UInt16)(0x0 + i)));
+            }
+            bus.Verify(b => b.Write(0x2004, 0xaa), Times.Exactly(255));
+        }
+
+        [Fact]
+        public void CpuHandlesDMA2()
+        {
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+
+            var cpu = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+
+            cpu.HandleDMA(0x10);
+            var cycles = cpu.RunInstruction();
+            for(byte i = 0; i < 0xff; i++)
+            {
+                bus.Verify(b => b.Read((UInt16)((0x10 << 8) + i)));
+            }
+            bus.Verify(b => b.Write(0x2004, 0xaa), Times.Exactly(255));
+        }
     }
 }

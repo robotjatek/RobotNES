@@ -1,6 +1,7 @@
 ﻿using Moq;
 
 using NESCore;
+using NESCore.CPU;
 using NESCore.PPU;
 
 namespace NESCoreTests.Unit
@@ -294,6 +295,28 @@ namespace NESCoreTests.Unit
             {
                 ppu.Verify(p => p.Write(address, 0xaa), Times.Exactly(1024));
             }
+        }
+
+        [Fact]
+        public void WriteToOAMDmaRegisterRaisesEvent()
+        {
+            var memory = new Mock<IMemory>();
+            var bus = new Bus(_mockCartridge.Object, memory.Object, _mockPPU, _logger);
+            using var monitor = bus.Monitor<IBUS>();
+
+            bus.Write(0x4014, 0x0);
+            monitor.Should().Raise(nameof(bus.OAMDMAEvent)).WithArgs<byte>(a => a == 0);
+        }
+
+        [Fact]
+        public void WriteToOAMDmaRegisterRaisesEvent2()
+        {
+            var memory = new Mock<IMemory>();
+            var bus = new Bus(_mockCartridge.Object, memory.Object, _mockPPU, _logger);
+            using var monitor = bus.Monitor<IBUS>();
+
+            bus.Write(0x4014, 0x10);
+            monitor.Should().Raise(nameof(bus.OAMDMAEvent)).WithArgs<byte>(a => a == 0x10);
         }
     }
 }

@@ -8,7 +8,11 @@ namespace NESCore.CPU
         private readonly IRegisters _registers;
         private readonly IReadOnlyList<Func<IBUS, IRegisters, byte>> _instructions;
         private readonly ILogger _logger;
+        private int _cycles = 0;
         private bool _nmi = false;
+
+        private bool _dma = false;
+        private byte _dmaCpuPage = 0;
 
         public CPU(IBUS bus, IRegisters registers, IReadOnlyList<Func<IBUS, IRegisters, byte>> instructions, ILogger logger)
         {
@@ -24,19 +28,32 @@ namespace NESCore.CPU
             _nmi = true;
         }
 
+        public void HandleDMA(byte cpuPage)
+        {
+            _dma = true;
+            _dmaCpuPage = cpuPage;
+        }
+
         public uint RunInstruction()
         {
-            if(_nmi)
+            if (_nmi)
             {
                 return DoNMI();
+            }
+
+            if (_dma)
+            {
+                return DoDMA(_dmaCpuPage);
             }
 
             var instructionCode = Fetch();
             var instruction = _instructions[instructionCode];
 
             _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
+            var instructionCycles = instruction(_bus, _registers);
+            _cycles += instructionCycles;
 
-            return instruction(_bus, _registers);
+            return instructionCycles;
         }
 
         private byte Fetch()
@@ -65,6 +82,19 @@ namespace NESCore.CPU
             _registers.PC = (UInt16)((_bus.Read(0xFFFB) << 8) | _bus.Read(0xFFFA));
             _nmi = false;
             return 7;
+        }
+
+        private byte DoDMA(byte cpuPage)
+        {
+            _dma = false;
+            UInt16 address = (UInt16)(cpuPage << 8);
+            for (UInt16 i = address; i < address + 0xff; i++)
+            {
+                _bus.Write(0x2004, _bus.Read(i));
+            }
+
+            var penalty = _cycles % 2 == 1 ? 1 : 0;
+            return (byte)(513 + penalty);
         }
     }
 }
