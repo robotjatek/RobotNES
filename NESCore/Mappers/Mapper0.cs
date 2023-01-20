@@ -16,7 +16,7 @@ namespace NESCore.Mappers
 
         private readonly ILogger _logger;
 
-        public VROM CHRROM => throw new NotImplementedException();
+        public VROM CHRROM { get; private set; }
 
         public byte CHRROMNumber { get; private set; }
 
@@ -29,7 +29,9 @@ namespace NESCore.Mappers
             CHRROMNumber = (byte)chrROMS.Count;
             CHRROMSize = CHRROMNumber * 1024 * 8;
 
-            if(PRGRomNumber > 2 || PRGRomNumber == 0)
+            CHRROM = chrROMS[0];
+
+            if (PRGRomNumber > 2 || PRGRomNumber == 0)
             {
                 throw new ArgumentException("Invalid number of ROMs");
             }
@@ -37,7 +39,7 @@ namespace NESCore.Mappers
             _lowerBank = prgRoms[0];
 
             if (PRGRomNumber > 1)
-            { 
+            {
                 _upperBank = prgRoms[1];
             }
             else
@@ -54,7 +56,7 @@ namespace NESCore.Mappers
             {
                 return _lowerBank.Read((UInt16)(address - 0x8000));
             }
-            else if(address >= 0xC000)
+            else if (address >= 0xC000)
             {
                 return _upperBank.Read((UInt16)(address - 0xC000));
             }
@@ -66,7 +68,7 @@ namespace NESCore.Mappers
 
         public void Write(UInt16 address, byte value)
         {
-            if(address < 0x8000)
+            if (address < 0x8000)
             {
                 //TODO: possible PRG RAM writes
                 throw new NotImplementedException();

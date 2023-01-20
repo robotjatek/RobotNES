@@ -9,29 +9,30 @@
     <Window.DataContext>
         <local:MainWindowViewModel />
     </Window.DataContext>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="8*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!--<Image Grid.Row="0"/>-->
-        <ListView Grid.Row="0" Name="fileListView" ItemsSource="{Binding NesFiles}">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" />
-                </Style>
-            </ListView.ItemContainerStyle>
+        <DockPanel Grid.Row="0" Name="contentPanel" Height="Auto">
+            <ListView DockPanel.Dock="Top" Name="fileListView" ItemsSource="{Binding NesFiles}" Height="Auto" VerticalAlignment="Stretch">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" />
+                    </Style>
+                </ListView.ItemContainerStyle>
 
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
-        
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+
         <Button Click="Stop_Click" Grid.Row="1">Stop</Button>
     </Grid>
 </Window>

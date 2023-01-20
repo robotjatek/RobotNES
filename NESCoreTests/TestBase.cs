@@ -1,23 +1,36 @@
 ﻿using Moq;
 
 using NESCore;
+using NESCore.APU;
 using NESCore.Cartridge;
 using NESCore.CPU;
+using NESCore.PPU;
+
 using Serilog;
 
 namespace NESCoreTests
 {
     public abstract class TestBase
     {
-        protected ILogger _logger;
-        protected Mock<ICartridge> _mockCartridge;
-        protected Func<IBUS, IRegisters, byte>[] _instructions = new Func<IBUS, IRegisters, byte>[255];
+        protected const string NESTEST_ROM_PATH = "TestROMs/nestest.nes";
+        protected const string MARIO_BROS_ROM_PATH = "TestROMs/mario.nes";
+        protected const string SUPER_MARIO_ROM_PATH = "TestROMs/smario.nes";
+        protected const string DONKEY_KONG_ROM_PATH = "TestROMs/dk.nes";
+        protected const string DRAGON_WARRIOR_ROM_PATH = "TestROMs/dragon_warrior.nes";
+        protected const string RAD_RACER_II_ROM_PATH = "TestROMs/rad_racer_2.nes";
+        protected const string DEATHBOTS_ROM_PATH = "TestROMs/deathbots.nes";
+        protected const string DUCKTALESROM_PATH = "TestROMs/ducktales.nes";
 
-        public TestBase()
-        {
-            _logger = Mock.Of<ILogger>();
-            _mockCartridge = new Mock<ICartridge>();
-        }
+        protected ILogger _logger = Mock.Of<ILogger>();
+        protected Mock<ICartridge> _mockCartridge = new();
+        protected IPPU _mockPPU = Mock.Of<IPPU>();
+        protected Func<IBUS, IRegisters, byte>[] _instructions = new Func<IBUS, IRegisters, byte>[255];
+        protected Mock<IRegisters> _registers = new();
+        protected Mock<IPPURegisters> _ppuRegisters = new();
+        protected Mock<IPPUMemory> _ppuMemory = new();
+        protected Mock<IController> _controller1 = new();
+        protected Mock<IController> _controller2 = new();
+        protected Mock<IAPU> _apu = new();
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
         {

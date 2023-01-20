@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-
-using NESCore;
+﻿using NESCore;
 
 namespace NESCoreTests.Integration
 {
@@ -20,7 +18,7 @@ namespace NESCoreTests.Integration
         public void WritesRandomDataToMemoryThroughTheBusAndReadsItBackCorectly()
         {
             var memory = new Memory();
-            var bus = new Bus(_mockCartridge.Object, memory, _logger);
+            var bus = new Bus(_mockCartridge.Object, memory, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
             for(UInt16 i = 0; i < ramSize; i++)
             {
                 bus.Write(i, _testData[i]);
@@ -36,7 +34,7 @@ namespace NESCoreTests.Integration
         public void RandomDataShouldBeAvailableOnMirroredRegions()
         {
             var memory = new Memory();
-            var bus = new Bus(_mockCartridge.Object, memory, _logger);
+            var bus = new Bus(_mockCartridge.Object, memory, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
             for (UInt16 i = 0; i < ramSize; i++)
             {
                 bus.Write(i, _testData[i]);
@@ -61,7 +59,7 @@ namespace NESCoreTests.Integration
         public void WritesToFirstMirrorShouldBeAvailableInOtherMirroredRegions()
         {
             var memory = new Memory();
-            var bus = new Bus(_mockCartridge.Object, memory, _logger);
+            var bus = new Bus(_mockCartridge.Object, memory, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
             for (UInt16 i = 0; i < ramSize; i++)
             {
                 bus.Write((ushort)(i + 0x800), _testData[i]);
@@ -93,7 +91,7 @@ namespace NESCoreTests.Integration
         public void WritesToSecendMirrorShouldBeAvailableInOtherMirroredRegions()
         {
             var memory = new Memory();
-            var bus = new Bus(_mockCartridge.Object, memory, _logger);
+            var bus = new Bus(_mockCartridge.Object, memory, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
             for (UInt16 i = 0; i < ramSize; i++)
             {
                 bus.Write((ushort)(i + 0x1800), _testData[i]);

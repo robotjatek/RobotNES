@@ -1,6 +1,5 @@
 ﻿using NESCore.Mappers;
 //TODO: PRG RAM
-//TODO: CHR-ROMot a PPU a Cartridgeből kapja, külön címzi, nem a normál buszon keresztül
 
 namespace NESCore.Cartridge
 {

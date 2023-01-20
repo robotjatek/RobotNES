@@ -2,7 +2,7 @@
 
 Yet another Nintendo Entertainment System emulator written in C#.
 
-Project skeleton only with partially implemented bus and memory systems. The basics of the CPU emulation without most of the instruction emulation.
+Project skeleton only with partially implemented bus and memory systems.
 
 ## Partially implemented
 
@@ -12,6 +12,10 @@ Project skeleton only with partially implemented bus and memory systems. The bas
 - CPU emulation architecture
 - All official instructions are implemented
 - Unofficial opcodes from `nestest.nes` are implemented
+- PPU registers
+- PPU outputs noise every frame
+- Fake APU implementation (disregards any reads or writes)
+- Fake controller implementation
 
 Currently working on the PPU implementation.
 
