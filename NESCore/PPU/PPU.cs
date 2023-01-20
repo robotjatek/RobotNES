@@ -19,6 +19,8 @@ namespace NESCore.PPU
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
 
+        private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
+
         public event NMIEventHandler? NMIEvent;
 
         public PPU(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
@@ -26,6 +28,8 @@ namespace NESCore.PPU
             _logger = logger;
             _registers = registers;
             _ppuMemory = ppuMemory;
+
+            Array.Fill(_frameBuffer, (byte)0);
         }
 
         public byte Read(ushort address)
@@ -86,7 +90,6 @@ namespace NESCore.PPU
 
             _logger.Error($"Unsupported PPU read from: 0x{address:X4}");
             throw new NotImplementedException();
-
         }
 
         public void Write(ushort address, byte value)
@@ -157,11 +160,20 @@ namespace NESCore.PPU
             }
         }
 
+        Random r = new Random();
+
         private void Cycle()
         {
             if (_scanlines >= 0 && _scanlines < 240)
             {
                 //Cycle visible scanline
+                if (_scanlineCycles < 256)
+                {
+                    var pixel = (_scanlineCycles + _scanlines * 256) * 3;
+                    _frameBuffer[pixel] = (byte)r.Next(0, 255);
+                    _frameBuffer[pixel + 1] = (byte)r.Next(0, 255);
+                    _frameBuffer[pixel + 2] = (byte)r.Next(0, 255);
+                }
             }
             else if (_scanlines == 240)
             {
@@ -175,7 +187,7 @@ namespace NESCore.PPU
                     _registers.SetVBlankFlag(true);
                     if (_registers.GetEnableNMI())
                     {
-                        NMIEvent?.Invoke();
+                        NMIEvent?.Invoke(_frameBuffer);
                     }
                 }
             }

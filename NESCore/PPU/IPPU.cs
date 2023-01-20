@@ -1,6 +1,6 @@
 ﻿namespace NESCore.PPU
 {
-    public delegate void NMIEventHandler();
+    public delegate void NMIEventHandler(byte[] framebuffer);
 
     public interface IPPU
     {

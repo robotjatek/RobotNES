@@ -7,13 +7,15 @@ using NESCore.PPU;
 
 using Serilog;
 
-//TODO: output fake noise from ppu
 //TODO: cycle correct run: (3 ppu.cycle, 1 cpu.cycle [cpu: 1st cycle: fetch intruction code&determine length, execute instruction on the last cycle only])
 
 namespace NESCore
 {
+    public delegate void FrameBufferReadyEvent(byte[] frameBuffer);
     public class NesSystem
     {
+        public event FrameBufferReadyEvent? FrameBufferReady;
+
         private bool _running = false;
         private ulong _cycle = 0;
 
@@ -44,8 +46,9 @@ namespace NESCore
             var instructions = new CPUInstructions().InstructionSet;
             var registers = new Registers();
             _cpu = new CPU.CPU(_bus, registers, instructions, _logger);
-            _ppu.NMIEvent += _cpu.HandleNMI;
             _bus.OAMDMAEvent += _cpu.HandleDMA;
+
+            _ppu.NMIEvent += OnVBlank;
         }
 
         public void Run()
@@ -66,6 +69,13 @@ namespace NESCore
         public void Stop()
         {
             _running = false;
+            _logger.Information("Stopping emulation...");
+        }
+
+        private void OnVBlank(byte[] framebuffer)
+        {
+            _cpu.HandleNMI();
+            FrameBufferReady?.Invoke(framebuffer);
         }
 
         private ICartridge LoadCartridge(string path)
