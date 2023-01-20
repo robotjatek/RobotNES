@@ -1,6 +1,7 @@
 ﻿using Moq;
 
 using NESCore;
+using NESCore.APU;
 using NESCore.Cartridge;
 using NESCore.CPU;
 using NESCore.PPU;
@@ -27,6 +28,9 @@ namespace NESCoreTests
         protected Mock<IRegisters> _registers = new();
         protected Mock<IPPURegisters> _ppuRegisters = new();
         protected Mock<IPPUMemory> _ppuMemory = new();
+        protected Mock<IController> _controller1 = new();
+        protected Mock<IController> _controller2 = new();
+        protected Mock<IAPU> _apu = new();
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
         {

@@ -63,6 +63,11 @@ namespace NESCore.PPU
             {
                 _paletteMemory[address & 0x1f] = data;
             }
+            else
+            {
+                _logger.Error($"Invalid write to ppu memory address: 0x{address:X4}");
+            }
+
         }
 
         public void OamWrite(byte address, byte data)

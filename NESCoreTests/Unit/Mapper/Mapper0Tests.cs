@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.Mapper
             var upperBank = new ROM(RandomBytePattern(16));
             var loggerMock = new Mock<ILogger>();
 
-            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>(), loggerMock.Object);
+            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, loggerMock.Object);
             for (int address = 0x8000; address <= 0xBFFF; address++)
             {
                 var data = sut.Read((ushort)address);
@@ -32,7 +32,7 @@ namespace NESCoreTests.Unit.Mapper
             var upperBank = new ROM(RandomBytePattern(16));
             var loggerMock = new Mock<ILogger>();
 
-            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>(), loggerMock.Object);
+            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, loggerMock.Object);
             for (int address = 0xC000; address <= 0xFFFF; address++)
             {
                 var data = sut.Read((ushort)address);
@@ -47,7 +47,7 @@ namespace NESCoreTests.Unit.Mapper
             var upperBank = new ROM(RandomBytePattern(16));
             var loggerMock = new Mock<ILogger>();
 
-            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>(), loggerMock.Object);
+            var sut = new Mapper0(new List<ROM>() { lowerBank, upperBank }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, loggerMock.Object);
 
             for (int address = 0x8000; address <= 0xFFFF; address++)
             {
@@ -63,7 +63,7 @@ namespace NESCoreTests.Unit.Mapper
         {
             var loggerMock = new Mock<ILogger>();
             var bank = new ROM(RandomBytePattern(16));
-            var sut = () => new Mapper0(new List<ROM>() { bank }, new List<VROM>(), loggerMock.Object);
+            var sut = () => new Mapper0(new List<ROM>() { bank }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, loggerMock.Object);
             sut.Should().NotThrow();
         }
 
@@ -73,7 +73,7 @@ namespace NESCoreTests.Unit.Mapper
             var loggerMock = new Mock<ILogger>();
             var bank1 = new ROM(RandomBytePattern(16));
             var bank2 = new ROM(RandomBytePattern(16));
-            var sut = () => new Mapper0(new List<ROM> { bank1, bank2 }, new List<VROM>(), loggerMock.Object); ;
+            var sut = () => new Mapper0(new List<ROM> { bank1, bank2 }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, loggerMock.Object); ;
             sut.Should().NotThrow();
         }
 
@@ -100,7 +100,7 @@ namespace NESCoreTests.Unit.Mapper
         public void MapperIDShouldBe0()
         {
             var bank1 = new ROM(RandomBytePattern(16));
-            var sut = new Mapper0(new List<ROM>() { bank1 }, new List<VROM>(), new Mock<ILogger>().Object);
+            var sut = new Mapper0(new List<ROM>() { bank1 }, new List<VROM>() { new VROM(RandomBytePattern(8)) }, new Mock<ILogger>().Object);
             sut.ID.Should().Be(0);
         }
     }

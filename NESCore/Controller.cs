@@ -13,13 +13,13 @@ namespace NESCore
 
         public byte ReadNextButton()
         {
-            _logger.Warning("Controller read is ignored");
+            _logger.Debug("Controller read is ignored");
             return 0;
         }
 
         public void Reset()
         {
-            _logger.Warning("Controller reset is ignored");
+            _logger.Debug("Controller reset is ignored");
         }
     }
 }

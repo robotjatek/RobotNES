@@ -15,6 +15,7 @@ namespace NESCore.PPU
         private int _scanlineCycles = 0;
 
         private UInt16 _ppuAddress = 0;
+        private UInt16 _tempPPUAddress = 0;
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
 
@@ -125,11 +126,11 @@ namespace NESCore.PPU
                 _registers.Address = value;
                 if(_addressLatch == false)
                 {
-                    _ppuAddress |= (UInt16)(value << 8);
+                    _tempPPUAddress = (UInt16)(value << 8);
                 }
                 else
                 {
-                    _ppuAddress |= value;
+                    _ppuAddress = (UInt16)((_tempPPUAddress&0x3f00) | value);
                 }
 
                 _ppuAddress = (UInt16)(_ppuAddress & 0x3fff);

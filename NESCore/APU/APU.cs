@@ -12,13 +12,13 @@ namespace NESCore.APU
 
         public byte Read(ushort address)
         {
-            _logger.Warning($"Read from APU address 0x{address:X4} is ignored");
+            _logger.Debug($"Read from APU address 0x{address:X4} is ignored");
             return 0;
         }
 
         public void Write(ushort address, byte data)
         {
-            _logger.Warning($"Write to APU address 0x{address:X4} is ignored. Value: 0x{data:X2}");
+            _logger.Debug($"Write to APU address 0x{address:X4} is ignored. Value: 0x{data:X2}");
         }
     }
 }
