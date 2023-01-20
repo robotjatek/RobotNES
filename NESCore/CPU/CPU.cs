@@ -36,8 +36,7 @@ namespace NESCore.CPU
 
             _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
 
-            var elapsedCycles = instruction(_bus, _registers);
-            return elapsedCycles;
+            return instruction(_bus, _registers);
         }
 
         private byte Fetch()

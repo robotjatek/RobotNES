@@ -231,5 +231,20 @@ namespace NESCoreTests.Unit.PPUTest
                 memory.Read(i).Should().Be(0xaa);
             }
         }
+
+        [Fact]
+        public void WritesOamCanBeReadBack()
+        {
+            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            for (byte i = 0; i < 0xff; i++)
+            {
+                memory.OamWrite(i, 0xaa);
+            }
+
+            for (byte i = 0; i < 0xff; i++)
+            {
+                memory.OamRead(i).Should().Be(0xaa);
+            }
+        }
     }
 }

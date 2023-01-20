@@ -39,8 +39,10 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void SetsVBlankFlagAndSendsNMI()
         {
-            var registers = new PPURegisters();
-            registers.Control = 0x80; //Enable nmi
+            var registers = new PPURegisters
+            {
+                Control = 0x80 //Enable nmi
+            };
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
@@ -78,8 +80,10 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void SetsVBlankFlagAndSendsNMIMultipleTimes()
         {
-            var registers = new PPURegisters();
-            registers.Control = 0x80; //Enable nmi
+            var registers = new PPURegisters
+            {
+                Control = 0x80 //Enable nmi
+            };
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
@@ -209,6 +213,21 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
+        public void WriteToScrollSetsTheValue()
+        {
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+
+            var ppu = new PPU(registers.Object, _ppuMemory.Object, _logger);
+            
+            ppu.Write(0x2005, 0xde);
+            ppu.Write(0x2005, 0xad);
+
+            registers.Object.XScroll.Should().Be(0xde);
+            registers.Object.YScroll.Should().Be(0xad);
+        }
+
+        [Fact]
         public void ReadFromAddressLogs()
         {
             var logger = new Mock<ILogger>();
@@ -255,7 +274,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void WriteToVRAMIncrementsAddressBy32()
         {
             var ppuMemory = new Mock<IPPUMemory>();
-            
+
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
             registers.Setup(r => r.VRAMIncrement()).Returns(32);
@@ -283,7 +302,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new PPU(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
-            
+
             var result = ppu.Read(0x2007); //First result is the previously buffered data
             result = ppu.Read(0x2007); // real data byte
 
@@ -390,11 +409,44 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
 
-            var logger = new Mock<ILogger>();
 
-            var ppu = new PPU(registers.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new PPU(registers.Object, _ppuMemory.Object, _logger);
             ppu.Write(0x2003, 0xaa);
             registers.Object.OAMAddress.Should().Be(0xaa);
+        }
+
+        [Fact]
+        public void WriteToOAMDataWritesValueToOamAndIncrementsOAMAddress()
+        {
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+            registers.Object.OAMAddress = 0x0;
+
+            var memory = new Mock<IPPUMemory>();
+
+            var ppu = new PPU(registers.Object, memory.Object, _logger);
+            ppu.Write(0x2004, 0xde);
+
+            memory.Verify(m => m.OamWrite(0x0, 0xde));
+            registers.Object.OAMAddress.Should().Be(1);
+        }
+
+        [Fact]
+        public void ReadFromOAMDataReadsValueFromOamAndDoesNotIncrementOAMAddress()
+        {
+            var registers = new Mock<IPPURegisters>();
+            registers.SetupAllProperties();
+            registers.Object.OAMAddress = 0x0;
+
+            var memory = new Mock<IPPUMemory>();
+            memory.Setup(m => m.OamRead(0)).Returns(0xde);
+
+            var ppu = new PPU(registers.Object, memory.Object, _logger);
+            var value = ppu.Read(0x2004);
+            value.Should().Be(0xde);
+
+            memory.Verify(m => m.OamRead(0x0));
+            registers.Object.OAMAddress.Should().Be(0);
         }
     }
 }

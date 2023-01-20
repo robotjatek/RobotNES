@@ -1,5 +1,8 @@
 ﻿using Serilog;
 
+//TODO: OAM DMA (0x4014)
+//TODO: OAMADDR set to 0 on prerender (257-320)
+
 namespace NESCore.PPU
 {
     public class PPU : IPPU
@@ -50,6 +53,10 @@ namespace NESCore.PPU
                 _logger.Warning("PPU OAM address register read 0x2003. Normally this should not happen.");
                 return _registers.OAMAddress;
             }
+            else if(address == 0x2004)
+            {
+                return _ppuMemory.OamRead(_registers.OAMAddress);
+            }
             else if(address == 0x2005)
             {
                 _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen.");
@@ -96,9 +103,23 @@ namespace NESCore.PPU
             {
                 _registers.OAMAddress = value;
             }
+            else if(address == 0x2004)
+            {
+                _ppuMemory.OamWrite(_registers.OAMAddress, value);
+                _registers.OAMAddress++;
+            }
             else if(address == 0x2005)
             {
                 _registers.Scroll = value;
+                if(_addressLatch == false)
+                {
+                    _registers.XScroll = value;
+                }
+                else
+                {
+                    _registers.YScroll = value;
+                }
+                _addressLatch = !_addressLatch;
             }
             else if(address == 0x2006)
             {

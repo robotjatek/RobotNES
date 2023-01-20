@@ -12,9 +12,10 @@
         byte Control { get; set; }
         byte Mask { get; set; }
         byte OAMAddress { get; set; }
-        //TODO: OAM data register (0x2004)
         byte Scroll { get; set; }
         byte Address { get; set; }
+        byte XScroll { get; set; }
+        byte YScroll { get; set; }
 
 
         #region STATUS_REGISTER

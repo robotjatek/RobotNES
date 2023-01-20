@@ -10,6 +10,7 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
+        private readonly byte[] _oam = new byte[0xff];
 
         public PPUMemory(ICartridge cartridge, ILogger logger)
         {
@@ -62,6 +63,16 @@ namespace NESCore.PPU
             {
                 _paletteMemory[address & 0x1f] = data;
             }
+        }
+
+        public void OamWrite(byte address, byte data)
+        {
+            _oam[address] = data;
+        }
+
+        public byte OamRead(byte address)
+        {
+            return _oam[address];
         }
 
         private UInt16 UseNametableMirroring(ushort address)
