@@ -15,7 +15,7 @@ namespace NESCore.PPU
         private int _scanlineCycles = 0;
 
         private byte _ppuDataBus = 0;
-        private ushort _ppuAddress = 0; // v
+        private ushort _ppuAddress = 0; // v: 0 yyy NN YYYYY XXXXX 
         private ushort _tempPPUAddress = 0; // t
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
@@ -197,6 +197,12 @@ namespace NESCore.PPU
             else
                 _ppuAddress = (ushort)(_ppuAddress + 1);
         }
+
+        private void IncrementY()
+        {
+            // increment fineY at the end of the scanline
+            
+        }
         
         private void Cycle()
         {
@@ -239,6 +245,22 @@ namespace NESCore.PPU
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
                         _patternHigh = _ppuMemory.Read(ptAddress);
                         IncrementCoarseX();
+                    }
+
+                    if (_scanlineCycles == 255)
+                    {
+                         // IncrementY();
+                         
+                         // increment fineY at the end of the scanline
+                         var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+                         if (fineY < 7) 
+                         {
+                             _ppuAddress += 0x1000; // increment fineY
+                         }
+                         else
+                         {
+                             
+                         }
                     }
                 }
                 

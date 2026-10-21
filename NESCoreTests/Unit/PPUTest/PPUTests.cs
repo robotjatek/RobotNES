@@ -577,5 +577,25 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuAddress = field?.GetValue(ppu);
             ppuAddress.Should().Be(0x0400);
         }
+
+        [Fact]
+        public void ShouldIncrementFineYOnCycle256()
+        {
+            // We are at the end of the scanline, so we should wrap around to the next tile row (increment fineY)
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            ppu.Write(0x2006, 0x20);
+            ppu.Write(0x2006, 0x00);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0);
+            
+            ppu.Run(256);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuAddress = field?.GetValue(ppu);
+            // Fine Y should be incremented by 1: 0 001 00 00000 00000 + 0x2000 + (0x400 because we also increased X) = 0x3400
+            ppuAddress.Should().Be(0x3400); // We are in the same tile row but down one scanline
+        }
     }
 }
