@@ -212,8 +212,8 @@ namespace NESCoreTests.Unit.PPUTest
             var memory = new PPUMemory(_mockCartridge.Object, _logger);
             for(UInt16 i = 0x3f00; i < 0x3f20; i++)
             {
-                memory.Write(i, 0xaa);
-                memory.Read(i).Should().Be(0xaa);
+                memory.Write(i, 0x2a);
+                memory.Read(i).Should().Be(0x2a);
             }
         }
 
@@ -223,13 +223,33 @@ namespace NESCoreTests.Unit.PPUTest
             var memory = new PPUMemory(_mockCartridge.Object, _logger);
             for (UInt16 i = 0x3f00; i < 0x3f20; i++)
             {
-                memory.Write(i, 0xaa);
+                memory.Write(i, 0x2a);
             }
 
             for(UInt16 i = 0x3f20; i < 0x4000; i++)
             {
-                memory.Read(i).Should().Be(0xaa);
+                memory.Read(i).Should().Be(0x2a);
             }
+        }
+        
+        [Fact]
+        public void PaletteWritesAre6Bit()
+        {
+            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            memory.Write(0x3f00, 0xff);
+            memory.Read(0x3f00).Should().Be(0x3f);
+        }
+
+        [Theory]
+        [InlineData(0x3f10, 0x3f00)]
+        [InlineData(0x3f14, 0x3f04)]
+        [InlineData(0x3f18, 0x3f08)]
+        [InlineData(0x3f1c, 0x3f0c)]
+        public void PaletteInternalMirror(ushort wAddress, ushort rAddress)
+        {
+            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            memory.Write(wAddress, 0x3f);
+            memory.Read(rAddress).Should().Be(0x3f);
         }
 
         [Fact]

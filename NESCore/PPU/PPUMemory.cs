@@ -10,7 +10,7 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
-        private readonly byte[] _oam = new byte[0xff];
+        private readonly byte[] _oam = new byte[256];
 
         public PPUMemory(ICartridge cartridge, ILogger logger)
         {
@@ -20,6 +20,8 @@ namespace NESCore.PPU
 
         public byte Read(ushort address)
         {
+            address &= 0x3fff;
+            
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
@@ -35,7 +37,7 @@ namespace NESCore.PPU
             }
             else if (IsInPaletteMemory(address))
             {
-                return _paletteMemory[address & 0x1f];
+                return _paletteMemory[GetPaletteIndex(address)];
             }
 
             throw new NotImplementedException();
@@ -43,6 +45,8 @@ namespace NESCore.PPU
 
         public void Write(ushort address, byte data)
         {
+            address &= 0x3fff;
+            
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe these writes are CHR-RAM writes?
@@ -61,13 +65,24 @@ namespace NESCore.PPU
             }
             else if (IsInPaletteMemory(address))
             {
-                _paletteMemory[address & 0x1f] = data;
+                _paletteMemory[GetPaletteIndex(address)] = (byte)(data & 0x3f);
             }
             else
             {
                 _logger.Error($"Invalid write to ppu memory address: 0x{address:X4}");
             }
 
+        }
+        
+        private int GetPaletteIndex(ushort address)
+        {
+            var index = address & 0x1f;
+            // ID 3f10, 3f14, 3f18, 3f1c mirror 3f00, 3f04, 3f08, 3f0c
+            if ((index & 0x13) == 0x10)
+            {
+                index &= ~0x10;
+            }
+            return index;
         }
 
         public void OamWrite(byte address, byte data)

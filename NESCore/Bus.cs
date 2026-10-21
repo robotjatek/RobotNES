@@ -82,10 +82,11 @@ namespace NESCore
             else if (address == 0x4016)
             {
                 _controller1.Reset();
+                _controller2.Reset();
             }
             else if (address == 0x4017)
             {
-                _controller2.Reset();
+                // TODO: apu
             }
             else if (IsInApuArea(address))
             {
