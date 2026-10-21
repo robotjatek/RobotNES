@@ -176,14 +176,16 @@ namespace NESCore.PPU
             }
         }
 
-        Random r = new ();
+        Random r = new();
 
+        private byte _ntId = 0;
+        private byte _attributeId = 0;
+        private byte _patternLow = 0;
+        
         private void Cycle()
         {
-            if (_scanlines >= 0 && _scanlines < 240)
-            {
-                // TODO: fetch AT (3-4)
-                // TODO: fetch pattern LS (5-6)
+            if (_scanlines is >= 0 and < 240)
+            { 
                 // TODO: fetch pattern MS (7-8)
                 // TODO: increment horiV (8)
                 
@@ -195,9 +197,8 @@ namespace NESCore.PPU
                     {
                         // Fetch nametable:
                         // tile address = 0x2000 | (v & 0x0FFF)
-                        
                         var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0fff));
-                        var nt = _ppuMemory.Read(ntAddress); // TODO: save this as member
+                        _ntId = _ppuMemory.Read(ntAddress);
                     } 
                     else if (phase == 3)
                     {
@@ -206,6 +207,20 @@ namespace NESCore.PPU
                         var atAddress = (ushort)(0x23C0 | (_ppuAddress & 0x0C00) | ((_ppuAddress >> 4) & 0x0038) |
                                                            ((_ppuAddress >> 2) & 0x0007));
                         var at = _ppuMemory.Read(atAddress);
+                    }
+                    else if (phase == 5)
+                    {
+                        // pattern table low
+                        // address is based on the control register
+                        var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
+                        var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+                        var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16);
+                        _patternLow = _ppuMemory.Read(ptAddress);
+                    }
+                    else if (phase == 7)
+                    {
+                        
+                        // TODO: increment coarseX
                     }
                 }
                 
@@ -249,7 +264,7 @@ namespace NESCore.PPU
 
             _cycles++;
             _scanlineCycles++;
-            if(_scanlineCycles == 341)
+            if (_scanlineCycles == 341)
             {
                 _scanlines++;
                 _scanlineCycles = 0;

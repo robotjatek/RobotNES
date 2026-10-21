@@ -484,5 +484,55 @@ namespace NESCoreTests.Unit.PPUTest
 
             memory.Verify(m => m.Read(0x23CB), Times.Once);
         }
+
+        [Fact]
+        public void ShouldFetchPatternTableLowCycle6()
+        {
+            var registers = new PPURegisters
+            {
+                Control = 0x10 // BG pattern table in the second thebe (0x1000-0x1fff)
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            ppu.Write(0x2006, 0x00);
+            ppu.Write(0x2006, 0x8C);
+            // NT read
+            memory.Setup(m => m.Read(0x208C)).Returns(0x41); // Tile ID
+            // AT read
+            memory.Setup(m => m.Read(0x23CB)).Returns(0xAA);
+            // PT low read
+            memory.Setup(m => m.Read(0x1410)).Returns(0b01010101);
+            
+            ppu.Run(6);
+            
+            // 0x1000 + 0x41 (65) * 16 (+ fineY) => 0x1410
+            memory.Verify(m => m.Read(0x1410), Times.Once);
+        }
+        
+        [Fact]
+        public void ShouldFetchPatternTableHighCycle8()
+        {
+            var registers = new PPURegisters
+            {
+                Control = 0x10 // BG pattern table in the second thebe (0x1000-0x1fff)
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            ppu.Write(0x2006, 0x00);
+            ppu.Write(0x2006, 0x8C);
+            // NT read
+            memory.Setup(m => m.Read(0x208C)).Returns(0x41); // Tile ID
+            // AT read
+            memory.Setup(m => m.Read(0x23CB)).Returns(0xAA);
+            // PT low read
+            memory.Setup(m => m.Read(0x1410)).Returns(0b01010101);
+            // PT high read
+            memory.Setup(m => m.Read(0x1418)).Returns(0b11001100);
+            
+            ppu.Run(8);
+            
+            // 0x1000 + 0x41 (65) * 16 (+ fineY) + 8 => 0x1418
+            memory.Verify(m => m.Read(0x1418), Times.Once);
+        }
     }
 }
