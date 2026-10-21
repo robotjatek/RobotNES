@@ -539,5 +539,43 @@ namespace NESCoreTests.Unit.PPUTest
             // 0x1000 + 0x41 (65) * 16 (+ fineY) + 8 => 0x1418
             memory.Verify(m => m.Read(0x1418), Times.Once);
         }
+
+        [Fact]
+        public void ShouldIncrementCoarseXOnCycle8()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            // set ppu address to 0x2000 => coarseX = 0
+            ppu.Write(0x2006, 0x20);
+            ppu.Write(0x2006, 0x00);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0x00);
+
+            ppu.Run(8);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuAddress = field?.GetValue(ppu);
+            ppuAddress.Should().Be(0x2001);
+        }
+
+        [Fact]
+        public void CoarseXShouldWrapAroundOn32()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // set coarseX to 32
+            ppu.Write(0x2006, 0x00);
+            ppu.Write(0x2006, 0x1F);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0);
+            
+            ppu.Run(8);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuAddress = field?.GetValue(ppu);
+            ppuAddress.Should().Be(0x0400);
+        }
     }
 }

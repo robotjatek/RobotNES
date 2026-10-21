@@ -139,6 +139,7 @@ namespace NESCore.PPU
                     _registers.YScroll = value;
                 }
                 _addressLatch = !_addressLatch;
+                // TODO: address register change
             }
             else if(address == 0x2006)
             {
@@ -154,6 +155,7 @@ namespace NESCore.PPU
                     _ppuAddress = _tempPPUAddress;
                     _addressLatch = false;
                 }
+                // TODO: temp register change
             }
             else if(address == 0x2007)
             {
@@ -182,13 +184,24 @@ namespace NESCore.PPU
         private byte _attributeId = 0;
         private byte _patternLow = 0;
         private byte _patternHigh = 0;
+
+        private void IncrementCoarseX()
+        {
+            // From https://www.nesdev.org/wiki/PPU_scrolling
+            // wrap around:
+            if ((_ppuAddress & 0b11111) == 31)
+            {
+                _ppuAddress &= 0xFFE0; // zero out the bottom 5 bits (coarse x part of the address)
+                _ppuAddress ^= 0x0400; // Switch to next nametable
+            }
+            else
+                _ppuAddress = (ushort)(_ppuAddress + 1);
+        }
         
         private void Cycle()
         {
             if (_scanlines is >= 0 and < 240)
             { 
-                // TODO: increment horiV (8)
-                
                 //Cycle visible scanline
                 if (_scanlineCycles < 256)
                 {
@@ -219,15 +232,15 @@ namespace NESCore.PPU
                     }
                     else if (phase == 7)
                     {
+                        // pattern table low
+                        // address is based on the control register
                         var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
                         var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
                         _patternHigh = _ppuMemory.Read(ptAddress);
-                        // TODO: increment coarseX
+                        IncrementCoarseX();
                     }
                 }
-                
-                
                 
                 if (_scanlineCycles < 256)
                 {
