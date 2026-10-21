@@ -448,5 +448,22 @@ namespace NESCoreTests.Unit.PPUTest
             memory.Verify(m => m.OamRead(0x0));
             registers.Object.OAMAddress.Should().Be(0);
         }
+
+        [Fact]
+        public void ShouldFetchNameTableOnVisibleCycle1()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            // V = 2042
+            ppu.Write(0x2006, 0x20);
+            ppu.Write(0x2006, 0x42);
+            memory.Setup(m => m.Read(0x2042)).Returns(0x77);
+            
+            ppu.Run(2);
+            
+            memory.Verify(m => m.Read(0x2042), Times.Once);
+        }
     }
 }

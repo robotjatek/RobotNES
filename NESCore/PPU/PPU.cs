@@ -176,13 +176,28 @@ namespace NESCore.PPU
             }
         }
 
-        Random r = new Random();
+        Random r = new ();
 
         private void Cycle()
         {
             if (_scanlines >= 0 && _scanlines < 240)
             {
+                // TODO: fetch AT (3-4)
+                // TODO: fetch pattern LS (5-6)
+                // TODO: fetch pattern MS (7-8)
+                // TODO: increment horiV (8)
+                
                 //Cycle visible scanline
+                if (_scanlineCycles < 256 && (_scanlineCycles % 8 == 1))
+                {
+                    // Fetch nametable:
+                    // tile address = 0x2000 | (v & 0x0FFF)
+                    // attribute address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
+                    var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0fff));
+                    var nt = _ppuMemory.Read(ntAddress);
+                }
+                
+                
                 if (_scanlineCycles < 256)
                 {
                     var pixel = (_scanlineCycles + _scanlines * 256) * 3;

@@ -84,7 +84,7 @@ namespace NESCore.PPU
                 0x14 => 0x04,
                 0x18 => 0x08,
                 0x1C => 0x0C,
-                _    => index
+                _ => index
             };
         }
 
@@ -100,6 +100,11 @@ namespace NESCore.PPU
 
         private UInt16 UseNametableMirroring(ushort address)
         {
+            if (address >= 0x3000)
+            {
+                address &= 0x2FFF;
+            }
+
             if(_cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
             {
                 _logger.Error("4-screen mirroring is not supported");
@@ -112,7 +117,6 @@ namespace NESCore.PPU
             }
             else if (_cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
             {
-                // Bit 11 is copied to bit 10 in horizontal mirroring mode: writes to 0x2000 are visible in both 0x2000 and 0x2400
                 return (UInt16)(((address & 0x800) >> 1) | (address & 0x3ff));
             }
 
