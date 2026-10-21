@@ -597,5 +597,23 @@ namespace NESCoreTests.Unit.PPUTest
             // Fine Y should be incremented by 1: 0 001 00 00000 00000 + 0x2000 + (0x400 because we also increased X) = 0x3400
             ppuAddress.Should().Be(0x3400); // We are in the same tile row but down one scanline
         }
+
+        [Fact]
+        public void ShouldRestoreXAtTheEndOfTheScanline()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            ppu.Write(0x2006, 0x20);
+            ppu.Write(0x2006, 0x00);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0);
+            
+            ppu.Run(257);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuX = field?.GetValue(ppu);
+            ppuX.Should().Be(0x3000); // We are back to the start of the tile row
+        }
     }
 }

@@ -263,7 +263,14 @@ namespace NESCore.PPU
                          }
                     }
                 }
+                else if (_scanlineCycles == 256)
+                {
+                    // reset X
+                    // copy coarseX and horizontal nametable bits from t 
+                    _ppuAddress = (ushort)((_ppuAddress & ~0x041F) | (_tempPPUAddress & 0x041F));
+                }
                 
+                // TODO: remove this and add proper pixel rendering
                 if (_scanlineCycles < 256)
                 {
                     var pixel = (_scanlineCycles + _scanlines * 256) * 3;
