@@ -181,12 +181,12 @@ namespace NESCore.PPU
         private byte _ntId = 0;
         private byte _attributeId = 0;
         private byte _patternLow = 0;
+        private byte _patternHigh = 0;
         
         private void Cycle()
         {
             if (_scanlines is >= 0 and < 240)
             { 
-                // TODO: fetch pattern MS (7-8)
                 // TODO: increment horiV (8)
                 
                 //Cycle visible scanline
@@ -219,7 +219,10 @@ namespace NESCore.PPU
                     }
                     else if (phase == 7)
                     {
-                        
+                        var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
+                        var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+                        var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
+                        _patternHigh = _ppuMemory.Read(ptAddress);
                         // TODO: increment coarseX
                     }
                 }
