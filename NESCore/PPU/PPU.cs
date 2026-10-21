@@ -99,9 +99,16 @@ namespace NESCore.PPU
             throw new NotImplementedException();
         }
 
+        public void OamDMAWrite(byte value)
+        {
+            _ppuMemory.OamWrite(_registers.OAMAddress, value);
+            _registers.OAMAddress++;
+        }
+
         public void Write(ushort address, byte value)
         {
             address = (ushort)(0x2000 + (address & 0x0007));
+            _ppuDataBus = value;
             
             if (address == 0x2000)
             {

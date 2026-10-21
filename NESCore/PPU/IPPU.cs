@@ -10,6 +10,8 @@
 
         void Run(uint cycles);
 
+        void OamDMAWrite(byte value);
+
         event NMIEventHandler NMIEvent;
     }
 }

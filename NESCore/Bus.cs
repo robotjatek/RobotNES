@@ -98,6 +98,11 @@ namespace NESCore
                 throw new NotImplementedException();
             }
         }
+        
+        public void PPUOamDMA(byte value)
+        {
+            _ppu.OamDMAWrite(value);
+        }
 
         private static bool IsInInternalMemory(UInt16 address)
         {
