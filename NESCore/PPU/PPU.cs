@@ -206,7 +206,7 @@ namespace NESCore.PPU
                         // attribute address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
                         var atAddress = (ushort)(0x23C0 | (_ppuAddress & 0x0C00) | ((_ppuAddress >> 4) & 0x0038) |
                                                            ((_ppuAddress >> 2) & 0x0007));
-                        var at = _ppuMemory.Read(atAddress);
+                        _attributeId = _ppuMemory.Read(atAddress);
                     }
                     else if (phase == 5)
                     {

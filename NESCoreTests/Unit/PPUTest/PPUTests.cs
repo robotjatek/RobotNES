@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System.Reflection;
+using Moq;
 
 using NESCore.PPU;
 
@@ -483,6 +484,10 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(4);
 
             memory.Verify(m => m.Read(0x23CB), Times.Once);
+            
+            var field = typeof(PPU).GetField("_attributeId", BindingFlags.NonPublic | BindingFlags.Instance);
+            var attributeId = field?.GetValue(ppu);
+            attributeId.Should().Be(0xAA);
         }
 
         [Fact]
