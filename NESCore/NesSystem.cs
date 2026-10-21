@@ -7,8 +7,6 @@ using NESCore.PPU;
 
 using Serilog;
 
-//TODO: cycle correct run: (3 ppu.cycle, 1 cpu.cycle [cpu: 1st cycle: fetch intruction code&determine length, execute instruction on the last cycle only])
-
 namespace NESCore
 {
     public delegate void FrameBufferReadyEvent(byte[] frameBuffer);
@@ -56,13 +54,8 @@ namespace NESCore
             _running = true;
             while (_running)
             {
-                //TODO: catch-up mechanism instead: run the cpu up until the ppu is accessed or a vblank happens then catch up with the ppu (run the cpu in a per instruction basis instead of a per cycle basis)
-                _cycle += _cpu.RunInstruction();
-                if(_cycle > 133) //TODO: this is a temporary hack to get the ppu running
-                {
-                    _ppu.Run(133 * 3);
-                    _cycle = 0;
-                }
+                var cycles = _cpu.RunInstruction();
+                _ppu.Run(cycles * 3);
             }
         }
 

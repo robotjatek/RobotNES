@@ -8,7 +8,7 @@
 
         void Write(UInt16 address, byte value);
 
-        void Run(int cycles);
+        void Run(uint cycles);
 
         event NMIEventHandler NMIEvent;
     }

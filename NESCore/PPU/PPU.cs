@@ -152,9 +152,9 @@ namespace NESCore.PPU
             }
         }
 
-        public void Run(int cycles)
+        public void Run(uint cycles)
         {
-            for (int i = 0; i < cycles; i++)
+            for (var i = 0; i < cycles; i++)
             {
                 Cycle();
             }
