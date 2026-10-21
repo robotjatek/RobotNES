@@ -188,14 +188,27 @@ namespace NESCore.PPU
                 // TODO: increment horiV (8)
                 
                 //Cycle visible scanline
-                if (_scanlineCycles < 256 && (_scanlineCycles % 8 == 1))
+                if (_scanlineCycles < 256)
                 {
-                    // Fetch nametable:
-                    // tile address = 0x2000 | (v & 0x0FFF)
-                    // attribute address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
-                    var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0fff));
-                    var nt = _ppuMemory.Read(ntAddress);
+                    var phase = _scanlineCycles % 8;
+                    if (phase == 1)
+                    {
+                        // Fetch nametable:
+                        // tile address = 0x2000 | (v & 0x0FFF)
+                        
+                        var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0fff));
+                        var nt = _ppuMemory.Read(ntAddress); // TODO: save this as member
+                    } 
+                    else if (phase == 3)
+                    {
+                        // Fetch attribute table
+                        // attribute address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
+                        var atAddress = (ushort)(0x23C0 | (_ppuAddress & 0x0C00) | ((_ppuAddress >> 4) & 0x0038) |
+                                                           ((_ppuAddress >> 2) & 0x0007));
+                        var at = _ppuMemory.Read(atAddress);
+                    }
                 }
+                
                 
                 
                 if (_scanlineCycles < 256)

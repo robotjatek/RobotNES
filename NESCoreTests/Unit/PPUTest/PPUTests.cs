@@ -450,7 +450,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ShouldFetchNameTableOnVisibleCycle1()
+        public void ShouldFetchNameTableOnVisibleCycle2()
         {
             var registers = new PPURegisters();
             var memory = new Mock<IPPUMemory>();
@@ -464,6 +464,25 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(2);
             
             memory.Verify(m => m.Read(0x2042), Times.Once);
+        }
+        
+        [Fact]
+        public void ShouldFetchAttributeTableOnVisibleCycle4()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            ppu.Write(0x2006, 0x00);
+            ppu.Write(0x2006, 0x8C);
+            // NT read
+            memory.Setup(m => m.Read(0x208C)).Returns(0x00);
+            // AT read
+            memory.Setup(m => m.Read(0x23CB)).Returns(0xAA);
+
+            ppu.Run(4);
+
+            memory.Verify(m => m.Read(0x23CB), Times.Once);
         }
     }
 }
