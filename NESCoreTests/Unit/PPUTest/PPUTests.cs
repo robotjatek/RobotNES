@@ -46,7 +46,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
-            var beforeVBlank =
+            uint beforeVBlank =
                 341 * 240 // Visible screen
                 + 341; // Post render scanline
 
@@ -65,7 +65,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
-            var beforeVBlank =
+            uint beforeVBlank =
                 341 * 240 // Visible screen
                 + 341; // Post render scanline
 
@@ -89,7 +89,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             for (int i = 0; i < 3; i++) // Three times a charm!
             {
-                var frameCycles = 341 * 261; // Visible screen
+                uint frameCycles = 341 * 261; // Visible screen
                 ppu.Run(frameCycles);
 
                 registers.GetVBlankFlag().Should().BeTrue();
@@ -103,7 +103,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
-            var beforePrerender =
+            uint beforePrerender =
                 341 * 240
                 + 341
                 + 2;
@@ -124,7 +124,7 @@ namespace NESCoreTests.Unit.PPUTest
             };
 
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
-            var beforePrerender =
+            uint beforePrerender =
                 341 * 240
                 + 341
                 + 2;
@@ -143,7 +143,7 @@ namespace NESCoreTests.Unit.PPUTest
             };
 
             var ppu = new PPU(registers, _ppuMemory.Object, _logger);
-            var beforePrerender =
+            uint beforePrerender =
                 341 * 240
                 + 341
                 + 2;

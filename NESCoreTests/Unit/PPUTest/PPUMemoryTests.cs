@@ -79,6 +79,22 @@ namespace NESCoreTests.Unit.PPUTest
                 memory.Read((UInt16)(i - 0x400)).Should().Be(0xaa);
             }
         }
+        
+        [Fact]
+        public void WritesToNameTable2DoesNotOverwriteNameTable3() // Fix for collapsed NT2 & NT3 in horizontal mirror mode
+        {
+            var mf = new Mock<IMapperFactory>();
+            var header = Mock.Of<ICartridgeHeader>();
+            var mapper = Mock.Of<IMapper>();
+            mf.Setup(f => f.CreateMapper(header, new List<ROM>(), new List<VROM>())).Returns(mapper);
+            var cartridge = new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); // Horizontal mirror mode
+            var memory = new PPUMemory(cartridge, _logger);
+            for (UInt16 i = 0x2400; i < 0x2800; i++)
+            {
+                memory.Write(i, 0xaa);
+                memory.Read((UInt16)(i + 0x400)).Should().NotBe(0xaa);
+            }
+        }
 
         [Fact]
         public void WritesToNametable2CanBeReadBackFromNameTable3HorizontalMirroring()
