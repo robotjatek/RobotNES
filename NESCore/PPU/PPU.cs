@@ -14,8 +14,9 @@ namespace NESCore.PPU
         private int _scanlines = 0;
         private int _scanlineCycles = 0;
 
-        private UInt16 _ppuAddress = 0;
-        private UInt16 _tempPPUAddress = 0;
+        private byte _ppuDataBus = 0;
+        private ushort _ppuAddress = 0; // v
+        private ushort _tempPPUAddress = 0; // t
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
 
@@ -34,42 +35,45 @@ namespace NESCore.PPU
 
         public byte Read(ushort address)
         {
+            address = (ushort)(0x2000 + (address & 0x0007));
+            
             //TODO: replace this branching with an indexed array (_ppuMemory[address & 0x7])
             if (address == 0x2000)
             {
                 _logger.Warning("PPU control register read 0x2000. Normally this should not happen.");
-                return _registers.Control;
+                return _ppuDataBus;
             }
             else if (address == 0x2001)
             {
                 _logger.Warning("PPU mask register read 0x2001. Normally this should not happen.");
-                return _registers.Mask;
+                return _ppuDataBus;
             }
             else if (address == 0x2002)
             {
-                var data = (byte)(_registers.Status & 0xE0);  //TODO: openbus behaviour. Return previous data from the ppu databuffer on the lower bits
+                _ppuDataBus = (byte)((_registers.Status & 0xE0) | (_ppuDataBus & 0x1F));
                 _registers.SetVBlankFlag(false);
                 _addressLatch = false;
-                return data;
+                return _ppuDataBus;
             }
             else if(address == 0x2003)
             {
                 _logger.Warning("PPU OAM address register read 0x2003. Normally this should not happen.");
-                return _registers.OAMAddress;
+                return _ppuDataBus;
             }
             else if(address == 0x2004)
             {
-                return _ppuMemory.OamRead(_registers.OAMAddress);
+                _ppuDataBus = _ppuMemory.OamRead(_registers.OAMAddress);
+                return _ppuDataBus;
             }
             else if(address == 0x2005)
             {
                 _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen.");
-                return _registers.Scroll;
+                return _ppuDataBus;
             }
             else if (address == 0x2006)
             {
                 _logger.Warning("PPU address register read 0x2006. Normally this should not happen.");
-                return _registers.Address;
+                return _ppuDataBus;
             }
             else if(address == 0x2007)
             {
@@ -77,13 +81,16 @@ namespace NESCore.PPU
                 {
                     var result = _dataBuffer;
                     _dataBuffer = _ppuMemory.Read(_ppuAddress);
-                    _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    _ppuDataBus = result;
                     return result;
                 }
                 else
                 {
                     var result = _ppuMemory.Read(_ppuAddress);
-                    _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    _dataBuffer = _ppuMemory.Read((ushort)(_ppuAddress - 0x1000));
+                    _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    _ppuDataBus = result;
                     return result;
                 }
             }
@@ -94,6 +101,8 @@ namespace NESCore.PPU
 
         public void Write(ushort address, byte value)
         {
+            address = (ushort)(0x2000 + (address & 0x0007));
+            
             if (address == 0x2000)
             {
                 _registers.Control = value;
@@ -129,20 +138,20 @@ namespace NESCore.PPU
                 _registers.Address = value;
                 if(_addressLatch == false)
                 {
-                    _tempPPUAddress = (UInt16)(value << 8);
+                    _tempPPUAddress = (ushort)( (_tempPPUAddress & 0x00ff) | ((value & 0x3f) << 8));
+                    _addressLatch = true;
                 }
                 else
                 {
-                    _ppuAddress = (UInt16)((_tempPPUAddress&0x3f00) | value);
+                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0xff00) | value);
+                    _ppuAddress = _tempPPUAddress;
+                    _addressLatch = false;
                 }
-
-                _ppuAddress = (UInt16)(_ppuAddress & 0x3fff);
-                _addressLatch = !_addressLatch;
             }
             else if(address == 0x2007)
             {
                 _ppuMemory.Write(_ppuAddress, value);
-                _ppuAddress = (UInt16)((_ppuAddress + _registers.VRAMIncrement()) & 0x3fff);
+                _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3fff);
             }
             else
             {
@@ -195,9 +204,12 @@ namespace NESCore.PPU
             {
                 //cycle prerender scanline
 
-                _registers.SetVBlankFlag(false);
-                _registers.SetOverflowFlag(false);
-                _registers.SetSpriteZeroHitFlag(false);
+                if (_scanlineCycles == 1)
+                {
+                    _registers.SetVBlankFlag(false);
+                    _registers.SetOverflowFlag(false);
+                    _registers.SetSpriteZeroHitFlag(false);
+                }
             }
 
             _cycles++;
