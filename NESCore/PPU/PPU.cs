@@ -304,9 +304,9 @@ namespace NESCore.PPU
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
-                        _frameBuffer[pxOffset] = Palette[paletteId, 0];
+                        _frameBuffer[pxOffset + 2] = Palette[paletteId, 0];
                         _frameBuffer[pxOffset + 1] = Palette[paletteId, 1];
-                        _frameBuffer[pxOffset + 2] = Palette[paletteId, 2];
+                        _frameBuffer[pxOffset] = Palette[paletteId, 2];
                     }
                     MoveShiftRegisters();
                     

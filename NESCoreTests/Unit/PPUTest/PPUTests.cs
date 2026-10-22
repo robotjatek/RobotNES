@@ -932,9 +932,9 @@ namespace NESCoreTests.Unit.PPUTest
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // NTSC colors
-            buffer[0].Should().Be(228); // R
+            buffer[2].Should().Be(228); // B
             buffer[1].Should().Be(0); // G
-            buffer[2].Should().Be(88); // B
+            buffer[0].Should().Be(88); // R
         }
 
         [Fact]
