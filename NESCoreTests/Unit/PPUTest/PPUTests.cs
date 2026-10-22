@@ -911,5 +911,30 @@ namespace NESCoreTests.Unit.PPUTest
             // 0x3F00 | (3 << 2) | 3 = 0x3F0F
             paletteAddress.Should().Be(0x3F0F);
         }
+
+        [Fact]
+        public void OnVisibleScanline_ShouldRenderPixelFromPalette()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);
+            
+            memory.Setup(m => m.Read(0x3F0F)).Returns(0x15);
+            
+            ppu.Run(1);
+            
+            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var buffer = (byte[])bufferField!.GetValue(ppu)!;
+          
+            // NTSC colors
+            buffer[0].Should().Be(228); // R
+            buffer[1].Should().Be(0); // G
+            buffer[2].Should().Be(88); // B
+        }
     }
 }
