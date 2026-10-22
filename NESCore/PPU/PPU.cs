@@ -133,10 +133,16 @@ namespace NESCore.PPU
                 if(_addressLatch == false)
                 {
                     _registers.XScroll = value;
+                    // TODO: set finex & coarseX
+                    // _registers.FineX = (byte)(value & 0x07);
+                    // _registers.CoarseX = (byte)((value & 0x38) >> 3);
                 }
                 else
                 {
                     _registers.YScroll = value;
+                    // TODO: set fineny & coarseY
+                    // _registers.FineY = (byte)(value & 0x07);
+                    // _registers.CoarseY = (byte)((value & 0x70) >> 4);
                 }
                 _addressLatch = !_addressLatch;
                 // TODO: address register change
@@ -259,7 +265,25 @@ namespace NESCore.PPU
                          }
                          else
                          {
+                             const ushort CoarseYMask = 0x03E0;
+                             var coarseY = (ushort)((_ppuAddress & CoarseYMask) >> 5);
                              
+                             _ppuAddress &= 0x0FFF;
+
+                             if (coarseY == 29)
+                             {
+                                 // end of the nametable => change NT
+                             }
+                             else if (coarseY == 31)
+                             {
+                                 coarseY = 0;
+                             }
+                             else
+                             {
+                                 coarseY++;
+                             }
+                             
+                             _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
                          }
                     }
                 }

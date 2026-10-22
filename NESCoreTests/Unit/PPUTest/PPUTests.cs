@@ -615,5 +615,31 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuX = field?.GetValue(ppu);
             ppuX.Should().Be(0x3000); // We are back to the start of the tile row
         }
+        
+        [Fact]
+        public void ShouldWrapFineYAndIncrementCoarseY_WhenFineYIs7()
+        {
+            // fineY = 0
+            // increment CoarseY
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // V = 0x3000 => fineY = 3
+            ppu.Write(0x2006, 0x30);
+            ppu.Write(0x2006, 0x00);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0);
+            
+            // run until coarseY increments
+            
+            // 4 full scanlines => + 5th sc 256 cycle
+            ppu.Run(1620);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuAddress = field?.GetValue(ppu);
+            ppuAddress.Should().Be(0x0420);
+        }
+        
+        
     }
 }
