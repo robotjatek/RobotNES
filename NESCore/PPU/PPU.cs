@@ -19,6 +19,13 @@ namespace NESCore.PPU
         private ushort _tempPPUAddress = 0; // t
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
+        
+        private byte _ntId = 0;
+        private byte _attributeId = 0;
+        private byte _patternLow = 0;
+        private byte _patternHigh = 0;
+
+        const ushort CoarseYMask = 0x03E0;
 
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
 
@@ -188,13 +195,6 @@ namespace NESCore.PPU
         }
 
         Random r = new();
-
-        private byte _ntId = 0;
-        private byte _attributeId = 0;
-        private byte _patternLow = 0;
-        private byte _patternHigh = 0;
-
-        const ushort CoarseYMask = 0x03E0;
         
         private void IncrementCoarseX()
         {
@@ -244,6 +244,9 @@ namespace NESCore.PPU
             
         }
         
+        private ushort _shiftRegisterHi = 0;
+        private ushort _shiftRegisterLo = 0;
+        
         private void Cycle()
         {
             if (_scanlines is >= 0 and < 240)
@@ -284,6 +287,11 @@ namespace NESCore.PPU
                         var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
                         _patternHigh = _ppuMemory.Read(ptAddress);
+                        
+                        // shift register load
+                        _shiftRegisterLo = (ushort)((_shiftRegisterLo & 0xFF00) | _patternLow);
+                        _shiftRegisterHi = (ushort)((_shiftRegisterHi & 0xFF00) | _patternHigh);
+                        
                         IncrementCoarseX();
                     }
 

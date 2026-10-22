@@ -745,5 +745,40 @@ namespace NESCoreTests.Unit.PPUTest
             latch = (bool)latchField!.GetValue(ppu);
             latch.Should().BeFalse();
         }
+
+        [Fact]
+        public void ShouldReloadShiftRegisters()
+        {
+            // Shift registers are used to output pixels.
+            // There are 2 shift registers, one for the low bits and one for the high bits from the pattern table.
+            // These bytes were loaded from the pattern table in the previous cycles.
+            var registers = new PPURegisters
+            {
+                Control = 0x10 // BG base 0x1000
+            };
+            
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            ppu.Write(0x2006, 0);
+            ppu.Write(0x2006, 0x8C);
+            
+            memory.Setup(m => m.Read(0x208C)).Returns(0x41);
+            memory.Setup(m => m.Read(0x22CB)).Returns(0x00);
+            memory.Setup(m => m.Read(0x1410)).Returns(0b11110000); // pattern-lo
+            memory.Setup(m => m.Read(0x1418)).Returns(0b10101010); // pattern-hi
+            
+            ppu.Run(8);
+            
+            memory.Verify(m => m.Read(0x208C));
+            
+            var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            var lowValue = (ushort)shiftLo!.GetValue(ppu);
+            var highValue = (ushort)shiftHi!.GetValue(ppu);
+            
+            (lowValue & 0x00FF).Should().Be(0b11110000);
+            (highValue & 0x00FF).Should().Be(0b10101010);
+        }
     }
 }
