@@ -671,10 +671,10 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Write(0x2005, 0x7D);
 
-            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
-            var tempAddress = (ushort)field!.GetValue(ppu);
+            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu)!;
             var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
-            var latch = (bool)latchField!.GetValue(ppu);
+            var latch = (bool)latchField!.GetValue(ppu)!;
             
             // temp low 5 bits is coarse X
             var tempCoarseX = tempAddress & 0x1F;
@@ -694,10 +694,10 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Write(0x2005, 0x7D);
             ppu.Write(0x2005, 0b10101010); // second write is tested here
 
-            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
-            var tempAddress = (ushort)field!.GetValue(ppu);
+            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu)!;
             var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
-            var latch = (bool)latchField!.GetValue(ppu);
+            var latch = (bool)latchField!.GetValue(ppu)!;
             
             //FGH..AB CDE..... <- d: ABCDEFGH
             
@@ -720,8 +720,8 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new PPU(registers, memory.Object, _logger);
 
             ppu.Write(0x2000, 0b00000011);
-            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
-            var tempAddress = (ushort)field!.GetValue(ppu);
+            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu)!;
             
             var nt = (tempAddress & 0x0C00) >> 10;
             //t: 0 yyy NN YYYYY XXXXX
@@ -736,13 +736,13 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Write(0x2005, 1);
             
             var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
-            var latch = (bool)latchField!.GetValue(ppu);
+            var latch = (bool)latchField!.GetValue(ppu)!;
             latch.Should().BeTrue();
 
             ppu.Read(0x2002);
             
             latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
-            latch = (bool)latchField!.GetValue(ppu);
+            latch = (bool)latchField!.GetValue(ppu)!;
             latch.Should().BeFalse();
         }
 
@@ -774,8 +774,8 @@ namespace NESCoreTests.Unit.PPUTest
             var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
             var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
             
-            var lowValue = (ushort)shiftLo!.GetValue(ppu);
-            var highValue = (ushort)shiftHi!.GetValue(ppu);
+            var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
+            var highValue = (ushort)shiftHi!.GetValue(ppu)!;
             
             (lowValue & 0x00FF).Should().Be(0b11110000);
             (highValue & 0x00FF).Should().Be(0b10101010);
@@ -805,12 +805,53 @@ namespace NESCoreTests.Unit.PPUTest
             var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
             var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            var lowValue = (ushort)shiftLo!.GetValue(ppu);
-            var highValue = (ushort)shiftHi!.GetValue(ppu);
+            var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
+            var highValue = (ushort)shiftHi!.GetValue(ppu)!;
 
             // registers should be shifted left one bit
             lowValue.Should().Be(0b111100000);
             highValue.Should().Be(0b101010100);
+        }
+
+        [Fact]
+        public void ShouldReloadAttributeShiftRegisterWithCorrect2BitsOnCycle8()
+        {
+            // every pixel needs two bits from AT
+            // AT bits:
+            //  0,1 top-left
+            //  2,3 top-right
+            //  4-5 bottom-left
+            //  6-7 bottom right
+            
+            // coarse X and coarse y determine which quarter of the AT to use
+            // coarse X bit 1 == 1 => right
+            // coarse Y bit 1 == 1 => bottom
+            
+            var registers = new PPURegisters
+            {
+                Control = 0x10
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // coarse X = 2 (bit 1 = 1), coarse y = 2 (bit 1 = 1) [right bottom at bits]
+            ppu.Write(0x2006, 0);
+            ppu.Write(0x2006, 0x42);
+            
+            memory.Setup(m => m.Read(0x2042)).Returns(0);
+            // $23C0 | 0 | 0 | 0 = $23C0
+            memory.Setup(m => m.Read(0x23C0)).Returns(0b11000000); // bottom right palette is set to 3
+
+            ppu.Run(8);
+            
+            var attrLo = typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var attrHi = typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            var attrLoValue = (byte)attrLo!.GetValue(ppu)!;
+            var attrHiValue = (byte)attrHi!.GetValue(ppu)!;
+
+            (attrLoValue & 0x01).Should().Be(1);
+            (attrHiValue & 0x01).Should().Be(1);
         }
     }
 }

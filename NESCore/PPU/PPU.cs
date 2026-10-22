@@ -16,7 +16,7 @@ namespace NESCore.PPU
 
         private byte _ppuDataBus = 0;
         private ushort _ppuAddress = 0; // v: 0 yyy NN YYYYY XXXXX 
-        private ushort _tempPPUAddress = 0; // t
+        private ushort _tempAddress = 0; // t
         private bool _addressLatch = false;
         private byte _dataBuffer = 0;
         
@@ -121,7 +121,7 @@ namespace NESCore.PPU
             if (address == 0x2000)
             {
                 _registers.Control = value;
-                _tempPPUAddress = (ushort)((_tempPPUAddress & 0xF3FF) 
+                _tempAddress = (ushort)((_tempAddress & 0xF3FF) 
                                            | (value & 0x03) << 10);
             }
             else if(address == 0x2001)
@@ -145,7 +145,7 @@ namespace NESCore.PPU
                     _registers.XScroll = value;
                     _registers.FineX = (byte)(value & 0x07);
                     _registers.CoarseX = (ushort)((value) >> 3);
-                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0xffe0) | _registers.CoarseX);
+                    _tempAddress = (ushort)((_tempAddress & 0xffe0) | _registers.CoarseX);
                 }
                 else
                 {
@@ -153,7 +153,7 @@ namespace NESCore.PPU
                     //FGH..AB CDE..... <- d: ABCDEFGH
                     _registers.FineY = (ushort)(value & 0x07);
                     _registers.CoarseY = (ushort)(value >> 3);
-                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0x8C1F) // mask out fineY and coarseY
+                    _tempAddress = (ushort)((_tempAddress & 0x8C1F) // mask out fineY and coarseY
                                                | (_registers.FineY << 12) 
                                                | (_registers.CoarseY << 5));
                 }
@@ -164,13 +164,13 @@ namespace NESCore.PPU
                 _registers.Address = value;
                 if(_addressLatch == false)
                 {
-                    _tempPPUAddress = (ushort)( (_tempPPUAddress & 0x00ff) | ((value & 0x3f) << 8));
+                    _tempAddress = (ushort)( (_tempAddress & 0x00ff) | ((value & 0x3f) << 8));
                     _addressLatch = true;
                 }
                 else
                 {
-                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0xff00) | value);
-                    _ppuAddress = _tempPPUAddress;
+                    _tempAddress = (ushort)((_tempAddress & 0xff00) | value);
+                    _ppuAddress = _tempAddress;
                     _addressLatch = false;
                 }
             }
@@ -205,9 +205,15 @@ namespace NESCore.PPU
             {
                 _ppuAddress &= 0xFFE0; // zero out the bottom 5 bits (coarse x part of the address)
                 _ppuAddress ^= 0x0400; // Switch to next nametable
+
+                _registers.CoarseX = 0;
             }
             else
+            {
                 _ppuAddress = (ushort)(_ppuAddress + 1);
+                _registers.CoarseX++;
+            }
+            
         }
 
         private void IncrementY()
@@ -247,13 +253,16 @@ namespace NESCore.PPU
         
         private ushort _shiftRegisterHi = 0;
         private ushort _shiftRegisterLo = 0;
+        private byte _attributeRegisterLo = 0;
+        private byte _attributeRegisterHi = 0;
         
         private void MoveShiftRegisters()
         {
             _shiftRegisterLo <<= 1;
             _shiftRegisterHi <<= 1;
             
-            // TODO: handle AT
+            _attributeRegisterLo <<= 1;
+            _attributeRegisterHi <<= 1;
         }
         
         private void Cycle()
@@ -303,6 +312,15 @@ namespace NESCore.PPU
                         _shiftRegisterLo = (ushort)((_shiftRegisterLo & 0xFF00) | _patternLow);
                         _shiftRegisterHi = (ushort)((_shiftRegisterHi & 0xFF00) | _patternHigh);
                         
+                        // attribute register load
+                        var coarseXBit1 = (_ppuAddress & 0x0002);
+                        var coarseYBit1 = (_ppuAddress & 0x0040) >> 4;
+                        var shiftAmount = coarseYBit1 | coarseXBit1;
+
+                        var paletteBits = (_attributeId >> shiftAmount) & 0x03;
+                        _attributeRegisterLo = (byte)((_attributeRegisterLo & 0xfe) | paletteBits & 0x1);
+                        _attributeRegisterHi = (byte)((_attributeRegisterHi & 0xfe) | (paletteBits >> 1) & 0x1);
+                        
                         IncrementCoarseX();
                     }
 
@@ -315,7 +333,7 @@ namespace NESCore.PPU
                 {
                     // reset X
                     // copy coarseX and horizontal nametable bits from t 
-                    _ppuAddress = (ushort)((_ppuAddress & ~0x041F) | (_tempPPUAddress & 0x041F));
+                    _ppuAddress = (ushort)((_ppuAddress & ~0x041F) | (_tempAddress & 0x041F));
                 }
                 
                 // TODO: remove this and add proper pixel rendering
