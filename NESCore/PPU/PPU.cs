@@ -207,19 +207,22 @@ namespace NESCore.PPU
             }
         }
 
-        Random r = new();
-
         private ushort GetCurrentPixelPaletteAddress()
         {
-            var colorId = (ushort)(((_shiftRegisterLo & 0x8000) >> 15) |
-                          ((_shiftRegisterHi & 0x8000) >> 14));
-            if (colorId == 0)
-            {
-                return 0x3f00;
-            }
+            var bitPosition = 15 - _registers.FineX;
 
-            var paletteId = (ushort)(((_attributeRegisterLo & 0x80) >> 7) | ((_attributeRegisterHi & 0x80) >> 6));
-            return (ushort)(0x3f00 + (paletteId << 2) | colorId);
+            var colorIndex = (((_shiftRegisterLo >> bitPosition) & 0x01) | 
+                              (((_shiftRegisterHi >> bitPosition) & 0x01) << 1));
+    
+            if (colorIndex == 0)
+            {
+                return 0x3F00;
+            }
+    
+            var paletteId = (((_attributeRegisterLo >> bitPosition) & 0x01) | 
+                             (((_attributeRegisterHi >> bitPosition) & 0x01) << 1));
+    
+            return (ushort)(0x3F00 | (paletteId << 2) | colorIndex);
         }
         
         internal ushort GetCurrentPixelPaletteAddressTest() => GetCurrentPixelPaletteAddress();
@@ -254,7 +257,7 @@ namespace NESCore.PPU
             else
             {
                 var coarseY = (ushort)((_ppuAddress & CoarseYMask) >> 5);
-                _ppuAddress &= 0x0FFF;
+                _ppuAddress &= 0x8FFF;
 
                 if (coarseY == 29)
                 {
@@ -262,7 +265,7 @@ namespace NESCore.PPU
                     // coarseY = 0;
                     // NT++
                     coarseY = 0;
-                    _ppuAddress ^= 0x800;
+                    _ppuAddress ^= 0x0800;
                 }
                 else if (coarseY == 31)
                 {
@@ -275,13 +278,12 @@ namespace NESCore.PPU
                              
                 _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
             }
-            
         }
         
         private ushort _shiftRegisterHi = 0;
         private ushort _shiftRegisterLo = 0;
-        private byte _attributeRegisterLo = 0;
-        private byte _attributeRegisterHi = 0;
+        private ushort _attributeRegisterLo = 0;
+        private ushort _attributeRegisterHi = 0;
         
         private void MoveShiftRegisters()
         {
@@ -294,10 +296,12 @@ namespace NESCore.PPU
         
         private void Cycle()
         {
+            var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
+            
             if (_scanlines is >= 0 and < 240)
             { 
                 //Cycle visible scanline
-                if (_scanlineCycles is < 256 or >= 320 and < 340) // ppu keeps fetching during non-visible cycles (after sprite evaluation)
+                if (renderingEnabled && _scanlineCycles is < 256 or >= 320 and < 340) // ppu keeps fetching during non-visible cycles (after sprite evaluation)
                 {
                     if (_scanlineCycles < 256)
                     {
@@ -354,8 +358,10 @@ namespace NESCore.PPU
                         var shiftAmount = coarseYBit1 | coarseXBit1;
 
                         var paletteBits = (_attributeId >> shiftAmount) & 0x03;
-                        _attributeRegisterLo = (byte)((_attributeRegisterLo & 0xfe) | paletteBits & 0x1);
-                        _attributeRegisterHi = (byte)((_attributeRegisterHi & 0xfe) | (paletteBits >> 1) & 0x1);
+                        var attrLo = (byte)((paletteBits & 1) != 0 ? 0xFF : 0x00);
+                        var attrHi = (byte)(((paletteBits >> 1) & 1) != 0 ? 0xFF : 0x00);
+                        _attributeRegisterLo = (ushort)((_attributeRegisterLo & 0xFF00) | attrLo);
+                        _attributeRegisterHi = (ushort)((_attributeRegisterHi & 0xFF00) | attrHi);
                         
                         IncrementCoarseX();
                     }
@@ -365,7 +371,7 @@ namespace NESCore.PPU
                        IncrementY();
                     }
                 }
-                else if (_scanlineCycles == 256)
+                else if (_scanlineCycles == 256 && renderingEnabled)
                 {
                     // reset X
                     // copy coarseX and horizontal nametable bits from t 
@@ -398,12 +404,11 @@ namespace NESCore.PPU
                     _registers.SetOverflowFlag(false);
                     _registers.SetSpriteZeroHitFlag(false);
                 }
-                else if (_scanlineCycles is >= 280 and <= 304)
+                
+                if (_scanlineCycles >= 280 && _scanlineCycles <= 304 && renderingEnabled)
                 {
                     // copy vertical info from temp register to the address register
-                    _ppuAddress &= 0x441F; // reset fineY and coarseY values in the address register
-                    var verticalValues = (ushort)(_tempAddress & 0x7BE0); // keep only the vertical values (mask is inverted)
-                    _ppuAddress |= verticalValues;
+                    _ppuAddress = (ushort)((_ppuAddress & ~0x7BE0) | (_tempAddress & 0x7BE0));
                 }
             }
 

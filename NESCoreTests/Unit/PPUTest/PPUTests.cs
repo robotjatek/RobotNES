@@ -562,7 +562,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void CoarseXShouldWrapAroundOn32()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters() { Control = 0x8 }; // Show background
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -915,7 +915,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void OnVisibleScanline_ShouldRenderPixelFromPalette()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Control = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
