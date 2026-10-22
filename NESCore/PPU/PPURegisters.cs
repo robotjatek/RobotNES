@@ -40,6 +40,8 @@
         public byte Address { get; set; } = 0;
         public byte XScroll { get; set; } = 0;
         public byte YScroll { get; set; } = 0;
+        public byte FineX { get; set; } = 0;
+        public ushort CoarseX { get; set; } = 0;
 
         #region STATUS_REGISTER
         public void SetVBlankFlag(bool value)

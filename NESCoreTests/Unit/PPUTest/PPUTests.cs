@@ -661,5 +661,27 @@ namespace NESCoreTests.Unit.PPUTest
             // Coarse X = 0x400
             ppuAddress.Should().Be(0x0C00);
         }
+
+        [Fact]
+        public void WriteToScrollForTheFirstTime_SetsCoarseScrollInTheTempAddressRegister()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            ppu.Write(0x2005, 0x7D);
+
+            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu);
+            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latch = (bool)latchField!.GetValue(ppu);
+            
+            // temp low 5 bits is coarse X
+            var tempCoarseX = tempAddress & 0x1F;
+            tempCoarseX.Should().Be(0xF);
+            registers.CoarseX.Should().Be(0xF); // also set in the background registers
+            registers.FineX.Should().Be(0x05);
+            latch.Should().BeTrue();
+        }
     }
 }

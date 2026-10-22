@@ -133,9 +133,9 @@ namespace NESCore.PPU
                 if(_addressLatch == false)
                 {
                     _registers.XScroll = value;
-                    // TODO: set finex & coarseX
-                    // _registers.FineX = (byte)(value & 0x07);
-                    // _registers.CoarseX = (byte)((value & 0x38) >> 3);
+                    _registers.FineX = (byte)(value & 0x07);
+                    _registers.CoarseX = (ushort)((value) >> 3);
+                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0xffe0) | _registers.CoarseX);
                 }
                 else
                 {

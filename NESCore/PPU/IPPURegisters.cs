@@ -16,6 +16,9 @@
         byte Address { get; set; }
         byte XScroll { get; set; }
         byte YScroll { get; set; }
+       
+        byte FineX { get; set; }
+        ushort CoarseX { get; set; }
 
 
         #region STATUS_REGISTER
