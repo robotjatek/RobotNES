@@ -113,6 +113,8 @@ namespace NESCore.PPU
             if (address == 0x2000)
             {
                 _registers.Control = value;
+                _tempPPUAddress = (ushort)((_tempPPUAddress & 0xF3FF) 
+                                           | (value & 0x03) << 10);
             }
             else if(address == 0x2001)
             {

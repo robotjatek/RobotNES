@@ -701,7 +701,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             //FGH..AB CDE..... <- d: ABCDEFGH
             
-            //: 0 yyy NN YYYYY XXXXX 
+            //t: 0 yyy NN YYYYY XXXXX 
             var tempFineY = (tempAddress & 0x7000) >> 12;
             tempFineY.Should().Be(0b010);
             registers.FineY.Should().Be(0b010);
@@ -710,6 +710,22 @@ namespace NESCoreTests.Unit.PPUTest
             tempCoarseY.Should().Be(0b10101);
             registers.CoarseY.Should().Be(0b10101);
             latch.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ControlRegisterWrite_ShouldUpdateNameTableBitsInTemp()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            ppu.Write(0x2000, 0b00000011);
+            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu);
+            
+            var nt = (tempAddress & 0x0C00) >> 10;
+            //t: 0 yyy NN YYYYY XXXXX
+            nt.Should().Be(0b11);
         }
     }
 }
