@@ -780,5 +780,37 @@ namespace NESCoreTests.Unit.PPUTest
             (lowValue & 0x00FF).Should().Be(0b11110000);
             (highValue & 0x00FF).Should().Be(0b10101010);
         }
+
+        [Fact]
+        public void ShiftRegisters_ShouldShiftLeftOneBit_DuringVisibleCycles()
+        {
+            // same as the previous test, only shift registers should be shifted left one bit
+            var registers = new PPURegisters()
+            {
+                Control = 0x10
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            ppu.Write(0x2006, 0);
+            ppu.Write(0x2006, 0x8C);
+
+            memory.Setup(m => m.Read(0x208c)).Returns(0x41);
+            memory.Setup(m => m.Read(0x22CB)).Returns(0);
+            memory.Setup(m => m.Read(0x1410)).Returns(0b11110000);
+            memory.Setup(m => m.Read(0x1418)).Returns(0b10101010);
+            
+            ppu.Run(8); // Load the shift registers with the first 8 bits
+            ppu.Run(1); // Shift left one bit
+            
+            var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var lowValue = (ushort)shiftLo!.GetValue(ppu);
+            var highValue = (ushort)shiftHi!.GetValue(ppu);
+
+            // registers should be shifted left one bit
+            lowValue.Should().Be(0b111100000);
+            highValue.Should().Be(0b101010100);
+        }
     }
 }

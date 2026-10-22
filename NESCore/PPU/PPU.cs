@@ -24,6 +24,7 @@ namespace NESCore.PPU
         private byte _attributeId = 0;
         private byte _patternLow = 0;
         private byte _patternHigh = 0;
+        
 
         const ushort CoarseYMask = 0x03E0;
 
@@ -247,6 +248,14 @@ namespace NESCore.PPU
         private ushort _shiftRegisterHi = 0;
         private ushort _shiftRegisterLo = 0;
         
+        private void MoveShiftRegisters()
+        {
+            _shiftRegisterLo <<= 1;
+            _shiftRegisterHi <<= 1;
+            
+            // TODO: handle AT
+        }
+        
         private void Cycle()
         {
             if (_scanlines is >= 0 and < 240)
@@ -254,6 +263,8 @@ namespace NESCore.PPU
                 //Cycle visible scanline
                 if (_scanlineCycles < 256)
                 {
+                    MoveShiftRegisters();
+                    
                     var phase = _scanlineCycles % 8;
                     if (phase == 1)
                     {
@@ -318,7 +329,7 @@ namespace NESCore.PPU
             }
             else if (_scanlines == 240)
             {
-                //cycle post render scanline
+                //cycle post render scanline: idle
             }
             else if(_scanlines >= 241 && _scanlines <= 260)
             {
