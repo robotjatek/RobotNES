@@ -297,31 +297,32 @@ namespace NESCore.PPU
         private void Cycle()
         {
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
-            
-            if (_scanlines is >= 0 and < 240)
-            { 
-                //Cycle visible scanline
-                if (renderingEnabled && _scanlineCycles is < 256 or >= 320 and < 340) // ppu keeps fetching during non-visible cycles (after sprite evaluation)
+            var isRenderScanline = _scanlines is >= 0 and < 240;
+            var isPreRenderScanline = _scanlines == 261;
+
+            if (isRenderScanline || isPreRenderScanline)
+            {
+                if (renderingEnabled && _scanlineCycles is < 256 or >= 320 and < 336)
                 {
-                    if (_scanlineCycles < 256)
+                    // Only output pixels to the framebuffer on visible scanlines (0..239)
+                    if (isRenderScanline && _scanlineCycles < 256)
                     {
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
                         _frameBuffer[pxOffset + 2] = Palette[paletteId, 0];
                         _frameBuffer[pxOffset + 1] = Palette[paletteId, 1];
-                        _frameBuffer[pxOffset] = Palette[paletteId, 2];
+                        _frameBuffer[pxOffset + 0] = Palette[paletteId, 2];
                     }
+
                     MoveShiftRegisters();
-                    
+
                     var phase = _scanlineCycles % 8;
                     if (phase == 1)
                     {
-                        // Fetch nametable:
-                        // tile address = 0x2000 | (v & 0x0FFF)
-                        var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0fff));
+                        var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0FFF));
                         _ntId = _ppuMemory.Read(ntAddress);
-                    } 
+                    }
                     else if (phase == 3)
                     {
                         // Fetch attribute table
@@ -347,12 +348,12 @@ namespace NESCore.PPU
                         var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
                         _patternHigh = _ppuMemory.Read(ptAddress);
-                        
-                        // shift register load
+
+                        // Reload shift registers (lower 8 bits)
                         _shiftRegisterLo = (ushort)((_shiftRegisterLo & 0xFF00) | _patternLow);
                         _shiftRegisterHi = (ushort)((_shiftRegisterHi & 0xFF00) | _patternHigh);
-                        
-                        // attribute register load
+
+                        // Reload attribute registers (lower 8 bits with 8 duplicated bits)
                         var coarseXBit1 = (_ppuAddress & 0x0002);
                         var coarseYBit1 = (_ppuAddress & 0x0040) >> 4;
                         var shiftAmount = coarseYBit1 | coarseXBit1;
@@ -362,53 +363,52 @@ namespace NESCore.PPU
                         var attrHi = (byte)(((paletteBits >> 1) & 1) != 0 ? 0xFF : 0x00);
                         _attributeRegisterLo = (ushort)((_attributeRegisterLo & 0xFF00) | attrLo);
                         _attributeRegisterHi = (ushort)((_attributeRegisterHi & 0xFF00) | attrHi);
-                        
+
                         IncrementCoarseX();
                     }
 
                     if (_scanlineCycles == 255)
                     {
-                       IncrementY();
+                        IncrementY();
                     }
                 }
-                else if (_scanlineCycles == 256 && renderingEnabled)
+                else if (renderingEnabled && _scanlineCycles == 256)
                 {
-                    // reset X
-                    // copy coarseX and horizontal nametable bits from t 
+                    // Reset horizontal scroll (coarse X and NT horizontal bit)
                     _ppuAddress = (ushort)((_ppuAddress & ~0x041F) | (_tempAddress & 0x041F));
+                }
+
+                // Pre-render line specific actions
+                if (isPreRenderScanline)
+                {
+                    if (_scanlineCycles == 1)
+                    {
+                        _registers.SetVBlankFlag(false);
+                        _registers.SetOverflowFlag(false);
+                        _registers.SetSpriteZeroHitFlag(false);
+                    }
+
+                    if (_scanlineCycles >= 280 && _scanlineCycles <= 304 && renderingEnabled)
+                    {
+                        // Reset vertical scroll
+                        _ppuAddress = (ushort)((_ppuAddress & ~0x7BE0) | (_tempAddress & 0x7BE0));
+                    }
                 }
             }
             else if (_scanlines == 240)
             {
-                //cycle post render scanline: idle
+                // Post-render scanline: idle
             }
-            else if(_scanlines >= 241 && _scanlines <= 260)
+            else if (_scanlines >= 241 && _scanlines <= 260)
             {
-                //cycle vblank scanline
-                if(_scanlines == 241 && _scanlineCycles == 0)
+                // VBlank scanlines
+                if (_scanlines == 241 && _scanlineCycles == 0)
                 {
                     _registers.SetVBlankFlag(true);
                     if (_registers.GetEnableNMI())
                     {
                         NMIEvent?.Invoke(_frameBuffer);
                     }
-                }
-            }
-            else if(_scanlines == 261)
-            {
-                //cycle prerender scanline
-
-                if (_scanlineCycles == 1)
-                {
-                    _registers.SetVBlankFlag(false);
-                    _registers.SetOverflowFlag(false);
-                    _registers.SetSpriteZeroHitFlag(false);
-                }
-                
-                if (_scanlineCycles >= 280 && _scanlineCycles <= 304 && renderingEnabled)
-                {
-                    // copy vertical info from temp register to the address register
-                    _ppuAddress = (ushort)((_ppuAddress & ~0x7BE0) | (_tempAddress & 0x7BE0));
                 }
             }
 
@@ -418,7 +418,7 @@ namespace NESCore.PPU
             {
                 _scanlines++;
                 _scanlineCycles = 0;
-                if(_scanlines > 261)
+                if (_scanlines > 261)
                 {
                     _scanlines = 0;
                 }
