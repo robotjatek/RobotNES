@@ -635,7 +635,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
-            ppuAddress.Should().Be(0x0420);
+            ppuAddress.Should().Be(0x0422);
         }
 
         [Fact]
@@ -659,7 +659,8 @@ namespace NESCoreTests.Unit.PPUTest
             // coarse Y = 0
             // NT horizontal = 1 0x800
             // Coarse X = 0x400
-            ppuAddress.Should().Be(0x0C00);
+            // + 2 prefetch reads
+            ppuAddress.Should().Be(0x0C02);
         }
 
         [Fact]
@@ -872,6 +873,26 @@ namespace NESCoreTests.Unit.PPUTest
             var address = (ushort)field!.GetValue(ppu)!;
             ((address & 0x7000) >> 12).Should().Be(6); // fine y
             ((address & 0x03e0) >> 5).Should().Be(11); // coarse Y
+        }
+
+        [Fact]
+        public void ShouldKeepFetchingOnNonVisibleCycles()
+        {
+            // ppu does not stop fetching during non-visible cycles
+            // NT, AT, PATTERN1, PATTERN2 fetches keep happening after between cycle 320 and 340 to prefetch the next 2 tiles for the next scanline
+
+            var registers = new PPURegisters { Control = 0x10 };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            ppu.Write(0x2006, 0x20);
+            ppu.Write(0x2006, 0x0);
+            memory.Setup(m => m.Read(0x2000)).Returns(0x99);
+            memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0);
+            
+            ppu.Run(321); // the first pre-fetch nt read should happen here
+            
+            memory.Verify(m => m.Read(0x2000), Times.Once);
         }
     }
 }

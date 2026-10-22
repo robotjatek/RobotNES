@@ -270,7 +270,7 @@ namespace NESCore.PPU
             if (_scanlines is >= 0 and < 240)
             { 
                 //Cycle visible scanline
-                if (_scanlineCycles < 256)
+                if (_scanlineCycles is < 256 or >= 320 and < 340) // ppu keeps fetching during non-visible cycles (after sprite evaluation)
                 {
                     MoveShiftRegisters();
                     
