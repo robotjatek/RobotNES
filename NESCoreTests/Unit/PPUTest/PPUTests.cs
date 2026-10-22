@@ -683,5 +683,33 @@ namespace NESCoreTests.Unit.PPUTest
             registers.FineX.Should().Be(0x05);
             latch.Should().BeTrue();
         }
+        
+        [Fact]
+        public void WriteToScrollForTheSecondTime_SetsYScrollInTheTempAddressRegister()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            ppu.Write(0x2005, 0x7D);
+            ppu.Write(0x2005, 0b10101010); // second write is tested here
+
+            var field = typeof(PPU).GetField("_tempPPUAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tempAddress = (ushort)field!.GetValue(ppu);
+            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latch = (bool)latchField!.GetValue(ppu);
+            
+            //FGH..AB CDE..... <- d: ABCDEFGH
+            
+            //: 0 yyy NN YYYYY XXXXX 
+            var tempFineY = (tempAddress & 0x7000) >> 12;
+            tempFineY.Should().Be(0b010);
+            registers.FineY.Should().Be(0b010);
+            
+            var tempCoarseY = (tempAddress & 0x3e0) >> 5;
+            tempCoarseY.Should().Be(0b10101);
+            registers.CoarseY.Should().Be(0b10101);
+            latch.Should().BeFalse();
+        }
     }
 }

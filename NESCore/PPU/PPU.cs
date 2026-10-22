@@ -140,12 +140,14 @@ namespace NESCore.PPU
                 else
                 {
                     _registers.YScroll = value;
-                    // TODO: set fineny & coarseY
-                    // _registers.FineY = (byte)(value & 0x07);
-                    // _registers.CoarseY = (byte)((value & 0x70) >> 4);
+                    //FGH..AB CDE..... <- d: ABCDEFGH
+                    _registers.FineY = (ushort)(value & 0x07);
+                    _registers.CoarseY = (ushort)(value >> 3);
+                    _tempPPUAddress = (ushort)((_tempPPUAddress & 0x8C1F) // mask out fineY and coarseY
+                                               | (_registers.FineY << 12) 
+                                               | (_registers.CoarseY << 5));
                 }
                 _addressLatch = !_addressLatch;
-                // TODO: address register change
             }
             else if(address == 0x2006)
             {
