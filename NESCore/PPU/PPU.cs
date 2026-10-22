@@ -1,4 +1,4 @@
-﻿using Serilog;
+﻿﻿using Serilog;
 
 //TODO: OAMADDR set to 0 on prerender (257-320)
 
@@ -196,6 +196,21 @@ namespace NESCore.PPU
         }
 
         Random r = new();
+
+        private ushort GetCurrentPixelPaletteAddress()
+        {
+            var colorId = (ushort)(((_shiftRegisterLo & 0x8000) >> 15) |
+                          ((_shiftRegisterHi & 0x8000) >> 14));
+            if (colorId == 0)
+            {
+                return 0x3f00;
+            }
+
+            var paletteId = (ushort)(((_attributeRegisterLo & 0x80) >> 7) | ((_attributeRegisterHi & 0x80) >> 6));
+            return (ushort)(0x3f00 + (paletteId << 2) | colorId);
+        }
+        
+        internal ushort GetCurrentPixelPaletteAddressTest() => GetCurrentPixelPaletteAddress();
         
         private void IncrementCoarseX()
         {

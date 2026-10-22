@@ -51,13 +51,13 @@ namespace NESCore.PPU
             {
                 //TODO: maybe these writes are CHR-RAM writes?
                 _logger.Error("Unsupported write to pattern table 0 through ppu");
-                throw new NotImplementedException();
+            //    throw new NotImplementedException();
             }
             else if (IsInPatternTableOne(address))
             {
                 //TODO: maybe these writes are CHR-RAM writes?
                 _logger.Error("Unsupported write to pattern table 1 through ppu");
-                throw new NotImplementedException();
+           //     throw new NotImplementedException();
             }
             else if (IsInNameTable(address))
             {

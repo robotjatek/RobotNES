@@ -894,5 +894,22 @@ namespace NESCoreTests.Unit.PPUTest
             
             memory.Verify(m => m.Read(0x2000), Times.Once);
         }
+
+        [Fact]
+        public void ShouldGetCurrentPixelPalletteAddressFromShiftRegisters()
+        {
+            var registers = new PPURegisters { Control = 0x10 };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 0 = 1
+            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 1 = 1 -> Color Index = 3
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);  // bit 0 = 1
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);  // bit 1 = 1 -> Palette ID = 3
+            
+            var paletteAddress = ppu.GetCurrentPixelPaletteAddressTest();
+            // 0x3F00 | (3 << 2) | 3 = 0x3F0F
+            paletteAddress.Should().Be(0x3F0F);
+        }
     }
 }
