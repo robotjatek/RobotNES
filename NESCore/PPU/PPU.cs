@@ -379,7 +379,7 @@ namespace NESCore.PPU
             else if(_scanlines >= 241 && _scanlines <= 260)
             {
                 //cycle vblank scanline
-                if(_scanlines == 241 && _scanlineCycles == 1)
+                if(_scanlines == 241 && _scanlineCycles == 0)
                 {
                     _registers.SetVBlankFlag(true);
                     if (_registers.GetEnableNMI())

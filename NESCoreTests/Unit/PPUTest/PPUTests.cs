@@ -936,5 +936,23 @@ namespace NESCoreTests.Unit.PPUTest
             buffer[1].Should().Be(0); // G
             buffer[2].Should().Be(88); // B
         }
+
+        [Fact]
+        public void ShouldSetVBlankFlagAtTheExactStartOfVBlank()
+        {
+            var registers = new PPURegisters { Control = 0x80 }; // nmi enabled: bit 7 = 1
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            using var monitor = ppu.Monitor();
+
+            uint cyclesBeforeVBlank = 240 * 341 + 341;
+            ppu.Run(cyclesBeforeVBlank);
+            registers.GetVBlankFlag().Should().BeFalse();
+
+            ppu.Run(1);
+
+            registers.GetVBlankFlag().Should().BeTrue();
+            monitor.Should().Raise(nameof(ppu.NMIEvent));
+        }
     }
 }
