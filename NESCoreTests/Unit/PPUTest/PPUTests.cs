@@ -453,7 +453,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldFetchNameTableOnVisibleCycle2()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
 
@@ -470,7 +470,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldFetchAttributeTableOnVisibleCycle4()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -495,7 +495,8 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters
             {
-                Control = 0x10 // BG pattern table in the second thebe (0x1000-0x1fff)
+                Control = 0x10, // BG pattern table in the second table (0x1000-0x1fff)
+                Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -519,7 +520,8 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters
             {
-                Control = 0x10 // BG pattern table in the second thebe (0x1000-0x1fff)
+                Control = 0x10, // BG pattern table in the second table (0x1000-0x1fff)
+                Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -543,7 +545,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldIncrementCoarseXOnCycle8()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
 
@@ -562,7 +564,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void CoarseXShouldWrapAroundOn32()
         {
-            var registers = new PPURegisters() { Control = 0x8 }; // Show background
+            var registers = new PPURegisters() { Mask = 0x8 }; // Show background
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -582,7 +584,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ShouldIncrementFineYOnCycle256()
         {
             // We are at the end of the scanline, so we should wrap around to the next tile row (increment fineY)
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -601,7 +603,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldRestoreXAtTheEndOfTheScanline()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -619,7 +621,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldWrapFineYAndIncrementCoarseY_WhenFineYIs7()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -641,7 +643,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldIncrementNameTableBit()
         {
-            var registers = new PPURegisters();
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -755,7 +757,8 @@ namespace NESCoreTests.Unit.PPUTest
             // These bytes were loaded from the pattern table in the previous cycles.
             var registers = new PPURegisters
             {
-                Control = 0x10 // BG base 0x1000
+                Control = 0x10, // BG base 0x1000
+                Mask = 0x8
             };
             
             var memory = new Mock<IPPUMemory>();
@@ -788,7 +791,8 @@ namespace NESCoreTests.Unit.PPUTest
             // same as the previous test, only shift registers should be shifted left one bit
             var registers = new PPURegisters()
             {
-                Control = 0x10
+                Control = 0x10,
+                Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -830,7 +834,8 @@ namespace NESCoreTests.Unit.PPUTest
             
             var registers = new PPURegisters
             {
-                Control = 0x10
+                Control = 0x10,
+                Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -848,8 +853,8 @@ namespace NESCoreTests.Unit.PPUTest
             var attrLo = typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
             var attrHi = typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
             
-            var attrLoValue = (byte)attrLo!.GetValue(ppu)!;
-            var attrHiValue = (byte)attrHi!.GetValue(ppu)!;
+            var attrLoValue = (ushort)attrLo!.GetValue(ppu)!;
+            var attrHiValue = (ushort)attrHi!.GetValue(ppu)!;
 
             (attrLoValue & 0x01).Should().Be(1);
             (attrHiValue & 0x01).Should().Be(1);
@@ -860,7 +865,8 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters
             {
-                Control = 0x10
+                Control = 0x10,
+                Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -881,7 +887,7 @@ namespace NESCoreTests.Unit.PPUTest
             // ppu does not stop fetching during non-visible cycles
             // NT, AT, PATTERN1, PATTERN2 fetches keep happening after between cycle 320 and 340 to prefetch the next 2 tiles for the next scanline
 
-            var registers = new PPURegisters { Control = 0x10 };
+            var registers = new PPURegisters { Control = 0x10, Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -904,8 +910,8 @@ namespace NESCoreTests.Unit.PPUTest
             
             typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 0 = 1
             typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 1 = 1 -> Color Index = 3
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);  // bit 0 = 1
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);  // bit 1 = 1 -> Palette ID = 3
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 0 = 1
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 1 = 1 -> Palette ID = 3
             
             var paletteAddress = ppu.GetCurrentPixelPaletteAddressTest();
             // 0x3F00 | (3 << 2) | 3 = 0x3F0F
@@ -915,14 +921,14 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void OnVisibleScanline_ShouldRenderPixelFromPalette()
         {
-            var registers = new PPURegisters { Control = 0x8 };
+            var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
             typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (byte)0x80);
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             
             memory.Setup(m => m.Read(0x3F0F)).Returns(0x15);
             
@@ -932,9 +938,9 @@ namespace NESCoreTests.Unit.PPUTest
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // NTSC colors
-            buffer[2].Should().Be(228); // B
+            buffer[2].Should().Be(228); // R
             buffer[1].Should().Be(0); // G
-            buffer[0].Should().Be(88); // R
+            buffer[0].Should().Be(88); // B
         }
 
         [Fact]
