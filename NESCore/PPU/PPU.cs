@@ -371,6 +371,13 @@ namespace NESCore.PPU
                     _registers.SetOverflowFlag(false);
                     _registers.SetSpriteZeroHitFlag(false);
                 }
+                else if (_scanlineCycles is >= 280 and <= 304)
+                {
+                    // copy vertical info from temp register to the address register
+                    _ppuAddress &= 0x441F; // reset fineY and coarseY values in the address register
+                    var verticalValues = (ushort)(_tempAddress & 0x7BE0); // keep only the vertical values (mask is inverted)
+                    _ppuAddress |= verticalValues;
+                }
             }
 
             _cycles++;

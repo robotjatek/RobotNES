@@ -853,5 +853,25 @@ namespace NESCoreTests.Unit.PPUTest
             (attrLoValue & 0x01).Should().Be(1);
             (attrHiValue & 0x01).Should().Be(1);
         }
+
+        [Fact]
+        public void ShouldCopyVerticalBitsFromTempAddress()
+        {
+            var registers = new PPURegisters
+            {
+                Control = 0x10
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            ppu.Write(0x2005, 0); // X scroll 0
+            ppu.Write(0x2005, 0x5e); // y scroll => fineY = 6, CoarseY = 11: temp address = $6160
+            ppu.Run(261 * 341 + 304); // scanline 261, cycle 304
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var address = (ushort)field!.GetValue(ppu)!;
+            ((address & 0x7000) >> 12).Should().Be(6); // fine y
+            ((address & 0x03e0) >> 5).Should().Be(11); // coarse Y
+        }
     }
 }
