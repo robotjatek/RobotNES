@@ -87,10 +87,10 @@ namespace NESCore.CPU
         private byte DoDMA(byte cpuPage)
         {
             _dma = false;
-            UInt16 address = (UInt16)(cpuPage << 8);
-            for (UInt16 i = address; i < address + 0xff; i++)
+            var address = (UInt16)(cpuPage << 8);
+            for (var i = address; i < address + 0x100; i++)
             {
-                _bus.Write(0x2004, _bus.Read(i));
+                _bus.PPUOamDMA(_bus.Read(i));
             }
 
             var penalty = _cycles % 2 == 1 ? 1 : 0;

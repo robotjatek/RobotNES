@@ -10,7 +10,7 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
-        private readonly byte[] _oam = new byte[0xff];
+        private readonly byte[] _oam = new byte[256];
 
         public PPUMemory(ICartridge cartridge, ILogger logger)
         {
@@ -20,6 +20,8 @@ namespace NESCore.PPU
 
         public byte Read(ushort address)
         {
+            address &= 0x3fff;
+            
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
@@ -35,7 +37,7 @@ namespace NESCore.PPU
             }
             else if (IsInPaletteMemory(address))
             {
-                return _paletteMemory[address & 0x1f];
+                return _paletteMemory[GetPaletteIndex(address)];
             }
 
             throw new NotImplementedException();
@@ -43,17 +45,19 @@ namespace NESCore.PPU
 
         public void Write(ushort address, byte data)
         {
+            address &= 0x3fff;
+            
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe these writes are CHR-RAM writes?
                 _logger.Error("Unsupported write to pattern table 0 through ppu");
-                throw new NotImplementedException();
+            //    throw new NotImplementedException();
             }
             else if (IsInPatternTableOne(address))
             {
                 //TODO: maybe these writes are CHR-RAM writes?
                 _logger.Error("Unsupported write to pattern table 1 through ppu");
-                throw new NotImplementedException();
+           //     throw new NotImplementedException();
             }
             else if (IsInNameTable(address))
             {
@@ -61,13 +65,27 @@ namespace NESCore.PPU
             }
             else if (IsInPaletteMemory(address))
             {
-                _paletteMemory[address & 0x1f] = data;
+                _paletteMemory[GetPaletteIndex(address)] = (byte)(data & 0x3f);
             }
             else
             {
                 _logger.Error($"Invalid write to ppu memory address: 0x{address:X4}");
             }
 
+        }
+        
+        private int GetPaletteIndex(ushort address)
+        {
+            // ID 3f10, 3f14, 3f18, 3f1c mirror 3f00, 3f04, 3f08, 3f0c
+            var index = address & 0x1F;
+            return index switch
+            {
+                0x10 => 0x00,
+                0x14 => 0x04,
+                0x18 => 0x08,
+                0x1C => 0x0C,
+                _ => index
+            };
         }
 
         public void OamWrite(byte address, byte data)
@@ -82,6 +100,11 @@ namespace NESCore.PPU
 
         private UInt16 UseNametableMirroring(ushort address)
         {
+            if (address >= 0x3000)
+            {
+                address &= 0x2FFF;
+            }
+
             if(_cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
             {
                 _logger.Error("4-screen mirroring is not supported");
@@ -90,34 +113,34 @@ namespace NESCore.PPU
 
             if (_cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
             {
-                address = (UInt16)(address & (~0x800));
+                return (UInt16)(address & 0x7ff);
             }
             else if (_cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
             {
-                address = (UInt16)(address & (~0x400));
+                return (UInt16)(((address & 0x800) >> 1) | (address & 0x3ff));
             }
 
-            return (UInt16)(address & 0x7ff);
+            throw new NotImplementedException("Unsupported address");
         }
 
         private static bool IsInPatternTableZero(ushort address)
         {
-            return address >= 0 && address <= 0x0fff;
+            return address <= 0x0fff;
         }
 
         private static bool IsInPatternTableOne(ushort address)
         {
-            return address >= 0x1000 && address <= 0x1fff;
+            return address is >= 0x1000 and <= 0x1fff;
         }
 
         private static bool IsInPaletteMemory(ushort address)
         {
-            return address >= 0x3f00 && address <= 0x3fff;
+            return address is >= 0x3f00 and <= 0x3fff;
         }
 
         private static bool IsInNameTable(ushort address)
         {
-            return address >= 0x2000 && address <= 0x3EFF;
+            return address is >= 0x2000 and <= 0x3EFF;
         }
     }
 }

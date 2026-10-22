@@ -16,7 +16,11 @@
         byte Address { get; set; }
         byte XScroll { get; set; }
         byte YScroll { get; set; }
-
+       
+        byte FineX { get; set; }
+        ushort CoarseX { get; set; }
+        ushort FineY { get; set; }
+        ushort CoarseY { get; set; }
 
         #region STATUS_REGISTER
         void SetVBlankFlag(bool value);

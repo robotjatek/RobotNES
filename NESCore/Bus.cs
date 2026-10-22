@@ -82,10 +82,11 @@ namespace NESCore
             else if (address == 0x4016)
             {
                 _controller1.Reset();
+                _controller2.Reset();
             }
             else if (address == 0x4017)
             {
-                _controller2.Reset();
+                // TODO: apu
             }
             else if (IsInApuArea(address))
             {
@@ -96,6 +97,11 @@ namespace NESCore
                 _logger.Warning($"Unsupported write to 0x{address:X4}");
                 throw new NotImplementedException();
             }
+        }
+        
+        public void PPUOamDMA(byte value)
+        {
+            _ppu.OamDMAWrite(value);
         }
 
         private static bool IsInInternalMemory(UInt16 address)

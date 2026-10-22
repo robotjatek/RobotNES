@@ -82,7 +82,7 @@ namespace NESCoreTests.Unit.CPUTest
             {
                 bus.Verify(b => b.Read((UInt16)(0x0 + i)));
             }
-            bus.Verify(b => b.Write(0x2004, 0xaa), Times.Exactly(255));
+            bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace NESCoreTests.Unit.CPUTest
             {
                 bus.Verify(b => b.Read((UInt16)((0x10 << 8) + i)));
             }
-            bus.Verify(b => b.Write(0x2004, 0xaa), Times.Exactly(255));
+            bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
         }
     }
 }

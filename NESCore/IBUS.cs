@@ -9,5 +9,7 @@
         byte Read(UInt16 address);
 
         event OAMDMAEventHandler OAMDMAEvent;
+        
+        void PPUOamDMA(byte value);
     }
 }
