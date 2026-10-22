@@ -191,6 +191,8 @@ namespace NESCore.PPU
         private byte _patternLow = 0;
         private byte _patternHigh = 0;
 
+        const ushort CoarseYMask = 0x03E0;
+        
         private void IncrementCoarseX()
         {
             // From https://www.nesdev.org/wiki/PPU_scrolling
@@ -207,6 +209,35 @@ namespace NESCore.PPU
         private void IncrementY()
         {
             // increment fineY at the end of the scanline
+            var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+            if (fineY < 7) 
+            {
+                _ppuAddress += 0x1000; // increment fineY
+            }
+            else
+            {
+                var coarseY = (ushort)((_ppuAddress & CoarseYMask) >> 5);
+                _ppuAddress &= 0x0FFF;
+
+                if (coarseY == 29)
+                {
+                    // end of the nametable => change NT
+                    // coarseY = 0;
+                    // NT++
+                    coarseY = 0;
+                    _ppuAddress ^= 0x800;
+                }
+                else if (coarseY == 31)
+                {
+                    coarseY = 0;
+                }
+                else
+                {
+                    coarseY++;
+                }
+                             
+                _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
+            }
             
         }
         
@@ -255,36 +286,7 @@ namespace NESCore.PPU
 
                     if (_scanlineCycles == 255)
                     {
-                         // IncrementY();
-                         
-                         // increment fineY at the end of the scanline
-                         var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
-                         if (fineY < 7) 
-                         {
-                             _ppuAddress += 0x1000; // increment fineY
-                         }
-                         else
-                         {
-                             const ushort CoarseYMask = 0x03E0;
-                             var coarseY = (ushort)((_ppuAddress & CoarseYMask) >> 5);
-                             
-                             _ppuAddress &= 0x0FFF;
-
-                             if (coarseY == 29)
-                             {
-                                 // end of the nametable => change NT
-                             }
-                             else if (coarseY == 31)
-                             {
-                                 coarseY = 0;
-                             }
-                             else
-                             {
-                                 coarseY++;
-                             }
-                             
-                             _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
-                         }
+                       IncrementY();
                     }
                 }
                 else if (_scanlineCycles == 256)

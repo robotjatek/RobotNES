@@ -619,8 +619,6 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ShouldWrapFineYAndIncrementCoarseY_WhenFineYIs7()
         {
-            // fineY = 0
-            // increment CoarseY
             var registers = new PPURegisters();
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -639,7 +637,29 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuAddress = field?.GetValue(ppu);
             ppuAddress.Should().Be(0x0420);
         }
-        
-        
+
+        [Fact]
+        public void ShouldIncrementNameTableBit()
+        {
+            var registers = new PPURegisters();
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // fine Y = 3 => 0x3000
+            // coarse Y = 29 => 29 << 5 => 928 => 0x03A0
+            ppu.Write(0x2006, 0x33);
+            ppu.Write(0x2006, 0xA0);
+            
+            // run for 4 full scanlines
+            ppu.Run(1620);
+            
+            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var ppuAddress = field?.GetValue(ppu);
+            // fine Y = 0
+            // coarse Y = 0
+            // NT horizontal = 1 0x800
+            // Coarse X = 0x400
+            ppuAddress.Should().Be(0x0C00);
+        }
     }
 }
