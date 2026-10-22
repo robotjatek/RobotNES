@@ -727,5 +727,23 @@ namespace NESCoreTests.Unit.PPUTest
             //t: 0 yyy NN YYYYY XXXXX
             nt.Should().Be(0b11);
         }
+
+        [Fact]
+        public void StatusRegisterRead_ShouldResetTheLatch()
+        {
+            var ppu = new PPU(_ppuRegisters.Object, _ppuMemory.Object, _logger);
+            
+            ppu.Write(0x2005, 1);
+            
+            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latch = (bool)latchField!.GetValue(ppu);
+            latch.Should().BeTrue();
+
+            ppu.Read(0x2002);
+            
+            latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            latch = (bool)latchField!.GetValue(ppu);
+            latch.Should().BeFalse();
+        }
     }
 }

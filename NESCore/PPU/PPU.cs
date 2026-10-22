@@ -165,7 +165,6 @@ namespace NESCore.PPU
                     _ppuAddress = _tempPPUAddress;
                     _addressLatch = false;
                 }
-                // TODO: temp register change
             }
             else if(address == 0x2007)
             {
