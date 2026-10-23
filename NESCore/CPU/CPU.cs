@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Events;
 
 namespace NESCore.CPU
 {
@@ -14,7 +15,8 @@ namespace NESCore.CPU
         private bool _dma = false;
         private byte _dmaCpuPage = 0;
 
-        public CPU(IBUS bus, IRegisters registers, IReadOnlyList<Func<IBUS, IRegisters, byte>> instructions, ILogger logger)
+        public CPU(IBUS bus, IRegisters registers, IReadOnlyList<Func<IBUS, IRegisters, byte>> instructions,
+            ILogger logger)
         {
             _logger = logger;
             _bus = bus;
@@ -49,7 +51,11 @@ namespace NESCore.CPU
             var instructionCode = Fetch();
             var instruction = _instructions[instructionCode];
 
-            _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
+            if (_logger.IsEnabled(LogEventLevel.Debug))
+            {
+                _logger.Debug($"{_registers.PC - 1:X4} {instructionCode:X2}");
+            }
+
             var instructionCycles = instruction(_bus, _registers);
             _cycles += instructionCycles;
 
