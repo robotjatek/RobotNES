@@ -81,8 +81,8 @@ namespace NESCore
             }
             else if (address == 0x4016)
             {
-                _controller1.Reset();
-                _controller2.Reset();
+                _controller1.StrobeWrite(data);
+                _controller2.StrobeWrite(data);
             }
             else if (address == 0x4017)
             {
@@ -126,7 +126,7 @@ namespace NESCore
 
         private byte InternalMemoryRead(UInt16 address)
         {
-            var mirroredAddress = address &= 0x7ff;
+            var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
                 _logger.Warning($"Mirrored internal memory address accessed: {address} => {mirroredAddress}");
@@ -137,7 +137,7 @@ namespace NESCore
 
         private void InternalMemoryWrite(UInt16 address, byte data)
         {
-            var mirroredAddress = address &= 0x7ff;
+            var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
                 _logger.Warning($"Mirrored internal memory address accessed: {address} => {mirroredAddress}");
@@ -147,7 +147,7 @@ namespace NESCore
 
         private byte PPURead(UInt16 address)
         {
-            var mirroredAddress = address &= 0x2007;
+            var mirroredAddress = (ushort)(0x2000 + (address & 0x0007));
             if (address != mirroredAddress)
             {
                 _logger.Warning($"Mirrored ppu address accessed: {address} => {mirroredAddress}");
@@ -157,7 +157,7 @@ namespace NESCore
 
         private void PPUWrite(UInt16 address, byte data)
         {
-            var mirroredAddress = address &= 0x2007;
+            var mirroredAddress = (ushort)(0x2000 + (address & 0x0007));
             if (address != mirroredAddress)
             {
                 _logger.Warning($"Mirrored ppu address accessed: {address} => {mirroredAddress}");

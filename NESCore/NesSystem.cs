@@ -1,20 +1,21 @@
-﻿using NESCore.APU;
+﻿using System.Diagnostics;
+using NESCore.APU;
 using NESCore.Cartridge;
 using NESCore.CPU;
 using NESCore.CPU.Instructions;
 using NESCore.Mappers;
 using NESCore.PPU;
-
 using Serilog;
 
 namespace NESCore
 {
     public delegate void FrameBufferReadyEvent(byte[] frameBuffer);
+
     public class NesSystem
     {
         public event FrameBufferReadyEvent? FrameBufferReady;
 
-        private bool _running = false;
+        private volatile bool _running = false;
         private ulong _cycle = 0;
 
         private readonly ILogger _logger;
@@ -26,12 +27,14 @@ namespace NESCore
         private readonly IController _contoller1;
         private readonly IController _contoller2;
         private readonly IAPU _apu;
+        private long _nextFrameTimestamp;
+        private static readonly long FrameIntervalTicks = Stopwatch.Frequency / 60;
 
         public NesSystem(string cartridgePath, ILogger logger)
         {
             _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
-            
+
             _contoller1 = new Controller(_logger);
             _contoller2 = new Controller(_logger);
             _apu = new APU.APU(_logger);
@@ -51,6 +54,7 @@ namespace NESCore
 
         public void Run()
         {
+            _nextFrameTimestamp = Stopwatch.GetTimestamp() + FrameIntervalTicks;
             _running = true;
             while (_running)
             {
@@ -65,16 +69,39 @@ namespace NESCore
             _logger.Information("Stopping emulation...");
         }
 
+        public void PressControllerButton(IController.Keys key)
+        {
+            _contoller1.PressKey(key);
+        }
+
+        public void ReleaseControllerButton(IController.Keys key)
+        {
+            _contoller1.ReleaseKey(key);
+        }
+
         private void OnVBlank(byte[] framebuffer)
         {
             _cpu.HandleNMI();
             FrameBufferReady?.Invoke(framebuffer);
+            LimitFrameRate();
         }
 
         private ICartridge LoadCartridge(string path)
         {
             var parser = new CartridgeParser(new MapperFactory(_logger));
             return parser.LoadCartridge(path);
+        }
+
+        private void LimitFrameRate()
+        {
+            var remainingTicks = _nextFrameTimestamp - Stopwatch.GetTimestamp();
+            if (remainingTicks > 0)
+            {
+                var remainingMilliseconds = (int)Math.Ceiling(remainingTicks * 1000.0 / Stopwatch.Frequency);
+                Task.Delay(remainingMilliseconds).GetAwaiter().GetResult();
+            }
+
+            _nextFrameTimestamp += FrameIntervalTicks;
         }
     }
 }

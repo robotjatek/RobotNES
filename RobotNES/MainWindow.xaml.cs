@@ -39,6 +39,36 @@ namespace RobotNES
             _logger = CreateLogger();
         }
 
+        private readonly Dictionary<Key, IController.Keys> _keyMap = new Dictionary<Key, IController.Keys>()
+        {
+            {Key.A, IController.Keys.A},
+            {Key.S, IController.Keys.B},
+            {Key.Left, IController.Keys.LEFT},
+            {Key.Right, IController.Keys.RIGHT},
+            {Key.Up, IController.Keys.UP},
+            {Key.Down, IController.Keys.DOWN},
+            {Key.Enter, IController.Keys.START},
+            {Key.Space, IController.Keys.SELECT}
+        };
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (_keyMap.TryGetValue(e.Key, out var value))
+            {
+                _nesSystem?.PressControllerButton(value);
+            }
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            if (_keyMap.TryGetValue(e.Key, out var value))
+            {
+                _nesSystem?.ReleaseControllerButton(value);
+            }
+        }
+
         private async void Stop_Click(object sender, RoutedEventArgs e)
         {
             await Task.Run(() => _nesSystem?.Stop());
@@ -63,6 +93,7 @@ namespace RobotNES
 
             return logger;
         }
+        
         private async void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             try

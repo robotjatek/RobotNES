@@ -12,11 +12,12 @@ Project skeleton only with partially implemented bus and memory systems.
 - CPU emulation architecture
 - All official instructions are implemented
 - Unofficial opcodes from `nestest.nes` are implemented
-- PPU registers
-- PPU outputs noise every frame
+- Controller implementation (Controller 1: A, S, Up, Down, Left, Right, Space, Enter)
+- Partial PPU implementation with background rendering
 - Fake APU implementation (disregards any reads or writes)
-- Fake controller implementation
 
 Currently working on the PPU implementation.
+
+Only works with NROM (mapper 0) games
 
 Files in `NesCoreTests/TestROMs/` are dumps of real games, but all of their data content are randomized to avoid any copyright issues, only the header data kept intact. (With the exception of nestest.nes which is a freely available test ROM)
