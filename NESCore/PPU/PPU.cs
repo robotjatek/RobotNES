@@ -330,7 +330,6 @@ namespace NESCore.PPU
                     break;
                 }
                 
-                // TODO: only draw the first sprite on a position
                 // TODO: vertical flip? --> change row?
                 //  sprite.Vflip
                 // TODO: horizontal flip? --> reverse pattern bits? 
@@ -351,10 +350,10 @@ namespace NESCore.PPU
                     var lowBit = (patternPlaneLow & mask) >> (7 - j);
                     var highBit = (patternPlaneHigh & mask) >> (7 - j);
                     var pixelColor = (highBit << 1) | lowBit;
-                    if (pixelColor == 0)
+                    if (pixelColor == 0 || _spriteScanlineBuffer[sprite.X + j] != null)
                     {
-                        // Both pattern bits are 0 => this pixel is transparent
-                        // skip color 0
+                        // Both pattern bits are 0 => this pixel is transparent => skip color 0
+                        // or skip when the pixel is already taken
                         mask >>= 1;
                         continue;
                     }
@@ -363,7 +362,7 @@ namespace NESCore.PPU
                     var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
                     var clr = Palette[c];
                     
-                    if (sprite.ScreenX + j < 256 && _spriteScanlineBuffer[sprite.X + j] == null) 
+                    if (sprite.ScreenX + j < 256) 
                         _spriteScanlineBuffer[sprite.X + j] = clr;
                     mask >>= 1;
                 }
