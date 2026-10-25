@@ -1,4 +1,4 @@
-﻿﻿using Serilog;
+﻿using Serilog;
 
 //TODO: OAMADDR set to 0 on prerender (257-320)
 
@@ -25,17 +25,19 @@ namespace NESCore.PPU
         private byte _patternLow = 0;
         private byte _patternHigh = 0;
 
-        private static readonly byte[,] Palette = new byte[,]
-        {
-            {0x7C,0x7C,0x7C}, {0x00,0x00,0xFC}, {0x00,0x00,0xBC}, {0x44,0x28,0xBC}, {0x94,0x00,0x84}, {0xA8,0x00,0x20}, {0xA8,0x10,0x00}, {0x88,0x14,0x00},
-            {0x50,0x30,0x00}, {0x00,0x78,0x00}, {0x00,0x68,0x00}, {0x00,0x58,0x00}, {0x00,0x40,0x58}, {0x00,0x00,0x00}, {0x00,0x00,0x00}, {0x00,0x00,0x00},
-            {0xBC,0xBC,0xBC}, {0x00,0x78,0xF8}, {0x00,0x58,0xF8}, {0x68,0x44,0xFC}, {0xD8,0x00,0xCC}, {0xE4,0x00,0x58}, {0xF8,0x38,0x00}, {0xE4,0x5C,0x10},
-            {0xAC,0x7C,0x00}, {0x00,0xB8,0x00}, {0x00,0xA8,0x00}, {0x00,0xA8,0x44}, {0x00,0x88,0x88}, {0x00,0x00,0x00}, {0x00,0x00,0x00}, {0x00,0x00,0x00},
-            {0xF8,0xF8,0xF8}, {0x3C,0xBC,0xFC}, {0x68,0xA0,0xFC}, {0xB0,0x7C,0xFC}, {0xFA,0x78,0xF8}, {0xF8,0x78,0x98}, {0xF8,0x88,0x58}, {0xF8,0xA8,0x44},
-            {0xF8,0xD8,0x78}, {0x98,0xF8,0x58}, {0x54,0xF8,0x58}, {0x58,0xF8,0x98}, {0x44,0xD8,0xD8}, {0x78,0x78,0x78}, {0x00,0x00,0x00}, {0x00,0x00,0x00},
-            {0xFC,0xFC,0xFC}, {0xA4,0xE4,0xFC}, {0xB8,0xB8,0xF8}, {0xD8,0xB8,0xF8}, {0xF8,0xB8,0xF8}, {0xF8,0xA4,0xC0}, {0xF0,0xD0,0xB0}, {0xFC,0xE4,0xA0},
-            {0xE4,0xF4,0xB0}, {0xB4,0xFA,0xB4}, {0xB4,0xF4,0xD8}, {0x00,0xFA,0xFA}, {0xCC,0xCC,0xCC}, {0x00,0x00,0x00}, {0x00,0x00,0x00}, {0x00,0x00,0x00}
-        };
+        readonly record struct Color(byte R, byte G, byte B);
+
+        private static readonly Color[] Palette =
+        [
+            new(0x7C,0x7C,0x7C), new(0x00,0x00,0xFC), new(0x00,0x00,0xBC), new(0x44,0x28,0xBC), new(0x94,0x00,0x84), new(0xA8,0x00,0x20), new(0xA8,0x10,0x00), new (0x88,0x14,0x00),
+            new(0x50,0x30,0x00), new(0x00,0x78,0x00), new(0x00,0x68,0x00), new(0x00,0x58,0x00), new(0x00,0x40,0x58), new(0x00,0x00,0x00), new(0x00,0x00,0x00), new (0x00,0x00,0x00),
+            new(0xBC,0xBC,0xBC), new(0x00,0x78,0xF8), new(0x00,0x58,0xF8), new(0x68,0x44,0xFC), new(0xD8,0x00,0xCC), new(0xE4,0x00,0x58), new(0xF8,0x38,0x00), new(0xE4,0x5C,0x10),
+            new(0xAC,0x7C,0x00), new(0x00,0xB8,0x00), new(0x00,0xA8,0x00), new(0x00,0xA8,0x44), new(0x00,0x88,0x88), new(0x00,0x00,0x00), new(0x00,0x00,0x00), new(0x00,0x00,0x00),
+            new(0xF8,0xF8,0xF8), new(0x3C,0xBC,0xFC), new(0x68,0xA0,0xFC), new(0xB0,0x7C,0xFC), new(0xFA,0x78,0xF8), new(0xF8,0x78,0x98), new(0xF8,0x88,0x58), new(0xF8,0xA8,0x44),
+            new(0xF8,0xD8,0x78), new(0x98,0xF8,0x58), new(0x54,0xF8,0x58), new(0x58,0xF8,0x98), new(0x44,0xD8,0xD8), new(0x78,0x78,0x78), new(0x00,0x00,0x00), new(0x00,0x00,0x00),
+            new(0xFC,0xFC,0xFC), new(0xA4,0xE4,0xFC), new(0xB8,0xB8,0xF8), new(0xD8,0xB8,0xF8), new(0xF8,0xB8,0xF8), new(0xF8,0xA4,0xC0), new(0xF0,0xD0,0xB0), new(0xFC,0xE4,0xA0),
+            new(0xE4,0xF4,0xB0), new(0xB4,0xFA,0xB4), new(0xB4,0xF4,0xD8), new(0x00,0xFA,0xFA), new(0xCC,0xCC,0xCC), new(0x00,0x00,0x00), new(0x00,0x00,0x00), new(0x00,0x00,0x00)
+        ];
         
 
         const ushort CoarseYMask = 0x03E0;
@@ -280,6 +282,7 @@ namespace NESCore.PPU
             }
         }
         
+        // TODO: move all these to the top of the class
         private ushort _shiftRegisterHi = 0;
         private ushort _shiftRegisterLo = 0;
         private ushort _attributeRegisterLo = 0;
@@ -293,6 +296,79 @@ namespace NESCore.PPU
             _attributeRegisterLo <<= 1;
             _attributeRegisterHi <<= 1;
         }
+
+        private readonly List<OamEntry> _secondaryOam = new(capacity: 8);
+        private readonly Color?[] _spriteScanlineBuffer = new Color?[256]; // TODO: this way i'll need a priority buffer too, to decide if the bg or the sprite should be drawn
+        // TODO: maybe a complex (Color, priority) tuple?
+        //private readonly byte[] _spriteScanlinePriorityBuffer = new byte[256];
+        
+        private void EvaluateSprites(int scanline)
+        {
+            // TODO: make it cycle correct: https://www.nesdev.org/wiki/PPU_sprite_evaluation#Details
+            Array.Clear(_spriteScanlineBuffer, 0, _spriteScanlineBuffer.Length);
+            _secondaryOam.Clear();
+            
+            var spriteSize = _registers.GetSpriteSize();
+            var height = spriteSize == SpriteSize._8x8 ? 8 : 16;
+
+            for (var i = 0; i < 64; i++)
+            {
+                var sprite = _ppuMemory.GetOamEntry(i);
+                var top = sprite.ScreenY;
+                var bottom = top + height;
+                
+                if (scanline < top || scanline >= bottom || top > 240) continue; // Skip sprites that are not visible on the current scanline
+                
+                if (_secondaryOam.Count < 8)
+                {
+                    _secondaryOam.Add(sprite);
+                }
+                else
+                {
+                    // According to the specification, the bit stays on until the next vblank, does not clear on the end of the scanline
+                    _registers.SetOverflowFlag(true);
+                    break;
+                }
+                
+                // TODO: only draw the first sprite on a position
+                // TODO: vertical flip? --> change row?
+                //  sprite.Vflip
+                // TODO: horizontal flip?  --> reverse pattern bits? 
+                // TODO: sprite 0 hit (in cycle)
+                
+                // Select the correct 8*1 row from the pattern table
+                var row = scanline - sprite.ScreenY;
+                var address = sprite.GetPatternTableAddress(_registers.GetSpriteSize(),
+                    _registers.GetSpritePatternTableAddress(), row);
+                
+                var patternPlaneLow = _ppuMemory.Read(address);
+                var patternPlaneHigh = _ppuMemory.Read((ushort)(address + 8));
+                var attribute = sprite.PaletteIndex;
+
+                var mask = 0x80;
+                for (var j = 0; j < 8; j++)
+                {
+                    var lowBit = (patternPlaneLow & mask) >> (7 - j);
+                    var highBit = (patternPlaneHigh & mask) >> (7 - j);
+                    var pixelColor = (highBit << 1) | lowBit;
+                    if (pixelColor == 0)
+                    {
+                        // Both pattern bits are 0 => this pixel is transparent
+                        // skip color 0
+                        mask >>= 1;
+                        continue;
+                    }
+                    
+                    var paletteIndex = (attribute << 2) | pixelColor;
+                    var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex));
+                    var clr = Palette[c];
+                    
+                    if (sprite.ScreenX + j < 256) 
+                        _spriteScanlineBuffer[sprite.X + j] = clr;
+                    mask >>= 1;
+                }
+            }
+        }
         
         private void Cycle()
         {
@@ -304,15 +380,25 @@ namespace NESCore.PPU
             {
                 if (renderingEnabled && _scanlineCycles is < 256 or >= 320 and < 336)
                 {
+                    if (_scanlineCycles == 0)
+                    {
+                        EvaluateSprites(_scanlines);
+                    }
+                    
                     // Only output pixels to the framebuffer on visible scanlines (0..239)
                     if (isRenderScanline && _scanlineCycles < 256)
                     {
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
-                        _frameBuffer[pxOffset + 2] = Palette[paletteId, 0];
-                        _frameBuffer[pxOffset + 1] = Palette[paletteId, 1];
-                        _frameBuffer[pxOffset + 0] = Palette[paletteId, 2];
+                        var bgPx = Palette[paletteId];
+                        
+                        // TODO: sprite px priority
+                        
+                        var spr = _spriteScanlineBuffer[_scanlineCycles];
+                        _frameBuffer[pxOffset + 2] = spr?.R ?? bgPx.R;
+                        _frameBuffer[pxOffset + 1] = spr?.G ?? bgPx.G;
+                        _frameBuffer[pxOffset + 0] = spr?.B ?? bgPx.B;
                     }
 
                     MoveShiftRegisters();

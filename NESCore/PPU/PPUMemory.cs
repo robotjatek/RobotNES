@@ -97,6 +97,11 @@ namespace NESCore.PPU
         {
             return _oam[address];
         }
+        
+        public OamEntry GetOamEntry(int index)
+        {
+            return new OamEntry(_oam[index * 4], _oam[index * 4 + 1], _oam[index * 4 + 2], _oam[index * 4 + 3], index);
+        }
 
         private UInt16 UseNametableMirroring(ushort address)
         {

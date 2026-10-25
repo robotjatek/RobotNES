@@ -1,0 +1,36 @@
+﻿namespace NESCore.PPU;
+
+public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, byte X, int Index)
+{
+    public bool IsSpriteZero => Index == 0;
+    public int ScreenY => Y + 1;
+    public int ScreenX => X;
+    public int PaletteIndex => Attributes & 0b11;
+    public bool VerticalFlip => (Attributes & 0x80) != 0;
+    public bool HorizontalFlip => (Attributes & 0x40) != 0;
+    public bool BehindBackground => (Attributes & 0x20) != 0; // false: Front of background, true: Behind background
+
+
+    // TODO: Handle vertical and horizontal flip
+    public ushort GetPatternTableAddress(SpriteSize spriteSize, ushort baseAddress, int row)
+    {
+
+        // TODO: vertical flip?
+        // TODO: horizontal flip?
+        
+        if (spriteSize == SpriteSize._8x8)
+        {
+            // base address comes from PPUCTRL
+            return (ushort)(baseAddress + (TileIndex * 16) + row);
+        }
+        else
+        {
+            // TODO: 8*16 mode
+            // Bit 0 selects the pattern table
+            var patternTable = (TileIndex & 0x1) * 0x1000;
+            var tileIndex = TileIndex & 0xFE;
+            
+            throw new NotImplementedException();
+        }
+    }
+}

@@ -6,5 +6,6 @@
         byte Read(UInt16 address);
         void OamWrite(byte address, byte data);
         byte OamRead(byte address);
+        OamEntry GetOamEntry(int index);
     }
 }

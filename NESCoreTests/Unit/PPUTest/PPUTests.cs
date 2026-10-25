@@ -960,5 +960,96 @@ namespace NESCoreTests.Unit.PPUTest
             registers.GetVBlankFlag().Should().BeTrue();
             monitor.Should().Raise(nameof(ppu.NMIEvent));
         }
+
+        [Fact]
+        public void Should_HaveEvaluatedSpritesInSecondaryOamOnTheSecondScanline()
+        {
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => i == 0 ? 
+                    new OamEntry(0, 0, 0, 10, 0) :
+                    new OamEntry(0xEF, 0, 0, 10, 0)); // initialize oam with sprites outside the visible area
+
+            ppu.Run(341 * 2); // end of the 2nd scanline
+            
+            memory.Verify(m => m.GetOamEntry(0), Times.Exactly(2));
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(1);
+            secondaryOam[0].Should().BeEquivalentTo(new OamEntry(0, 0, 0, 10, 0));
+        }
+        
+        [Fact]
+        public void Should_HaveTwoEvaluatedSpritesInSecondaryOAM()
+        {
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        0 => new OamEntry(49, 0, 0, 10, 0), // Starts in 50th row
+                        1 => new OamEntry(45, 0, 0, 10, 1), // Starts in 46th row, it is in the scanline
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) // Not evaluated
+                    };
+                });
+
+            ppu.Run(341 * 50 + 1);
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(2);
+            secondaryOam[0].Should().BeEquivalentTo(new OamEntry(49, 0, 0, 10, 0));
+            secondaryOam[1].Should().BeEquivalentTo(new OamEntry(45, 0, 0, 10, 1));
+        }
+
+        [Fact]
+        public void ShouldNot_HaveSpritesOnTheFirstScanline()
+        {
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        0 => new OamEntry(0, 0, 0, 10, 0),
+                        1 => new OamEntry(0, 0, 0, 10, 1),
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) // Not evaluated
+                    };
+                });
+
+            ppu.Run(341 * 50 + 1);
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(0);
+        }
+        
+        // TODO: 8 sprites per scanline limit
+        // TODO: scanline buffer test
+        // TODO: If two tiles overlap the first wins
+        // TODO: do not render sprites if sprite drawing is disabled
     }
 }
