@@ -1266,8 +1266,9 @@ namespace NESCoreTests.Unit.PPUTest
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
         
+        // TODO: hflip!
+        
         // TODO: vflip
-        // TODO: hflip
         // TODO: sprite priority
         // TODO: do not render sprites if sprite drawing is disabled
         // TODO: sprite 0
