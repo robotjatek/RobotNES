@@ -11,12 +11,11 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
     public bool BehindBackground => (Attributes & 0x20) != 0; // false: Front of background, true: Behind background
 
 
-    // TODO: Handle vertical and horizontal flip
+    // TODO: Handle vertical flip
     public ushort GetPatternTableAddress(SpriteSize spriteSize, ushort baseAddress, int row)
     {
 
         // TODO: vertical flip?
-        // TODO: horizontal flip?
         
         if (spriteSize == SpriteSize._8x8)
         {
@@ -34,7 +33,7 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
         }
     }
 
-    public record struct SpriteAttribute(byte Palette, bool Priority, bool VerticalFlip, bool HorizontalFlip)
+    public readonly record struct SpriteAttribute(byte Palette, bool Priority, bool VerticalFlip, bool HorizontalFlip)
     {
         public byte ToByte()
         {

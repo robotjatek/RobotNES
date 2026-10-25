@@ -39,7 +39,7 @@ namespace RobotNES
             _logger = CreateLogger();
         }
 
-        private readonly Dictionary<Key, IController.Keys> _keyMap = new Dictionary<Key, IController.Keys>()
+        private readonly Dictionary<Key, IController.Keys> _keyMap = new()
         {
             {Key.A, IController.Keys.A},
             {Key.S, IController.Keys.B},
@@ -51,9 +51,14 @@ namespace RobotNES
             {Key.Space, IController.Keys.SELECT}
         };
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override async void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
+            if (e.Key == Key.Escape)
+            {
+                await Stop();
+            }
+            
             if (_keyMap.TryGetValue(e.Key, out var value))
             {
                 _nesSystem?.PressControllerButton(value);
@@ -71,10 +76,18 @@ namespace RobotNES
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => _nesSystem?.Stop());
-            _logger.Information("Stopped");
-            this.contentPanel.Children.RemoveAt(0);
-            this.contentPanel.Children.Add(this.fileListView);
+            await Stop();
+        }
+
+        private async Task Stop()
+        {
+            if (_nesSystem?.Running == true)
+            {
+                await Task.Run(() => _nesSystem?.Stop());
+                _logger.Information("Stopped");
+                contentPanel.Children.RemoveAt(0);
+                contentPanel.Children.Add(this.fileListView);
+            }
         }
 
         private static ILogger CreateLogger()

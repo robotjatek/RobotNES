@@ -14,6 +14,7 @@ namespace NESCore
     public class NesSystem
     {
         public event FrameBufferReadyEvent? FrameBufferReady;
+        public bool Running => _running;
 
         private volatile bool _running = false;
         private ulong _cycle = 0;
