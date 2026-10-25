@@ -1047,7 +1047,97 @@ namespace NESCoreTests.Unit.PPUTest
             secondaryOam.Count.Should().Be(0);
         }
         
-        // TODO: 8 sprites per scanline limit
+        [Fact]
+        public void Should_OnlyHave8SpritesPerScanline()
+        {
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        >=0 and <10 => new OamEntry(0, 0, 0, 10, 0), // Return 10 sprites in the scanline
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) // Not evaluated
+                    };
+                });
+
+            ppu.Run(341 * 2);
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(8);
+            registers.GetOverflowFlag().Should().BeTrue();
+        }
+
+        [Fact]
+        public void SpriteOverflowDoesNotResetOnTheNextScanline()
+        {
+            // same as the Should_OnlyHave8SpritesPerScanline test but runs longer 
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        >=0 and <10 => new OamEntry(0, 0, 0, 10, 0), // Return 10 sprites in the scanline
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) // Not evaluated
+                    };
+                });
+
+            ppu.Run(341 * 60);
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(0); // No sprites here
+            registers.GetOverflowFlag().Should().BeTrue(); // But the overflow flag is still set
+            
+        }
+
+        [Fact]
+        public void SpriteOverflowFlagResetOnTheNextScanline()
+        {
+            // Render a frame with 10 in a scanline
+            // Then start a new frame => overflow bit should be reset
+            var registers = new PPURegisters
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprite pattern table address: 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        >=0 and <10 => new OamEntry(45, 0, 0, 10, 0), // Return 10 sprites in the scanline
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) // Not evaluated
+                    };
+                });
+
+            ppu.Run(341 * 262); // Run the PPU to the next frame
+            
+            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            secondaryOam.Count.Should().Be(0); // No sprites here
+            registers.GetOverflowFlag().Should().BeFalse(); // The overflow flag is reset on the next scanline
+        }
+        
         // TODO: scanline buffer test
         // TODO: If two tiles overlap the first wins
         // TODO: do not render sprites if sprite drawing is disabled
