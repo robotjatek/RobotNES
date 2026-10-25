@@ -1104,7 +1104,6 @@ namespace NESCoreTests.Unit.PPUTest
             var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
             secondaryOam.Count.Should().Be(0); // No sprites here
             registers.GetOverflowFlag().Should().BeTrue(); // But the overflow flag is still set
-            
         }
 
         [Fact]
@@ -1186,7 +1185,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
-            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(3);
+            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(3); // three visible pixels
 
             var expected = new List<PPU.Color?>();
             for (var i = 0; i < 256; i++)
@@ -1195,12 +1194,81 @@ namespace NESCoreTests.Unit.PPUTest
             }
             expected[0] = PPU.Palette[10];
             expected[1] = PPU.Palette[13];
-            expected[7] = PPU.Palette[13];
+            expected[6] = PPU.Palette[13];
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
+        
+        [Fact]
+        public void FirstSpriteWinsOnOverlap()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
             
-        // TODO: If two tiles overlap the first wins
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => 
+                { 
+                    return i switch 
+                    { 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, true, false, false).ToByte(), 0, i), 
+                        1 => new OamEntry(0, 1, new OamEntry.SpriteAttribute(3, true, false, false).ToByte(), 0, i), 
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) 
+                    }; 
+                });
+
+            const byte pattern1 = 0b00000000;
+            const byte pattern2 = 0b11111111;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) =>
+                {
+                    return address switch
+                    {
+                        // First sprite
+                        0x1000 => pattern1,
+                        0x1008 => pattern2,
+                        
+                        // Second sprite
+                        0x1010 => pattern1,
+                        0x1018 => pattern2,
+                        
+                        0x3f16 => 3, // PaletteId for sprite1
+                        0x3f1E => 4, // PaletteID for sprite2
+                        _ => 0
+                    };
+                });
+            
+            ppu.Run(341 * 2);
+            
+            var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(8); // three visible pixels
+
+            var expected = new List<PPU.Color?>();
+            for (var i = 0; i < 256; i++)
+            {
+                expected.Add(null);
+            }
+            
+            expected[0] = PPU.Palette[3];
+            expected[1] = PPU.Palette[3];
+            expected[2] = PPU.Palette[3];
+            expected[3] = PPU.Palette[3];
+            expected[4] = PPU.Palette[3];
+            expected[5] = PPU.Palette[3];
+            expected[6] = PPU.Palette[3];
+            expected[7] = PPU.Palette[3];
+            
+            spriteScanlineBuffer.Should().BeEquivalentTo(expected);
+        }
+        
+        // TODO: vflip
+        // TODO: hflip
+        // TODO: sprite priority
         // TODO: do not render sprites if sprite drawing is disabled
         // TODO: sprite 0
     }

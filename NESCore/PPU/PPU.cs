@@ -363,7 +363,7 @@ namespace NESCore.PPU
                     var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
                     var clr = Palette[c];
                     
-                    if (sprite.ScreenX + j < 256) 
+                    if (sprite.ScreenX + j < 256 && _spriteScanlineBuffer[sprite.X + j] == null) 
                         _spriteScanlineBuffer[sprite.X + j] = clr;
                     mask >>= 1;
                 }
