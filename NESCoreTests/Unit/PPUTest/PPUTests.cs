@@ -1138,8 +1138,70 @@ namespace NESCoreTests.Unit.PPUTest
             registers.GetOverflowFlag().Should().BeFalse(); // The overflow flag is reset on the next scanline
         }
         
-        // TODO: scanline buffer test
+        [Fact]
+        public void ShouldDrawIntoTheSpriteScanlineBuffer()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => 
+                { 
+                    return i switch 
+                    { 
+                        // X = 0-7, Palette 3 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, true, false, false).ToByte(), 0, i), 
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) 
+                    }; 
+                });
+
+            // merged pattern 12....2. with third palette (2) => DE....E. => + 0x3f10  => 0x3F1F, 0x3F1F + 8,   
+            const byte pattern1 = 0b10000000;
+            const byte pattern2 = 0b01000010;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) =>
+                {
+                    return address switch
+                    {
+                        // planes
+                        0x1000 => pattern1,
+                        0x1008 => pattern2,
+                        
+                        // palette px 1
+                        0x3F1D => 10,
+                        
+                        // palette px 2, 3
+                        0x3F1E => 13,
+                        
+                        _ => 0
+                    };
+                });
+            
+            ppu.Run(341 * 2); // the first scanline cannot have sprites
+            
+            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(3);
+
+            var expected = new List<PPU.Color?>();
+            for (var i = 0; i < 256; i++)
+            {
+                expected.Add(null);
+            }
+            expected[0] = PPU.Palette[10];
+            expected[1] = PPU.Palette[13];
+            expected[7] = PPU.Palette[13];
+            
+            spriteScanlineBuffer.Should().BeEquivalentTo(expected);
+        }
+            
         // TODO: If two tiles overlap the first wins
         // TODO: do not render sprites if sprite drawing is disabled
+        // TODO: sprite 0
     }
 }

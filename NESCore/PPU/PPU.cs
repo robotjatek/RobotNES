@@ -25,9 +25,9 @@ namespace NESCore.PPU
         private byte _patternLow = 0;
         private byte _patternHigh = 0;
 
-        readonly record struct Color(byte R, byte G, byte B);
+        public readonly record struct Color(byte R, byte G, byte B);
 
-        private static readonly Color[] Palette =
+        public static readonly Color[] Palette =
         [
             new(0x7C,0x7C,0x7C), new(0x00,0x00,0xFC), new(0x00,0x00,0xBC), new(0x44,0x28,0xBC), new(0x94,0x00,0x84), new(0xA8,0x00,0x20), new(0xA8,0x10,0x00), new (0x88,0x14,0x00),
             new(0x50,0x30,0x00), new(0x00,0x78,0x00), new(0x00,0x68,0x00), new(0x00,0x58,0x00), new(0x00,0x40,0x58), new(0x00,0x00,0x00), new(0x00,0x00,0x00), new (0x00,0x00,0x00),
@@ -297,7 +297,7 @@ namespace NESCore.PPU
             _attributeRegisterHi <<= 1;
         }
 
-        private readonly List<OamEntry> _secondaryOam = new(capacity: 8);
+        private readonly List<OamEntry> _secondaryOam = new(capacity: 8); // TODO: i dont need this oam a simple counter is enough
         private readonly Color?[] _spriteScanlineBuffer = new Color?[256]; // TODO: this way i'll need a priority buffer too, to decide if the bg or the sprite should be drawn
         // TODO: maybe a complex (Color, priority) tuple?
         //private readonly byte[] _spriteScanlinePriorityBuffer = new byte[256];
@@ -333,7 +333,7 @@ namespace NESCore.PPU
                 // TODO: only draw the first sprite on a position
                 // TODO: vertical flip? --> change row?
                 //  sprite.Vflip
-                // TODO: horizontal flip?  --> reverse pattern bits? 
+                // TODO: horizontal flip? --> reverse pattern bits? 
                 // TODO: sprite 0 hit (in cycle)
                 
                 // Select the correct 8*1 row from the pattern table
@@ -360,7 +360,7 @@ namespace NESCore.PPU
                     }
                     
                     var paletteIndex = (attribute << 2) | pixelColor;
-                    var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex));
+                    var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
                     var clr = Palette[c];
                     
                     if (sprite.ScreenX + j < 256) 
