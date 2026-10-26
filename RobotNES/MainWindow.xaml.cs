@@ -124,8 +124,9 @@ namespace RobotNES
             }
             catch (Exception ex)
             {
-                // log any uncatched errors
-                _logger.Fatal(ex, "Unhandled error.");
+                _logger.Fatal(ex, "Unhandled error");
+                MessageBox.Show($"Unhandled error: {ex.Message}.\n{ex.StackTrace}", "Error", MessageBoxButton.OK , MessageBoxImage.Error);
+                await Stop();
             }
         }
 

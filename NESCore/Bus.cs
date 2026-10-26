@@ -40,9 +40,9 @@ namespace NESCore
             {
                 return _cartridge.Read(address);
             }
-            else if (IsInPPUArea(address))
+            else if (IsInPpuArea(address))
             {
-                return PPURead(address);
+                return PpuRead(address);
             }
             else if (address == 0x4016)
             {
@@ -54,10 +54,10 @@ namespace NESCore
             }
             else if (IsInApuArea(address))
             {
-                _apu.Read(address);
+                return _apu.Read(address);
             }
 
-            _logger.Warning($"Unsupported read from 0x{address:X4}");
+            _logger.Warning("Unsupported read from 0x{Address:X4}", address);
             throw new NotImplementedException();
         }
 
@@ -71,9 +71,9 @@ namespace NESCore
             {
                 _cartridge.Write(address, data);
             }
-            else if (IsInPPUArea(address))
+            else if (IsInPpuArea(address))
             {
-                PPUWrite(address, data);
+                PpuWrite(address, data);
             }
             else if (address == 0x4014)
             {
@@ -94,7 +94,7 @@ namespace NESCore
             }
             else
             {
-                _logger.Warning($"Unsupported write to 0x{address:X4}");
+                _logger.Warning("Unsupported write to 0x{Address:X4}", address);
                 throw new NotImplementedException();
             }
         }
@@ -104,32 +104,32 @@ namespace NESCore
             _ppu.OamDMAWrite(value);
         }
 
-        private static bool IsInInternalMemory(UInt16 address)
+        private static bool IsInInternalMemory(ushort address)
         {
-            return address >= 0 && address <= 0x1fff;
+            return address <= 0x1fff;
         }
 
-        private static bool IsInCartridgeArea(UInt16 address)
+        private static bool IsInCartridgeArea(ushort address)
         {
-            return address >= 0x4020 && address <= 0xFFFF;
+            return address >= 0x4020;
         }
 
-        private static bool IsInPPUArea(UInt16 address)
+        private static bool IsInPpuArea(ushort address)
         {
-            return address >= 0x2000 && address <= 0x3FFF;
+            return address is >= 0x2000 and <= 0x3FFF;
         }
 
-        private static bool IsInApuArea(UInt16 address)
+        private static bool IsInApuArea(ushort address)
         {
-            return (address >= 0x4000 && address <= 0x4013) || address == 0x4015;
+            return address is >= 0x4000 and <= 0x4013 or 0x4015;
         }
 
-        private byte InternalMemoryRead(UInt16 address)
+        private byte InternalMemoryRead(ushort address)
         {
             var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
-                _logger.Warning($"Mirrored internal memory address accessed: {address} => {mirroredAddress}");
+                _logger.Warning("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
 
             return _memory.Read(mirroredAddress);
@@ -140,27 +140,27 @@ namespace NESCore
             var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
-                _logger.Warning($"Mirrored internal memory address accessed: {address} => {mirroredAddress}");
+                _logger.Warning("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
             _memory.Write(mirroredAddress, data);
         }
 
-        private byte PPURead(UInt16 address)
+        private byte PpuRead(ushort address)
         {
             var mirroredAddress = (ushort)(0x2000 + (address & 0x0007));
             if (address != mirroredAddress)
             {
-                _logger.Warning($"Mirrored ppu address accessed: {address} => {mirroredAddress}");
+                _logger.Warning("Mirrored ppu address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
-            return _ppu.Read(address);
+            return _ppu.Read(mirroredAddress);
         }
 
-        private void PPUWrite(UInt16 address, byte data)
+        private void PpuWrite(ushort address, byte data)
         {
             var mirroredAddress = (ushort)(0x2000 + (address & 0x0007));
             if (address != mirroredAddress)
             {
-                _logger.Warning($"Mirrored ppu address accessed: {address} => {mirroredAddress}");
+                _logger.Warning("Mirrored ppu address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
             _ppu.Write(mirroredAddress, data);
         }

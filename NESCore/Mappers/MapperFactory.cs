@@ -1,27 +1,32 @@
 ﻿using NESCore.Cartridge;
-
 using Serilog;
 
 namespace NESCore.Mappers
 {
     public interface IMapperFactory
     {
-        IMapper CreateMapper(ICartridgeHeader header, List<ROM> prgRoms, List<VROM> chrRoms);
+        IMapper CreateMapper(ICartridgeHeader header, List<Rom> prgRoms, List<ChrBase> chrRoms);
     }
 
-    public class MapperFactory : IMapperFactory
+    public class MapperFactory(ILogger logger) : IMapperFactory
     {
-        private readonly ILogger _logger;
-
-        public MapperFactory(ILogger logger) { _logger = logger; }
-
-        public IMapper CreateMapper(ICartridgeHeader header, List<ROM> prgRoms, List<VROM> chrRoms)
+        public IMapper CreateMapper(ICartridgeHeader header, List<Rom> prgRoms, List<ChrBase> chrRoms)
         {
-            _logger.Information($"Creating mapper {header.MapperID}");
+            logger.Information("Creating mapper {HeaderMapperId}", header.MapperID);
 
-            if(header.MapperID == 0)
+            if (header.MapperID == 0)
             {
-                return new Mapper0(prgRoms, chrRoms, _logger);
+                List<ChrBase> chr;
+                if (chrRoms.Count == 0)
+                {
+                    chr = [new ChrRam()];
+                }
+                else
+                {
+                    chr = chrRoms;
+                }
+
+                return new Mapper0(prgRoms, chr, logger);
             }
 
             throw new UnknownMapperException(header.MapperID);
