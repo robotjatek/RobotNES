@@ -70,12 +70,12 @@ namespace NESCore.PPU
             //TODO: replace this branching with an indexed array (_ppuMemory[address & 0x7])
             if (address == 0x2000)
             {
-                _logger.Warning("PPU control register read 0x2000. Normally this should not happen.");
+                _logger.Warning("PPU control register read 0x2000. Normally this should not happen");
                 return _ppuDataBus;
             }
             else if (address == 0x2001)
             {
-                _logger.Warning("PPU mask register read 0x2001. Normally this should not happen.");
+                _logger.Warning("PPU mask register read 0x2001. Normally this should not happen");
                 return _ppuDataBus;
             }
             else if (address == 0x2002)
@@ -87,7 +87,7 @@ namespace NESCore.PPU
             }
             else if (address == 0x2003)
             {
-                _logger.Warning("PPU OAM address register read 0x2003. Normally this should not happen.");
+                _logger.Warning("PPU OAM address register read 0x2003. Normally this should not happen");
                 return _ppuDataBus;
             }
             else if (address == 0x2004)
@@ -97,12 +97,12 @@ namespace NESCore.PPU
             }
             else if (address == 0x2005)
             {
-                _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen.");
+                _logger.Warning("PPU scroll register read 0x2005. Normally this should not happen");
                 return _ppuDataBus;
             }
             else if (address == 0x2006)
             {
-                _logger.Warning("PPU address register read 0x2006. Normally this should not happen.");
+                _logger.Warning("PPU address register read 0x2006. Normally this should not happen");
                 return _ppuDataBus;
             }
             else if (address == 0x2007)
@@ -125,7 +125,7 @@ namespace NESCore.PPU
                 }
             }
 
-            _logger.Error($"Unsupported PPU read from: 0x{address:X4}");
+            _logger.Error("Unsupported PPU read from: 0x{Address:X4}", address);
             throw new NotImplementedException();
         }
 
@@ -204,7 +204,7 @@ namespace NESCore.PPU
             }
             else
             {
-                _logger.Error($"Unsupported PPU write to: 0x{address:X4}");
+                _logger.Error("Unsupported PPU write to: 0x{Address:X4}", address);
                 throw new NotImplementedException();
             }
         }
@@ -339,12 +339,10 @@ namespace NESCore.PPU
                     break;
                 }
                 
-                // TODO: vertical flip? --> change row?
-                //  sprite.Vflip
                 // TODO: sprite 0 hit (in cycle)
 
                 // Select the correct 8*1 row from the pattern table
-                var row = scanline - sprite.ScreenY;
+                var row = sprite.VerticalFlip ? 7 - (scanline - sprite.ScreenY) : scanline - sprite.ScreenY;
                 var address = sprite.GetPatternTableAddress(_registers.GetSpriteSize(),
                     _registers.GetSpritePatternTableAddress(), row);
 

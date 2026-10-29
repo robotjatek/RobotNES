@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Moq;
 
 using NESCore.PPU;
@@ -1327,9 +1327,69 @@ namespace NESCoreTests.Unit.PPUTest
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
         
-        // TODO: vflip
+        [Fact]
+        public void ShouldFlipSpriteVertically()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) =>
+                {
+                    return i switch
+                    {
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, true, true, false).ToByte(), 0, i),
+                        _ => new OamEntry(0xEF, 0, 0, 10, i)
+                    };
+                });
+            
+            const byte pattern1 = 0b00000001;
+            const byte pattern2 = 0b11110001;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) =>
+                {
+                    return address switch
+                    {
+                        // last line of the sprite
+                        0x1007 => pattern1,
+                        0x100F => pattern2,
+                        
+                        0x3f16 => 3, // PaletteId for sprite1
+                        _ => 0
+                    };
+                });
+            
+            ppu.Run(341*2);
+            
+            var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(5);
+
+            var expected = new List<PPU.Color?>();
+            for (var i = 0; i < 256; i++)
+            {
+                expected.Add(null);
+            }
+            
+            expected[0] = PPU.Palette[3];
+            expected[1] = PPU.Palette[3];
+            expected[2] = PPU.Palette[3];
+            expected[3] = PPU.Palette[3];
+            expected[4] = null;
+            expected[5] = null;
+            expected[6] = null;
+            expected[7] = PPU.Palette[0];
+            
+            spriteScanlineBuffer.Should().BeEquivalentTo(expected);
+        }
+        
+        
         // TODO: sprite priority
         // TODO: do not render sprites if sprite drawing is disabled
-        // TODO: sprite 0
+        // TODO: sprite 0 hit
     }
 }

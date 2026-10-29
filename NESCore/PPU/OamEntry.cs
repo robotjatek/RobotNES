@@ -10,30 +10,25 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
     public bool HorizontalFlip => (Attributes & 0x40) != 0;
     public bool BehindBackground => (Attributes & 0x20) != 0; // false: Front of background, true: Behind background
 
-
-    // TODO: Handle vertical flip
     public ushort GetPatternTableAddress(SpriteSize spriteSize, ushort baseAddress, int row)
     {
-
-        // TODO: vertical flip?
-        
-        if (spriteSize == SpriteSize._8x8)
+        return spriteSize switch
         {
-            // base address comes from PPUCTRL
-            return (ushort)(baseAddress + (TileIndex * 16) + row);
-        }
-        else
-        {
-            // TODO: 8*16 mode
-            // Bit 0 selects the pattern table
-            var patternTable = (TileIndex & 0x1) * 0x1000;
-            var tileIndex = TileIndex & 0xFE;
-            
-            throw new NotImplementedException();
-        }
+            SpriteSize._8x8 => (ushort)(baseAddress + (TileIndex * 16) + row),
+            SpriteSize._8x16 => _8x16(),
+            _ => throw new ArgumentOutOfRangeException($"Invalid sprite size")
+        };
     }
 
-    public readonly record struct SpriteAttribute(byte Palette, bool Priority, bool VerticalFlip, bool HorizontalFlip)
+    private ushort _8x16()
+    {
+        // TODO: 8x16 mode
+        var patternTable = (TileIndex & 0x1) * 0x1000;
+        var tileIndex = TileIndex & 0xFE;
+        throw new NotImplementedException("8x16 sprite mode is not implemented");
+    }
+
+public readonly record struct SpriteAttribute(byte Palette, bool Priority, bool VerticalFlip, bool HorizontalFlip)
     {
         public byte ToByte()
         {

@@ -41,7 +41,7 @@ namespace NESCore
             _apu = new APU.APU(_logger);
 
             _memory = new Memory();
-            _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(_cartridge, _logger), _logger);
+            _ppu = new PPU.PPU(new PPURegisters(), new PpuMemory(_cartridge, _logger), _logger);
             _bus = new Bus(_cartridge, _memory, _ppu, _controller1, _controller2, _apu, _logger);
 
             //TODO: Move this CPU creation block to a factory

@@ -3,7 +3,7 @@ using Serilog;
 
 namespace NESCore.PPU
 {
-    public class PPUMemory : IPPUMemory
+    public class PpuMemory : IPPUMemory
     {
         private readonly ICartridge _cartridge;
         private readonly ILogger _logger;
@@ -11,7 +11,7 @@ namespace NESCore.PPU
         private readonly byte[] _paletteMemory = new byte[32];
         private readonly byte[] _oam = new byte[256];
 
-        public PPUMemory(ICartridge cartridge, ILogger logger)
+        public PpuMemory(ICartridge cartridge, ILogger logger)
         {
             _cartridge = cartridge;
             _logger = logger;
@@ -64,7 +64,7 @@ namespace NESCore.PPU
             }
             else
             {
-                _logger.Error($"Invalid write to ppu memory address: 0x{address:X4}");
+                _logger.Error("Invalid write to ppu memory address: 0x{Address:X4}", address);
             }
         }
 

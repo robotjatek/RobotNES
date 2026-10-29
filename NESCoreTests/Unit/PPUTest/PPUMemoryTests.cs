@@ -18,7 +18,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge = new Mock<ICartridge>();
             cartridge.Setup(c => c.Mapper).Returns(mapper.Object);
 
-            var memory = new PPUMemory(cartridge.Object, _logger);
+            var memory = new PpuMemory(cartridge.Object, _logger);
             for (UInt16 i = 0; i < 0x2000; i++)
             {
                 memory.Read(i).Should().Be(chr.Read(i));
@@ -34,7 +34,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge = new Mock<ICartridge>();
             cartridge.Setup(c => c.Mapper).Returns(mapper.Object);
 
-            var memory = new PPUMemory(cartridge.Object, _logger);
+            var memory = new PpuMemory(cartridge.Object, _logger);
             memory.Write(0x1000, 0xa5);
 
             memory.Read(0x1000).Should().Be(0xa5);
@@ -51,7 +51,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x3000; i++)
             {
                 memory.Write(i, 0xaa);
@@ -70,7 +70,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x2400; i++)
             {
                 memory.Write(i, 0xaa);
@@ -89,7 +89,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
             {
                 memory.Write(i, 0xaa);
@@ -106,7 +106,7 @@ namespace NESCoreTests.Unit.PPUTest
             var mapper = Mock.Of<IMapper>();
             mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
             var cartridge = new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); // Horizontal mirror mode
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
             {
                 memory.Write(i, 0xaa);
@@ -125,7 +125,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2800; i < 0x2C00; i++)
             {
                 memory.Write(i, 0xaa);
@@ -144,7 +144,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2C00; i < 0x2FFF; i++)
             {
                 memory.Write(i, 0xaa);
@@ -163,7 +163,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x3000; i++)
             {
                 memory.Write(i, 0xaa);
@@ -182,7 +182,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x2400; i++)
             {
                 memory.Write(i, 0xaa);
@@ -201,7 +201,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
             {
                 memory.Write(i, 0xaa);
@@ -220,7 +220,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2800; i < 0x2C00; i++)
             {
                 memory.Write(i, 0xaa);
@@ -239,7 +239,7 @@ namespace NESCoreTests.Unit.PPUTest
             var cartridge =
                 new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
 
-            var memory = new PPUMemory(cartridge, _logger);
+            var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2C00; i < 0x2FFF; i++)
             {
                 memory.Write(i, 0xaa);
@@ -250,7 +250,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToPaletteMemoryCanBeReadBack()
         {
-            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            var memory = new PpuMemory(_mockCartridge.Object, _logger);
             for (UInt16 i = 0x3f00; i < 0x3f20; i++)
             {
                 memory.Write(i, 0x2a);
@@ -261,7 +261,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToPaletteMemoryCanBeReadBackFromMirroredLocations()
         {
-            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            var memory = new PpuMemory(_mockCartridge.Object, _logger);
             for (UInt16 i = 0x3f00; i < 0x3f20; i++)
             {
                 memory.Write(i, 0x2a);
@@ -276,7 +276,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void PaletteWritesAre6Bit()
         {
-            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            var memory = new PpuMemory(_mockCartridge.Object, _logger);
             memory.Write(0x3f00, 0xff);
             memory.Read(0x3f00).Should().Be(0x3f);
         }
@@ -288,7 +288,7 @@ namespace NESCoreTests.Unit.PPUTest
         [InlineData(0x3f1c, 0x3f0c)]
         public void PaletteInternalMirror(ushort wAddress, ushort rAddress)
         {
-            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            var memory = new PpuMemory(_mockCartridge.Object, _logger);
             memory.Write(wAddress, 0x3f);
             memory.Read(rAddress).Should().Be(0x3f);
         }
@@ -296,7 +296,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesOamCanBeReadBack()
         {
-            var memory = new PPUMemory(_mockCartridge.Object, _logger);
+            var memory = new PpuMemory(_mockCartridge.Object, _logger);
             for (byte i = 0; i < 0xff; i++)
             {
                 memory.OamWrite(i, 0xaa);
