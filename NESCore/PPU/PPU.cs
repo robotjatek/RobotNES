@@ -394,10 +394,11 @@ namespace NESCore.PPU
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
-                        var bgPx = Palette[paletteId];
+                        var bgPx = _registers.ShowBackground() ? Palette[paletteId] : Palette[_ppuMemory.Read(0x3F00)]; // Render the default background color
                         
                         var sprData = _spriteScanlineBuffer[_scanlineCycles];
-                        var pixel = sprData is { PixelColor: not null, BehindBackground: false } ? sprData.PixelColor.Value : bgPx;
+                        
+                        var pixel = sprData is { PixelColor: not null, BehindBackground: false } && _registers.ShowSprites() ? sprData.PixelColor.Value : bgPx;
                         
                         _frameBuffer[pxOffset + 2] = pixel.R;
                         _frameBuffer[pxOffset + 1] = pixel.G;
