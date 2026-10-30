@@ -397,21 +397,36 @@ namespace NESCore.PPU
                     // Only output pixels to the framebuffer on visible scanlines (0..239)
                     if (isRenderScanline && _scanlineCycles < 256)
                     {
-                        // TODO: show sprites in left column
-                        // TODO: show background in left column
-                        // TODO: show in left affects sprite 0 hit detection!
-                        
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
-                        var bgPx = _registers.ShowBackground() ? Palette[paletteId] : Palette[_ppuMemory.Read(0x3F00)]; // Render the default background color
-                        
+
+                        var showBg = _registers.ShowBackground() &&
+                                     (_scanlineCycles >= 8 || _registers.ShowBackgroundInLeftColumn());
+                        var showSpr = _registers.ShowSprites() &&
+                                      (_scanlineCycles >= 8 || _registers.ShowSpritesInLeftColumn());
+                        var bgPx = showBg
+                            ? Palette[paletteId]
+                            : Palette[_ppuMemory.Read(0x3F00)]; // Render the default background color
+                        var bgOpaque = showBg && GetBgColorPaletteId() != 0;
                         var sprData = _spriteScanlineBuffer[_scanlineCycles];
+                        var sprOpaque = showSpr && sprData.PixelColor is not null;
+
+                        Color pixel;
+                        if (sprOpaque && (!bgOpaque || !sprData.BehindBackground))
+                        {
+                            pixel = sprData.PixelColor!.Value;
+                        }
+                        else
+                        {
+                            pixel = bgPx;
+                        }
                         
-                        var pixel = sprData is { PixelColor: not null, BehindBackground: false } && _registers.ShowSprites() ? sprData.PixelColor.Value : bgPx;
-                        
-                        // sprite 0: bg px is not transparent && sprite 0 is not transparent
-                        if (sprData is { PixelColor: not null } and { Zero: true } && GetBgColorPaletteId() != 0)
+                        // Sprite 0 Hit: both pixels must be opaque
+                        if (showBg && showSpr && 
+                            sprData is { PixelColor: not null, Zero: true } &&
+                            GetBgColorPaletteId() != 0 &&
+                            _scanlineCycles < 255)
                         {
                             _registers.SetSpriteZeroHitFlag(true);
                         }

@@ -921,7 +921,11 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void OnVisibleScanline_ShouldRenderPixelFromPalette()
         {
-            var registers = new PPURegisters { Mask = 0x8 };
+            var registers = new PPURegisters {
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND | 
+                       PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN |
+                       PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
             
@@ -1393,7 +1397,10 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new PPURegisters()
             {
                 Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
-                Mask = PPUMaskFlagPositions.SHOW_SPRITES | PPUMaskFlagPositions.SHOW_BACKGROUND
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN |
+                       PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -1461,7 +1468,10 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new PPURegisters()
             {
                 Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
-                Mask = PPUMaskFlagPositions.SHOW_SPRITES | PPUMaskFlagPositions.SHOW_BACKGROUND
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN | 
+                       PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -1529,7 +1539,7 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new PPURegisters()
             {
                 Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
-                Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND // No sprite rendering
+                Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND | PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN // No sprite rendering
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -1598,7 +1608,10 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new PPURegisters()
             {
                 Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
-                Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND | PPUMaskFlagPositions.SHOW_SPRITES
+                Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND | 
+                        PPUMaskFlagPositions.SHOW_SPRITES |
+                        PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN |
+                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
             var ppu = new PPU(registers, memory.Object, _logger);
@@ -1654,8 +1667,45 @@ namespace NESCoreTests.Unit.PPUTest
             registers.GetSpriteZeroHitFlag().Should().BeTrue();
         }
         
-        // TODO: show sprites in left column
-        // TODO: show background in left column
+        [Fact]
+        public void ShouldRenderSpriteBehindBackground_WhenBackgroundIsTransparent()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS,
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES |
+                       PPUMaskFlagPositions.SHOW_BACKGROUND | 
+                       PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN |
+                       PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => i switch
+                {
+                    0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, BehindBackground: true, false, false).ToByte(), 0, i),
+                    _ => new OamEntry(0xEF, 0, 0, 10, i)
+                });
+
+            memory.Setup(m => m.Read(0x1000)).Returns(0b10000000); // sprite pattern
+            memory.Setup(m => m.Read(0x3F1D)).Returns(4);          // sprite color
+            memory.Setup(m => m.Read(0x3F00)).Returns(0x22);       // backdrop color
+
+            ppu.Run(341); // scanline 0
+            ppu.Run(1);   // scanline 1
+
+            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var buffer = (byte[])bufferField!.GetValue(ppu)!;
+
+            // Sprite pixel should show through transparent background
+            const int pxOffset = 1 * 256 * 3;
+            var expectedSprColor = PPU.Palette[4];
+            buffer[pxOffset + 2].Should().Be(expectedSprColor.R);
+            buffer[pxOffset + 1].Should().Be(expectedSprColor.G);
+            buffer[pxOffset + 0].Should().Be(expectedSprColor.B);
+        }
+        
         // TODO: 8x16 sprite mode
     }
 }
