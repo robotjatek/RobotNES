@@ -4,11 +4,12 @@ using Serilog;
 
 namespace NESCore.PPU
 {
-    public class PPU : IPPU
+    public class Ppu : IPPU
     {
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
         private readonly IPPUMemory _ppuMemory;
+        private readonly SpriteEvaluator _spriteEvaluator;
 
         private int _cycles = 0;
         private int _scanlines = 0;
@@ -54,11 +55,12 @@ namespace NESCore.PPU
 
         public event NMIEventHandler? NMIEvent;
 
-        public PPU(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
+        public Ppu(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
         {
             _logger = logger;
             _registers = registers;
             _ppuMemory = ppuMemory;
+            _spriteEvaluator = new SpriteEvaluator(registers, ppuMemory);
 
             Array.Fill(_frameBuffer, (byte)0);
         }
@@ -312,73 +314,6 @@ namespace NESCore.PPU
             _attributeRegisterHi <<= 1;
         }
 
-        private readonly List<OamEntry> _secondaryOam = new(capacity: 8); // TODO: i dont need this oam a simple counter is enough
-
-        public record struct SpritePixelData(Color? PixelColor, bool BehindBackground, bool Zero = false);
-        
-        private readonly SpritePixelData[] _spriteScanlineBuffer = new SpritePixelData[256];
-
-        private void EvaluateSprites(int scanline)
-        {
-            // TODO: make it cycle correct: https://www.nesdev.org/wiki/PPU_sprite_evaluation#Details
-            Array.Clear(_spriteScanlineBuffer, 0, _spriteScanlineBuffer.Length);
-            _secondaryOam.Clear();
-
-            var spriteSize = _registers.GetSpriteSize();
-            var height = spriteSize == SpriteSize._8x8 ? 8 : 16;
-
-            for (var i = 0; i < 64; i++)
-            {
-                var sprite = _ppuMemory.GetOamEntry(i);
-                var top = sprite.ScreenY;
-                var bottom = top + height;
-
-                if (scanline < top || scanline >= bottom || top > 240) 
-                    continue; // Skip sprites that are not visible on the current scanline
-
-                if (_secondaryOam.Count < 8)
-                {
-                    _secondaryOam.Add(sprite);
-                }
-                else
-                {
-                    // According to the specification, the bit stays on until the next vblank, does not clear on the end of the scanline
-                    _registers.SetOverflowFlag(true);
-                    break;
-                }
-
-                // Select the correct row from the pattern table
-                var row = sprite.VerticalFlip ? height - 1 - (scanline - sprite.ScreenY) : scanline - sprite.ScreenY;
-                var address = sprite.GetPatternTableAddress(_registers.GetSpriteSize(),
-                    _registers.GetSpritePatternTableAddress(), row);
-
-                var patternPlaneLow = _ppuMemory.Read(address);
-                var patternPlaneHigh = _ppuMemory.Read((ushort)(address + 8));
-                var attribute = sprite.PaletteIndex;
-                
-                for (var j = 0; j < 8; j++)
-                {
-                    var bitPos = sprite.HorizontalFlip ? j : 7 - j; // Reverse the bit walking order based on h-flip
-                    var lowBit = (patternPlaneLow >> bitPos) & 1;
-                    var highBit = (patternPlaneHigh >> bitPos) & 1;
-                    var pixelColor = (highBit << 1) | lowBit;
-                    if (pixelColor == 0 || sprite.X + j >= 256 || _spriteScanlineBuffer[sprite.X + j].PixelColor != null)
-                    {
-                        // Both pattern bits are 0 => this pixel is transparent => skip color 0
-                        // or skip when the pixel is already taken
-                        continue;
-                    }
-
-                    var paletteIndex = (attribute << 2) | pixelColor;
-                    var paletteColor = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
-                    var spriteData = new SpritePixelData(Palette[paletteColor], sprite.BehindBackground, sprite.IsSpriteZero);
-
-                    if (sprite.ScreenX + j < 256)
-                        _spriteScanlineBuffer[sprite.X + j] = spriteData;
-                }
-            }
-        }
-
         private void Cycle()
         {
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
@@ -391,7 +326,7 @@ namespace NESCore.PPU
                 {
                     if (_scanlineCycles == 0)
                     {
-                        EvaluateSprites(_scanlines);
+                        _spriteEvaluator.EvaluateSprites(_scanlines);
                     }
 
                     // Only output pixels to the framebuffer on visible scanlines (0..239)
@@ -409,7 +344,7 @@ namespace NESCore.PPU
                             ? Palette[paletteId]
                             : Palette[_ppuMemory.Read(0x3F00)]; // Render the default background color
                         var bgOpaque = showBg && GetBgColorPaletteId() != 0;
-                        var sprData = _spriteScanlineBuffer[_scanlineCycles];
+                        var sprData = _spriteEvaluator.SpriteScanlineBuffer[_scanlineCycles];
                         var sprOpaque = showSpr && sprData.PixelColor is not null;
 
                         Color pixel;

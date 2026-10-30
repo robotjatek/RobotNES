@@ -18,7 +18,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = testData
             };
 
-            var ppu = new PPU(ppuRegisters, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _logger);
             var data = ppu.Read(0x2002);
             data.Should().Be(0b11100000);
         }
@@ -31,7 +31,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Status = testData
             };
-            var ppu = new PPU(ppuRegisters, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _logger);
             var status = ppu.Read(0x2002);
             status.Should().Be(0b11100000);
             ppuRegisters.Status.Should().Be(0b01100000);
@@ -44,7 +44,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Control = 0x80 //Enable nmi
             };
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             uint beforeVBlank =
@@ -63,7 +63,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void SetsVBlankFlagButDoesNotSendNMI()
         {
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             uint beforeVBlank =
@@ -85,7 +85,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Control = 0x80 //Enable nmi
             };
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             for (int i = 0; i < 3; i++) // Three times a charm!
@@ -103,7 +103,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ClearsVBlankFlag()
         {
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             uint beforePrerender =
                 341 * 240
                 + 341
@@ -124,7 +124,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = 0xff
             };
 
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             uint beforePrerender =
                 341 * 240
                 + 341
@@ -143,7 +143,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = 0xff
             };
 
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             uint beforePrerender =
                 341 * 240
                 + 341
@@ -162,7 +162,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Control = 0
             };
 
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             ppu.Write(0x2000, 0xff);
 
             registers.Control.Should().Be(0xff);
@@ -173,7 +173,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var logger = new Mock<ILogger>();
-            var ppu = new PPU(registers, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers, _ppuMemory.Object, logger.Object);
             ppu.Read(0x2000);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -186,7 +186,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Mask = 0
             };
-            var ppu = new PPU(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             ppu.Write(0x2001, 0xff);
 
             registers.Mask.Should().Be(0xff);
@@ -197,7 +197,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var logger = new Mock<ILogger>();
-            var ppu = new PPU(registers, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers, _ppuMemory.Object, logger.Object);
             ppu.Read(0x2001);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -207,7 +207,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ReadFromScrollLogs()
         {
             var logger = new Mock<ILogger>();
-            var ppu = new PPU(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
             ppu.Read(0x2005);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -219,7 +219,7 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
 
-            var ppu = new PPU(registers.Object, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, _ppuMemory.Object, _logger);
             
             ppu.Write(0x2005, 0xde);
             ppu.Write(0x2005, 0xad);
@@ -232,7 +232,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ReadFromAddressLogs()
         {
             var logger = new Mock<ILogger>();
-            var ppu = new PPU(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
             ppu.Read(0x2006);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -244,7 +244,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuMemory = new Mock<IPPUMemory>();
 
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
             ppu.Write(0x2007, 0xaa); // Data byte
@@ -258,7 +258,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuMemory = new Mock<IPPUMemory>();
 
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -280,7 +280,7 @@ namespace NESCoreTests.Unit.PPUTest
             registers.SetupAllProperties();
             registers.Setup(r => r.VRAMIncrement()).Returns(32);
 
-            var ppu = new PPU(registers.Object, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -300,7 +300,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
 
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -318,7 +318,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3f00)).Returns(0xaa);
 
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3f); // Upper byte first
             ppu.Write(0x2006, 0x00); // Lower byte second
 
@@ -338,13 +338,13 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3c11)).Returns(0xac);
 
             var registers = new PPURegisters();
-            var ppu = new PPU(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
-            var result = ppu.Read(0x2007); //First read should be discared because of the buffering
+            ppu.Read(0x2007); //First read should be discared because of the buffering
 
-            result = ppu.Read(0x2007);
+            var result = ppu.Read(0x2007);
             result.Should().Be(0xaa);
 
             result = ppu.Read(0x2007);
@@ -371,13 +371,13 @@ namespace NESCoreTests.Unit.PPUTest
             registers.SetupAllProperties();
             registers.Setup(r => r.VRAMIncrement()).Returns(32);
 
-            var ppu = new PPU(registers.Object, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, ppuMemory.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
-            var result = ppu.Read(0x2007); //First read should be discared because of the buffering
+            ppu.Read(0x2007); //First read should be discared because of the buffering
 
-            result = ppu.Read(0x2007);
+            var result = ppu.Read(0x2007);
             result.Should().Be(0xaa);
 
             result = ppu.Read(0x2007);
@@ -399,7 +399,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var logger = new Mock<ILogger>();
 
-            var ppu = new PPU(registers.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers.Object, _ppuMemory.Object, logger.Object);
             ppu.Read(0x2003);
             logger.Verify(l => l.Warning(It.IsAny<string>()));
         }
@@ -409,9 +409,8 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
-
-
-            var ppu = new PPU(registers.Object, _ppuMemory.Object, _logger);
+            
+            var ppu = new Ppu(registers.Object, _ppuMemory.Object, _logger);
             ppu.Write(0x2003, 0xaa);
             registers.Object.OAMAddress.Should().Be(0xaa);
         }
@@ -425,7 +424,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var memory = new Mock<IPPUMemory>();
 
-            var ppu = new PPU(registers.Object, memory.Object, _logger);
+            var ppu = new Ppu(registers.Object, memory.Object, _logger);
             ppu.Write(0x2004, 0xde);
 
             memory.Verify(m => m.OamWrite(0x0, 0xde));
@@ -442,7 +441,7 @@ namespace NESCoreTests.Unit.PPUTest
             var memory = new Mock<IPPUMemory>();
             memory.Setup(m => m.OamRead(0)).Returns(0xde);
 
-            var ppu = new PPU(registers.Object, memory.Object, _logger);
+            var ppu = new Ppu(registers.Object, memory.Object, _logger);
             var value = ppu.Read(0x2004);
             value.Should().Be(0xde);
 
@@ -455,7 +454,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             // V = 2042
             ppu.Write(0x2006, 0x20);
@@ -472,7 +471,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             ppu.Write(0x2006, 0x00);
             ppu.Write(0x2006, 0x8C);
@@ -485,7 +484,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             memory.Verify(m => m.Read(0x23CB), Times.Once);
             
-            var field = typeof(PPU).GetField("_attributeId", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_attributeId", BindingFlags.NonPublic | BindingFlags.Instance);
             var attributeId = field?.GetValue(ppu);
             attributeId.Should().Be(0xAA);
         }
@@ -499,7 +498,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             ppu.Write(0x2006, 0x00);
             ppu.Write(0x2006, 0x8C);
             // NT read
@@ -524,7 +523,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             ppu.Write(0x2006, 0x00);
             ppu.Write(0x2006, 0x8C);
             // NT read
@@ -547,7 +546,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             // set ppu address to 0x2000 => coarseX = 0
             ppu.Write(0x2006, 0x20);
@@ -556,7 +555,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(8);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
             ppuAddress.Should().Be(0x2001);
         }
@@ -566,7 +565,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters() { Mask = 0x8 }; // Show background
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // set coarseX to 32
             ppu.Write(0x2006, 0x00);
@@ -575,7 +574,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(8);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
             ppuAddress.Should().Be(0x0400);
         }
@@ -586,7 +585,7 @@ namespace NESCoreTests.Unit.PPUTest
             // We are at the end of the scanline, so we should wrap around to the next tile row (increment fineY)
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             ppu.Write(0x2006, 0x20);
             ppu.Write(0x2006, 0x00);
@@ -594,7 +593,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(256);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
             // Fine Y should be incremented by 1: 0 001 00 00000 00000 + 0x2000 + (0x400 because we also increased X) = 0x3400
             ppuAddress.Should().Be(0x3400); // We are in the same tile row but down one scanline
@@ -605,7 +604,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             ppu.Write(0x2006, 0x20);
             ppu.Write(0x2006, 0x00);
@@ -613,7 +612,7 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(257);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuX = field?.GetValue(ppu);
             ppuX.Should().Be(0x3000); // We are back to the start of the tile row
         }
@@ -623,7 +622,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // V = 0x3000 => fineY = 3
             ppu.Write(0x2006, 0x30);
@@ -635,7 +634,7 @@ namespace NESCoreTests.Unit.PPUTest
             // 4 full scanlines => + 5th sc 256 cycle
             ppu.Run(1620);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
             ppuAddress.Should().Be(0x0422);
         }
@@ -645,7 +644,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // fine Y = 3 => 0x3000
             // coarse Y = 29 => 29 << 5 => 928 => 0x03A0
@@ -655,7 +654,7 @@ namespace NESCoreTests.Unit.PPUTest
             // run for 4 full scanlines
             ppu.Run(1620);
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var ppuAddress = field?.GetValue(ppu);
             // fine Y = 0
             // coarse Y = 0
@@ -670,13 +669,13 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             ppu.Write(0x2005, 0x7D);
 
-            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var tempAddress = (ushort)field!.GetValue(ppu)!;
-            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latchField = typeof(Ppu).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
             var latch = (bool)latchField!.GetValue(ppu)!;
             
             // temp low 5 bits is coarse X
@@ -692,14 +691,14 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             ppu.Write(0x2005, 0x7D);
             ppu.Write(0x2005, 0b10101010); // second write is tested here
 
-            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var tempAddress = (ushort)field!.GetValue(ppu)!;
-            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latchField = typeof(Ppu).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
             var latch = (bool)latchField!.GetValue(ppu)!;
             
             //FGH..AB CDE..... <- d: ABCDEFGH
@@ -720,10 +719,10 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             ppu.Write(0x2000, 0b00000011);
-            var field = typeof(PPU).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_tempAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var tempAddress = (ushort)field!.GetValue(ppu)!;
             
             var nt = (tempAddress & 0x0C00) >> 10;
@@ -734,17 +733,17 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void StatusRegisterRead_ShouldResetTheLatch()
         {
-            var ppu = new PPU(_ppuRegisters.Object, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, _logger);
             
             ppu.Write(0x2005, 1);
             
-            var latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            var latchField = typeof(Ppu).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
             var latch = (bool)latchField!.GetValue(ppu)!;
             latch.Should().BeTrue();
 
             ppu.Read(0x2002);
             
-            latchField = typeof(PPU).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
+            latchField = typeof(Ppu).GetField("_addressLatch", BindingFlags.NonPublic | BindingFlags.Instance);
             latch = (bool)latchField!.GetValue(ppu)!;
             latch.Should().BeFalse();
         }
@@ -762,7 +761,7 @@ namespace NESCoreTests.Unit.PPUTest
             };
             
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             ppu.Write(0x2006, 0);
             ppu.Write(0x2006, 0x8C);
             
@@ -775,8 +774,8 @@ namespace NESCoreTests.Unit.PPUTest
             
             memory.Verify(m => m.Read(0x208C));
             
-            var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftLo = typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftHi = typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
             
             var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
             var highValue = (ushort)shiftHi!.GetValue(ppu)!;
@@ -795,7 +794,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             ppu.Write(0x2006, 0);
             ppu.Write(0x2006, 0x8C);
 
@@ -807,8 +806,8 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(8); // Load the shift registers with the first 8 bits
             ppu.Run(1); // Shift left one bit
             
-            var shiftLo = typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var shiftHi = typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftLo = typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var shiftHi = typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
 
             var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
             var highValue = (ushort)shiftHi!.GetValue(ppu)!;
@@ -838,7 +837,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // coarse X = 2 (bit 1 = 1), coarse y = 2 (bit 1 = 1) [right bottom at bits]
             ppu.Write(0x2006, 0);
@@ -850,8 +849,8 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(8);
             
-            var attrLo = typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var attrHi = typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
+            var attrLo = typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
+            var attrHi = typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
             
             var attrLoValue = (ushort)attrLo!.GetValue(ppu)!;
             var attrHiValue = (ushort)attrHi!.GetValue(ppu)!;
@@ -869,13 +868,13 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             ppu.Write(0x2005, 0); // X scroll 0
             ppu.Write(0x2005, 0x5e); // y scroll => fineY = 6, CoarseY = 11: temp address = $6160
             ppu.Run(261 * 341 + 304); // scanline 261, cycle 304
             
-            var field = typeof(PPU).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
+            var field = typeof(Ppu).GetField("_ppuAddress", BindingFlags.NonPublic | BindingFlags.Instance);
             var address = (ushort)field!.GetValue(ppu)!;
             ((address & 0x7000) >> 12).Should().Be(6); // fine y
             ((address & 0x03e0) >> 5).Should().Be(11); // coarse Y
@@ -889,7 +888,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var registers = new PPURegisters { Control = 0x10, Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             ppu.Write(0x2006, 0x20);
             ppu.Write(0x2006, 0x0);
@@ -906,12 +905,12 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Control = 0x10 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 0 = 1
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 1 = 1 -> Color Index = 3
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 0 = 1
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 1 = 1 -> Palette ID = 3
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 0 = 1
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 1 = 1 -> Color Index = 3
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 0 = 1
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 1 = 1 -> Palette ID = 3
             
             var paletteAddress = ppu.GetCurrentPixelPaletteAddressTest();
             // 0x3F00 | (3 << 2) | 3 = 0x3F0F
@@ -927,18 +926,18 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN |
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             
             memory.Setup(m => m.Read(0x3F0F)).Returns(0x15);
             
             ppu.Run(1);
             
-            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var bufferField = typeof(Ppu).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // NTSC colors
@@ -952,7 +951,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Control = 0x80 }; // nmi enabled: bit 7 = 1
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             using var monitor = ppu.Monitor();
 
             uint cyclesBeforeVBlank = 240 * 341 + 341;
@@ -974,7 +973,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => i == 0 ? 
@@ -985,8 +984,12 @@ namespace NESCoreTests.Unit.PPUTest
             
             memory.Verify(m => m.GetOamEntry(0), Times.Exactly(2));
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
+            
             secondaryOam.Count.Should().Be(1);
             secondaryOam[0].Should().BeEquivalentTo(new OamEntry(0, 0, 0, 10, 0));
         }
@@ -1000,7 +1003,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
@@ -1015,8 +1018,11 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 50 + 1);
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
             secondaryOam.Count.Should().Be(2);
             secondaryOam[0].Should().BeEquivalentTo(new OamEntry(49, 0, 0, 10, 0));
             secondaryOam[1].Should().BeEquivalentTo(new OamEntry(45, 0, 0, 10, 1));
@@ -1031,7 +1037,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
@@ -1046,9 +1052,13 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 50 + 1);
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
             secondaryOam.Count.Should().Be(0);
+            
         }
         
         [Fact]
@@ -1060,7 +1070,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
@@ -1074,8 +1084,12 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 2);
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
+            
             secondaryOam.Count.Should().Be(8);
             registers.GetOverflowFlag().Should().BeTrue();
         }
@@ -1090,7 +1104,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
@@ -1104,8 +1118,10 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 60);
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
             secondaryOam.Count.Should().Be(0); // No sprites here
             registers.GetOverflowFlag().Should().BeTrue(); // But the overflow flag is still set
         }
@@ -1121,7 +1137,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
@@ -1135,8 +1151,10 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 262); // Run the PPU to the next frame
             
-            var secondaryOamField = typeof(PPU).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
-            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var secondaryOamField = typeof(SpriteEvaluator).GetField("_secondaryOam", BindingFlags.NonPublic | BindingFlags.Instance);
+            var secondaryOam = (List<OamEntry>)secondaryOamField!.GetValue(spriteEvaluator)!;
             secondaryOam.Count.Should().Be(0); // No sprites here
             registers.GetOverflowFlag().Should().BeFalse(); // The overflow flag is reset on the next scanline
         }
@@ -1150,7 +1168,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => 
@@ -1187,18 +1205,19 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(341 * 2); // the first scanline cannot have sprites
             
-            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
             spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(3); // three visible pixels
 
-            var expected = new List<PPU.SpritePixelData>();
+            var expected = new List<SpriteEvaluator.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(new PPU.SpritePixelData(null, false));
+                expected.Add(new SpriteEvaluator.SpritePixelData(null, false));
             }
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[10], false, true);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[13], false, true);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[13], false, true);
+            expected[0] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[10], false, true);
+            expected[1] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[13], false, true);
+            expected[6] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[13], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1212,7 +1231,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => 
@@ -1248,24 +1267,25 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(341 * 2);
             
-            var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
             spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(8);
 
-            var expected = new List<PPU.SpritePixelData>();
+            var expected = new List<SpriteEvaluator.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(new PPU.SpritePixelData(null, false));
+                expected.Add(new SpriteEvaluator.SpritePixelData(null, false));
             }
             
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[0] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[1] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[2] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[3] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[4] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[5] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[6] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[7] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1279,7 +1299,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => 
@@ -1309,24 +1329,25 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(341 * 2);
             
-            var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
             spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(5);
             
-            var expected = new List<PPU.SpritePixelData>();
+            var expected = new List<SpriteEvaluator.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(new PPU.SpritePixelData(null, false));
+                expected.Add(new SpriteEvaluator.SpritePixelData(null, false));
             }
 
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[0], false, true);
-            expected[1] = new PPU.SpritePixelData(null, false);
-            expected[2] = new PPU.SpritePixelData(null, false);
-            expected[3] = new PPU.SpritePixelData(null, false);
-            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[0] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[0], false, true);
+            expected[1] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[2] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[3] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[4] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[5] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[6] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[7] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
 
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1340,7 +1361,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) =>
                 {
@@ -1369,24 +1390,25 @@ namespace NESCoreTests.Unit.PPUTest
             
             ppu.Run(341*2);
             
-            var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
             spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(5);
 
-            var expected = new List<PPU.SpritePixelData>();
+            var expected = new List<SpriteEvaluator.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(new PPU.SpritePixelData(null, false));
+                expected.Add(new SpriteEvaluator.SpritePixelData(null, false));
             }
             
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
-            expected[4] = new PPU.SpritePixelData(null, false);
-            expected[5] = new PPU.SpritePixelData(null, false);
-            expected[6] = new PPU.SpritePixelData(null, false);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[0], false, true);
+            expected[0] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[1] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[2] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[3] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[3], false, true);
+            expected[4] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[5] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[6] = new SpriteEvaluator.SpritePixelData(null, false);
+            expected[7] = new SpriteEvaluator.SpritePixelData(Ppu.Palette[0], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1403,7 +1425,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // Sprite setup
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
@@ -1440,23 +1462,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341); // First line
             
             // set the background bits on the second line into the shift registers
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
             
             ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
             
-            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var bufferField = typeof(Ppu).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // Only the background color should be rendered
             const int pxOffset = 1 * 256 * 3; // Scanline 1, Cycle 0
-            var expectedBgColor = PPU.Palette[0x15];
+            var expectedBgColor = Ppu.Palette[0x15];
             buffer[pxOffset + 2].Should().Be(expectedBgColor.R); // R (228)
             buffer[pxOffset + 1].Should().Be(expectedBgColor.G); // G (0)
             buffer[pxOffset + 0].Should().Be(expectedBgColor.B); // B (88)
@@ -1474,7 +1496,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // Sprite setup
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
@@ -1511,23 +1533,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341); // First line
             
             // set the background bits on the second line into the shift registers
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
             
             ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
             
-            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var bufferField = typeof(Ppu).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // Only the background color should be rendered
             const int pxOffset = 1 * 256 * 3; // Scanline 1, Cycle 0
-            var expectedBgColor = PPU.Palette[4];
+            var expectedBgColor = Ppu.Palette[4];
             buffer[pxOffset + 2].Should().Be(expectedBgColor.R); // R (228)
             buffer[pxOffset + 1].Should().Be(expectedBgColor.G); // G (0)
             buffer[pxOffset + 0].Should().Be(expectedBgColor.B); // B (88)
@@ -1542,7 +1564,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND | PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN // No sprite rendering
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // Sprite setup:
             // There is a sprite at X = 0-7, Palette 3, but sprite rendering is disabled
@@ -1580,23 +1602,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341); // First line
             
             // set the background bits on the second line into the shift registers
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
             
             ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
             
-            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var bufferField = typeof(Ppu).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
           
             // Only the background color should be rendered
             const int pxOffset = 1 * 256 * 3; // Scanline 1, Cycle 0
-            var expectedBgColor = PPU.Palette[0x15];
+            var expectedBgColor = Ppu.Palette[0x15];
             buffer[pxOffset + 2].Should().Be(expectedBgColor.R); // R (228)
             buffer[pxOffset + 1].Should().Be(expectedBgColor.G); // G (0)
             buffer[pxOffset + 0].Should().Be(expectedBgColor.B); // B (88)
@@ -1614,7 +1636,7 @@ namespace NESCoreTests.Unit.PPUTest
                         PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
             
             // Sprite setup:
             // There is a sprite at X = 0-7, Palette 3, but sprite rendering is disabled
@@ -1653,13 +1675,13 @@ namespace NESCoreTests.Unit.PPUTest
             registers.GetSpriteZeroHitFlag().Should().BeFalse();
             
             // set the background bits on the second line into the shift registers
-            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
-            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
                 SetValue(ppu, (ushort)0x8000);
             
             ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
@@ -1679,7 +1701,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => i switch
@@ -1695,12 +1717,12 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341); // scanline 0
             ppu.Run(1);   // scanline 1
 
-            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var bufferField = typeof(Ppu).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
             var buffer = (byte[])bufferField!.GetValue(ppu)!;
 
             // Sprite pixel should show through transparent background
             const int pxOffset = 1 * 256 * 3;
-            var expectedSprColor = PPU.Palette[4];
+            var expectedSprColor = Ppu.Palette[4];
             buffer[pxOffset + 2].Should().Be(expectedSprColor.R);
             buffer[pxOffset + 1].Should().Be(expectedSprColor.G);
             buffer[pxOffset + 0].Should().Be(expectedSprColor.B);
@@ -1718,7 +1740,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => i switch
@@ -1748,23 +1770,23 @@ namespace NESCoreTests.Unit.PPUTest
                     _ => 0
                 });
 
-            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+
+            var buffer = spriteEvaluator.SpriteScanlineBuffer;
 
             // Scanline 1 (top tile row 0)
             ppu.Run(341 * 2);
-            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
-            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
+            buffer[0].Should().Be(new SpriteEvaluator.SpritePixelData(Ppu.Palette[5], false, true));
             buffer[7].PixelColor.Should().BeNull();
 
             // Advance 8 scanlines to scanline 9 (bottom tile row 0)
             ppu.Run(341 * 8);
-            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
-            buffer[7].Should().Be(new PPU.SpritePixelData(PPU.Palette[9], false, true));
+            buffer[7].Should().Be(new SpriteEvaluator.SpritePixelData(Ppu.Palette[9], false, true));
             buffer[0].PixelColor.Should().BeNull();
 
             // Advance 8 scanlines to scanline 17 (past the 16 pixel height)
             ppu.Run(341 * 8);
-            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
             buffer.Where(c => c.PixelColor != null).Should().BeEmpty();
         }
 
@@ -1779,7 +1801,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => i switch
@@ -1800,9 +1822,10 @@ namespace NESCoreTests.Unit.PPUTest
 
             ppu.Run(341 * 2);
 
-            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
-            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[7], false, true));
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
+            spriteScanlineBuffer[0].Should().Be(new SpriteEvaluator.SpritePixelData(Ppu.Palette[7], false, true));
         }
 
         [Fact]
@@ -1814,7 +1837,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = PPUMaskFlagPositions.SHOW_SPRITES
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new PPU(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _logger);
 
             // TileIndex = 0 (table 0x0000, tile 0 and 1)
             // VerticalFlip = true
@@ -1840,19 +1863,19 @@ namespace NESCoreTests.Unit.PPUTest
                     _ => 0
                 });
 
-            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-
             // Scanline 1: bottom tile's bottom row should be rendered
             ppu.Run(341 * 2);
-            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
-            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
-            buffer[7].PixelColor.Should().BeNull();
+            
+            var spriteEvaluatorField = typeof(Ppu).GetField("_spriteEvaluator", BindingFlags.NonPublic | BindingFlags.Instance);
+            var spriteEvaluator = (SpriteEvaluator)spriteEvaluatorField!.GetValue(ppu)!;
+            var spriteScanlineBuffer = spriteEvaluator.SpriteScanlineBuffer;
+            spriteScanlineBuffer[0].Should().Be(new SpriteEvaluator.SpritePixelData(Ppu.Palette[5], false, true));
+            spriteScanlineBuffer[7].PixelColor.Should().BeNull();
 
             // Advance 15 scanlines to scanline 16: top tile's top row should be rendered
             ppu.Run(341 * 15);
-            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
-            buffer[7].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
-            buffer[0].PixelColor.Should().BeNull();
+            spriteScanlineBuffer[7].Should().Be(new SpriteEvaluator.SpritePixelData(Ppu.Palette[5], false, true));
+            spriteScanlineBuffer[0].PixelColor.Should().BeNull();
         }
     }
 }
