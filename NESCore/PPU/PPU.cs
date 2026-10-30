@@ -306,9 +306,9 @@ namespace NESCore.PPU
 
         private readonly List<OamEntry> _secondaryOam = new(capacity: 8); // TODO: i dont need this oam a simple counter is enough
 
-        private readonly Color?[] _spriteScanlineBuffer = new Color?[256]; // TODO: this way i'll need a priority buffer too, to decide if the bg or the sprite should be drawn
-        // TODO: maybe a complex (Color, priority) tuple?
-        //private readonly byte[] _spriteScanlinePriorityBuffer = new byte[256];
+        private record struct SpritePixelData(Color? PixelColor, bool BehindBackground);
+        
+        private readonly SpritePixelData[] _spriteScanlineBuffer = new SpritePixelData[256];
 
         private void EvaluateSprites(int scanline)
         {
@@ -356,7 +356,7 @@ namespace NESCore.PPU
                     var lowBit = (patternPlaneLow >> bitPos) & 1;
                     var highBit = (patternPlaneHigh >> bitPos) & 1;
                     var pixelColor = (highBit << 1) | lowBit;
-                    if (pixelColor == 0 || sprite.X + j >= 256 || _spriteScanlineBuffer[sprite.X + j] != null)
+                    if (pixelColor == 0 || sprite.X + j >= 256 || _spriteScanlineBuffer[sprite.X + j].PixelColor != null)
                     {
                         // Both pattern bits are 0 => this pixel is transparent => skip color 0
                         // or skip when the pixel is already taken
@@ -364,11 +364,11 @@ namespace NESCore.PPU
                     }
 
                     var paletteIndex = (attribute << 2) | pixelColor;
-                    var c = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
-                    var clr = Palette[c];
+                    var paletteColor = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
+                    var spriteData = new SpritePixelData(Palette[paletteColor], sprite.BehindBackground);
 
                     if (sprite.ScreenX + j < 256)
-                        _spriteScanlineBuffer[sprite.X + j] = clr;
+                        _spriteScanlineBuffer[sprite.X + j] = spriteData;
                 }
             }
         }
@@ -395,13 +395,13 @@ namespace NESCore.PPU
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
                         var bgPx = Palette[paletteId];
-
-                        // TODO: sprite px priority
-
-                        var spr = _spriteScanlineBuffer[_scanlineCycles];
-                        _frameBuffer[pxOffset + 2] = spr?.R ?? bgPx.R;
-                        _frameBuffer[pxOffset + 1] = spr?.G ?? bgPx.G;
-                        _frameBuffer[pxOffset + 0] = spr?.B ?? bgPx.B;
+                        
+                        var sprData = _spriteScanlineBuffer[_scanlineCycles];
+                        var pixel = sprData is { PixelColor: not null, BehindBackground: false } ? sprData.PixelColor.Value : bgPx;
+                        
+                        _frameBuffer[pxOffset + 2] = pixel.R;
+                        _frameBuffer[pxOffset + 1] = pixel.G;
+                        _frameBuffer[pxOffset + 0] = pixel.B;
                     }
 
                     MoveShiftRegisters();
