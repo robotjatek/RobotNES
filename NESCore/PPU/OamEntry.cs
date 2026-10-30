@@ -16,7 +16,7 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
         {
             SpriteSize._8x8 => (ushort)(baseAddress + (TileIndex * 16) + row),
             SpriteSize._8x16 => _8x16(),
-            _ => throw new ArgumentOutOfRangeException($"Invalid sprite size")
+            _ => throw new InvalidOperationException($"Invalid sprite size")
         };
     }
 
@@ -28,7 +28,7 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
         throw new NotImplementedException("8x16 sprite mode is not implemented");
     }
 
-public readonly record struct SpriteAttribute(byte Palette, bool BehindBackground, bool VerticalFlip, bool HorizontalFlip)
+    public readonly record struct SpriteAttribute(byte Palette, bool BehindBackground, bool VerticalFlip, bool HorizontalFlip)
     {
         public byte ToByte()
         {

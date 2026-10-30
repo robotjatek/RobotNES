@@ -1192,9 +1192,9 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 expected.Add(new PPU.SpritePixelData(null, false));
             }
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[10], false);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[13], false);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[13], false);
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[10], false, true);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[13], false, true);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[13], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1254,14 +1254,14 @@ namespace NESCoreTests.Unit.PPUTest
                 expected.Add(new PPU.SpritePixelData(null, false));
             }
             
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1315,14 +1315,14 @@ namespace NESCoreTests.Unit.PPUTest
                 expected.Add(new PPU.SpritePixelData(null, false));
             }
 
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[0], false);
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[0], false, true);
             expected[1] = new PPU.SpritePixelData(null, false);
             expected[2] = new PPU.SpritePixelData(null, false);
             expected[3] = new PPU.SpritePixelData(null, false);
-            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
 
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1375,14 +1375,14 @@ namespace NESCoreTests.Unit.PPUTest
                 expected.Add(new PPU.SpritePixelData(null, false));
             }
             
-            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false);
-            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
+            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false, true);
             expected[4] = new PPU.SpritePixelData(null, false);
             expected[5] = new PPU.SpritePixelData(null, false);
             expected[6] = new PPU.SpritePixelData(null, false);
-            expected[7] = new PPU.SpritePixelData(PPU.Palette[0], false);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[0], false, true);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1592,7 +1592,70 @@ namespace NESCoreTests.Unit.PPUTest
             buffer[pxOffset + 0].Should().Be(expectedBgColor.B); // B (88)
         }
         
+        [Fact]
+        public void ShouldSetSpriteZeroHitBit()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
+                Mask =  PPUMaskFlagPositions.SHOW_BACKGROUND | PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // Sprite setup:
+            // There is a sprite at X = 0-7, Palette 3, but sprite rendering is disabled
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => 
+                { 
+                    return i switch 
+                    { 
+                        // X = 0-7, Palette 3 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, BehindBackground: false, false, false).ToByte(), 0, i), 
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) 
+                    }; 
+                });
+            
+            const byte pattern1 = 0b10000000;
+            const byte pattern2 = 0b01000000;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) =>
+                {
+                    return address switch
+                    {
+                        // planes
+                        0x1000 => pattern1,
+                        0x1008 => pattern2,
+                        
+                        // palette px 1 (first sprite pixel from palette index 4)
+                        0x3F1D => 4,
+                        
+                        _ => 0
+                    };
+                });
+            
+            memory.Setup(m => m.Read(0x3F0F)).Returns(21); // Background color from palette index 21
+            
+            ppu.Run(341); // First line
+            registers.GetSpriteZeroHitFlag().Should().BeFalse();
+            
+            // set the background bits on the second line into the shift registers
+            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            
+            ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
+            
+            registers.GetSpriteZeroHitFlag().Should().BeTrue();
+        }
         
-        // TODO: sprite 0 hit
+        // TODO: show sprites in left column
+        // TODO: show background in left column
+        // TODO: 8x16 sprite mode
     }
 }

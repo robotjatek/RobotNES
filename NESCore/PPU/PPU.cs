@@ -220,9 +220,7 @@ namespace NESCore.PPU
         private ushort GetCurrentPixelPaletteAddress()
         {
             var bitPosition = 15 - _registers.FineX;
-
-            var colorIndex = (((_shiftRegisterLo >> bitPosition) & 0x01) |
-                              (((_shiftRegisterHi >> bitPosition) & 0x01) << 1));
+            var colorIndex = GetBgColorPaletteId();
 
             if (colorIndex == 0)
             {
@@ -233,6 +231,16 @@ namespace NESCore.PPU
                              (((_attributeRegisterHi >> bitPosition) & 0x01) << 1));
 
             return (ushort)(0x3F00 | (paletteId << 2) | colorIndex);
+        }
+        
+        private ushort GetBgColorPaletteId()
+        {
+            var bitPosition = 15 - _registers.FineX;
+
+            var colorIndex = ((_shiftRegisterLo >> bitPosition) & 0x01) |
+                             (((_shiftRegisterHi >> bitPosition) & 0x01) << 1);
+
+            return (ushort)(colorIndex);
         }
 
         internal ushort GetCurrentPixelPaletteAddressTest() => GetCurrentPixelPaletteAddress();
@@ -306,7 +314,7 @@ namespace NESCore.PPU
 
         private readonly List<OamEntry> _secondaryOam = new(capacity: 8); // TODO: i dont need this oam a simple counter is enough
 
-        public record struct SpritePixelData(Color? PixelColor, bool BehindBackground);
+        public record struct SpritePixelData(Color? PixelColor, bool BehindBackground, bool Zero = false);
         
         private readonly SpritePixelData[] _spriteScanlineBuffer = new SpritePixelData[256];
 
@@ -338,8 +346,6 @@ namespace NESCore.PPU
                     _registers.SetOverflowFlag(true);
                     break;
                 }
-                
-                // TODO: sprite 0 hit (in cycle)
 
                 // Select the correct 8*1 row from the pattern table
                 var row = sprite.VerticalFlip ? 7 - (scanline - sprite.ScreenY) : scanline - sprite.ScreenY;
@@ -365,7 +371,7 @@ namespace NESCore.PPU
 
                     var paletteIndex = (attribute << 2) | pixelColor;
                     var paletteColor = _ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
-                    var spriteData = new SpritePixelData(Palette[paletteColor], sprite.BehindBackground);
+                    var spriteData = new SpritePixelData(Palette[paletteColor], sprite.BehindBackground, sprite.IsSpriteZero);
 
                     if (sprite.ScreenX + j < 256)
                         _spriteScanlineBuffer[sprite.X + j] = spriteData;
@@ -391,6 +397,10 @@ namespace NESCore.PPU
                     // Only output pixels to the framebuffer on visible scanlines (0..239)
                     if (isRenderScanline && _scanlineCycles < 256)
                     {
+                        // TODO: show sprites in left column
+                        // TODO: show background in left column
+                        // TODO: show in left affects sprite 0 hit detection!
+                        
                         var paletteAddress = GetCurrentPixelPaletteAddress();
                         var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
@@ -399,6 +409,12 @@ namespace NESCore.PPU
                         var sprData = _spriteScanlineBuffer[_scanlineCycles];
                         
                         var pixel = sprData is { PixelColor: not null, BehindBackground: false } && _registers.ShowSprites() ? sprData.PixelColor.Value : bgPx;
+                        
+                        // sprite 0: bg px is not transparent && sprite 0 is not transparent
+                        if (sprData is { PixelColor: not null } and { Zero: true } && GetBgColorPaletteId() != 0)
+                        {
+                            _registers.SetSpriteZeroHitFlag(true);
+                        }
                         
                         _frameBuffer[pxOffset + 2] = pixel.R;
                         _frameBuffer[pxOffset + 1] = pixel.G;

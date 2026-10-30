@@ -13,7 +13,7 @@ Project skeleton only with partially implemented bus and memory systems.
 - All official instructions are implemented
 - Unofficial opcodes from `nestest.nes` are implemented
 - Controller implementation (Controller 1: A, S, Up, Down, Left, Right, Space, Enter)
-- Partial PPU implementation with background rendering
+- PPU implementation
 - Fake APU implementation (disregards any reads or writes)
 
 Currently working on the PPU implementation.
