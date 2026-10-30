@@ -1154,7 +1154,7 @@ namespace NESCoreTests.Unit.PPUTest
                     return i switch 
                     { 
                         // X = 0-7, Palette 3 
-                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, true, false, false).ToByte(), 0, i), 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, BehindBackground:false, false, false).ToByte(), 0, i), 
                         _ => new OamEntry(0xEF, 0, 0, 10, i) 
                     }; 
                 });
@@ -1184,17 +1184,17 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341 * 2); // the first scanline cannot have sprites
             
             var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
-            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(3); // three visible pixels
+            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(3); // three visible pixels
 
-            var expected = new List<PPU.Color?>();
+            var expected = new List<PPU.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(null);
+                expected.Add(new PPU.SpritePixelData(null, false));
             }
-            expected[0] = PPU.Palette[10];
-            expected[1] = PPU.Palette[13];
-            expected[6] = PPU.Palette[13];
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[10], false);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[13], false);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[13], false);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1215,8 +1215,8 @@ namespace NESCoreTests.Unit.PPUTest
                 { 
                     return i switch 
                     { 
-                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, true, false, false).ToByte(), 0, i), 
-                        1 => new OamEntry(0, 1, new OamEntry.SpriteAttribute(3, true, false, false).ToByte(), 0, i), 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, BehindBackground: false, false, false).ToByte(), 0, i), 
+                        1 => new OamEntry(0, 1, new OamEntry.SpriteAttribute(3, BehindBackground: false, false, false).ToByte(), 0, i), 
                         _ => new OamEntry(0xEF, 0, 0, 10, i) 
                     }; 
                 });
@@ -1236,7 +1236,7 @@ namespace NESCoreTests.Unit.PPUTest
                         0x1010 => pattern1,
                         0x1018 => pattern2,
                         
-                        0x3f16 => 3, // PaletteId for sprite1
+                        0x3f16 => 3, // PaletteID for sprite1
                         0x3f1E => 4, // PaletteID for sprite2
                         _ => 0
                     };
@@ -1245,23 +1245,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341 * 2);
             
             var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
-            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(8);
+            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(8);
 
-            var expected = new List<PPU.Color?>();
+            var expected = new List<PPU.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(null);
+                expected.Add(new PPU.SpritePixelData(null, false));
             }
             
-            expected[0] = PPU.Palette[3];
-            expected[1] = PPU.Palette[3];
-            expected[2] = PPU.Palette[3];
-            expected[3] = PPU.Palette[3];
-            expected[4] = PPU.Palette[3];
-            expected[5] = PPU.Palette[3];
-            expected[6] = PPU.Palette[3];
-            expected[7] = PPU.Palette[3];
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1282,7 +1282,7 @@ namespace NESCoreTests.Unit.PPUTest
                 { 
                     return i switch 
                     { 
-                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, true, false, true).ToByte(), 0, i), 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, BehindBackground: false, false, true).ToByte(), 0, i), 
                         _ => new OamEntry(0xEF, 0, 0, 10, i) 
                     }; 
                 });
@@ -1306,23 +1306,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341 * 2);
             
             var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
-            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(5);
+            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(5);
             
-            var expected = new List<PPU.Color?>();
+            var expected = new List<PPU.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(null);
+                expected.Add(new PPU.SpritePixelData(null, false));
             }
 
-            expected[0] = PPU.Palette[0];
-            expected[1] = null;
-            expected[2] = null;
-            expected[3] = null;
-            expected[4] = PPU.Palette[3];
-            expected[5] = PPU.Palette[3];
-            expected[6] = PPU.Palette[3];
-            expected[7] = PPU.Palette[3];
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[0], false);
+            expected[1] = new PPU.SpritePixelData(null, false);
+            expected[2] = new PPU.SpritePixelData(null, false);
+            expected[3] = new PPU.SpritePixelData(null, false);
+            expected[4] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[5] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[6] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[3], false);
 
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }
@@ -1342,7 +1342,7 @@ namespace NESCoreTests.Unit.PPUTest
                 {
                     return i switch
                     {
-                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, true, true, false).ToByte(), 0, i),
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(1, BehindBackground:false, true, false).ToByte(), 0, i),
                         _ => new OamEntry(0xEF, 0, 0, 10, i)
                     };
                 });
@@ -1366,23 +1366,23 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(341*2);
             
             var spriteScanlineBufferField = ppu.GetType().GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
-            var spriteScanlineBuffer = (PPU.Color?[])spriteScanlineBufferField!.GetValue(ppu)!;
-            spriteScanlineBuffer.Where(c => c != null).Should().HaveCount(5);
+            var spriteScanlineBuffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            spriteScanlineBuffer.Where(c => c.PixelColor != null).Should().HaveCount(5);
 
-            var expected = new List<PPU.Color?>();
+            var expected = new List<PPU.SpritePixelData>();
             for (var i = 0; i < 256; i++)
             {
-                expected.Add(null);
+                expected.Add(new PPU.SpritePixelData(null, false));
             }
             
-            expected[0] = PPU.Palette[3];
-            expected[1] = PPU.Palette[3];
-            expected[2] = PPU.Palette[3];
-            expected[3] = PPU.Palette[3];
-            expected[4] = null;
-            expected[5] = null;
-            expected[6] = null;
-            expected[7] = PPU.Palette[0];
+            expected[0] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[1] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[2] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[3] = new PPU.SpritePixelData(PPU.Palette[3], false);
+            expected[4] = new PPU.SpritePixelData(null, false);
+            expected[5] = new PPU.SpritePixelData(null, false);
+            expected[6] = new PPU.SpritePixelData(null, false);
+            expected[7] = new PPU.SpritePixelData(PPU.Palette[0], false);
             
             spriteScanlineBuffer.Should().BeEquivalentTo(expected);
         }

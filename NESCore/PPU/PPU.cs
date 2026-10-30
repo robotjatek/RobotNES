@@ -306,7 +306,7 @@ namespace NESCore.PPU
 
         private readonly List<OamEntry> _secondaryOam = new(capacity: 8); // TODO: i dont need this oam a simple counter is enough
 
-        private record struct SpritePixelData(Color? PixelColor, bool BehindBackground);
+        public record struct SpritePixelData(Color? PixelColor, bool BehindBackground);
         
         private readonly SpritePixelData[] _spriteScanlineBuffer = new SpritePixelData[256];
 
