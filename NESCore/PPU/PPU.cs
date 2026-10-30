@@ -11,20 +11,25 @@ namespace NESCore.PPU
         private readonly IPPUMemory _ppuMemory;
         private readonly SpriteEvaluator _spriteEvaluator;
 
-        private int _cycles = 0;
-        private int _scanlines = 0;
-        private int _scanlineCycles = 0;
+        private int _cycles;
+        private int _scanlines;
+        private int _scanlineCycles;
 
-        private byte _ppuDataBus = 0;
-        private ushort _ppuAddress = 0; // v: 0 yyy NN YYYYY XXXXX 
-        private ushort _tempAddress = 0; // t
-        private bool _addressLatch = false;
-        private byte _dataBuffer = 0;
+        private byte _ppuDataBus;
+        private ushort _ppuAddress; // v: 0 yyy NN YYYYY XXXXX 
+        private ushort _tempAddress; // t
+        private bool _addressLatch;
+        private byte _dataBuffer;
 
-        private byte _ntId = 0;
-        private byte _attributeId = 0;
-        private byte _patternLow = 0;
-        private byte _patternHigh = 0;
+        private byte _ntId;
+        private byte _attributeId;
+        private byte _patternLow;
+        private byte _patternHigh;
+        
+        private ushort _shiftRegisterHi;
+        private ushort _shiftRegisterLo;
+        private ushort _attributeRegisterLo;
+        private ushort _attributeRegisterHi;
 
         public readonly record struct Color(byte R, byte G, byte B);
 
@@ -298,12 +303,6 @@ namespace NESCore.PPU
                 _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
             }
         }
-
-        // TODO: move all these to the top of the class
-        private ushort _shiftRegisterHi = 0;
-        private ushort _shiftRegisterLo = 0;
-        private ushort _attributeRegisterLo = 0;
-        private ushort _attributeRegisterHi = 0;
 
         private void MoveShiftRegisters()
         {
