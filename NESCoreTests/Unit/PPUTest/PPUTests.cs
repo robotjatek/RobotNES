@@ -4,15 +4,16 @@ using Moq;
 using NESCore.PPU;
 
 using Serilog;
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace NESCoreTests.Unit.PPUTest
 {
-    public class PPUTests : TestBase
+    public class PpuTests : TestBase
     {
         [Fact]
         public void ReadFromStatusOnlyReturnsTheTop3bits()  //TODO: openbus behaviour. Return previous data from the ppu databuffer on the lower bits
         {
-            byte testData = 0xff;
+            const byte testData = 0xff;
             var ppuRegisters = new PPURegisters
             {
                 Status = testData
@@ -26,7 +27,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ReadFromStatusResetsVBlankFlag()
         {
-            byte testData = 0xE0;
+            const byte testData = 0xE0;
             var ppuRegisters = new PPURegisters
             {
                 Status = testData
@@ -38,7 +39,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsVBlankFlagAndSendsNMI()
+        public void SetsVBlankFlagAndSendsNmi()
         {
             var registers = new PPURegisters
             {
@@ -47,7 +48,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
-            uint beforeVBlank =
+            const uint beforeVBlank =
                 341 * 240 // Visible screen
                 + 341; // Post render scanline
 
@@ -60,13 +61,13 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsVBlankFlagButDoesNotSendNMI()
+        public void SetsVBlankFlagButDoesNotSendNmi()
         {
             var registers = new PPURegisters();
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
-            uint beforeVBlank =
+            const uint beforeVBlank =
                 341 * 240 // Visible screen
                 + 341; // Post render scanline
 
@@ -79,7 +80,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsVBlankFlagAndSendsNMIMultipleTimes()
+        public void SetsVBlankFlagAndSendsNmiMultipleTimes()
         {
             var registers = new PPURegisters
             {
@@ -88,9 +89,9 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
-            for (int i = 0; i < 3; i++) // Three times a charm!
+            for (var i = 0; i < 3; i++) // Three times a charm!
             {
-                uint frameCycles = 341 * 261; // Visible screen
+                const uint frameCycles = 341 * 261; // Visible screen
                 ppu.Run(frameCycles);
 
                 registers.GetVBlankFlag().Should().BeTrue();
@@ -239,7 +240,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void WriteToVRAM()
+        public void WriteToPpuRam()
         {
             var ppuMemory = new Mock<IPPUMemory>();
 
@@ -253,7 +254,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void WriteToVRAMIncrementsAddressByOne()
+        public void WriteToPpuRamIncrementsAddressByOne()
         {
             var ppuMemory = new Mock<IPPUMemory>();
 
@@ -272,7 +273,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void WriteToVRAMIncrementsAddressBy32()
+        public void WriteToPpuRamIncrementsAddressBy32()
         {
             var ppuMemory = new Mock<IPPUMemory>();
 
@@ -294,7 +295,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ReadFromVRAM()
+        public void ReadFromPpuRam()
         {
             var ppuMemory = new Mock<IPPUMemory>();
             ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
@@ -312,7 +313,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ReadFromVRAMPaletteIsNotBuffered()
+        public void ReadFromPpuRamPaletteIsNotBuffered()
         {
             var ppuMemory = new Mock<IPPUMemory>();
             ppuMemory.Setup(m => m.Read(0x3f00)).Returns(0xaa);
@@ -359,7 +360,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ReadFromVRAMIncrementsAddressBy32()
+        public void ReadFromPpuRamIncrementsAddressBy32()
         {
             var ppuMemory = new Mock<IPPUMemory>();
             ppuMemory.Setup(m => m.Read(0x3c0e)).Returns(0x00);
@@ -392,7 +393,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ReadFromOAMAddressLogs()
+        public void ReadFromOamAddressLogs()
         {
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
@@ -405,7 +406,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void WriteToOAMAddress()
+        public void WriteToOamAddress()
         {
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
@@ -416,7 +417,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void WriteToOAMDataWritesValueToOamAndIncrementsOAMAddress()
+        public void WriteToOamDataWritesValueToOamAndIncrementsOamAddress()
         {
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
@@ -432,7 +433,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ReadFromOAMDataReadsValueFromOamAndDoesNotIncrementOAMAddress()
+        public void ReadFromOamDataReadsValueFromOamAndDoesNotIncrementOamAddress()
         {
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
