@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Moq;
 
 using NESCore.PPU;
@@ -1706,6 +1706,153 @@ namespace NESCoreTests.Unit.PPUTest
             buffer[pxOffset + 0].Should().Be(expectedSprColor.B);
         }
         
-        // TODO: 8x16 sprite mode
+        [Fact]
+        public void ShouldDraw8x16Sprite_TopAndBottomTiles()
+        {
+            var registers = new PPURegisters()
+            {
+                // In 8x16 mode, bit 3 of Control (sprite pattern table) is ignored,
+                // and bit 0 of TileIndex determines the pattern table:
+                // TileIndex = 1 -> pattern table 0x1000, top tile = 0, bottom tile = 1
+                Control = PPUControlFlagPositions.SPRITE_SIZE,
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => i switch
+                {
+                    0 => new OamEntry(0, 1, new OamEntry.SpriteAttribute(0, BehindBackground: false, false, false).ToByte(), 0, i),
+                    _ => new OamEntry(0xEF, 0, 0, 10, i)
+                });
+
+            // Top tile (tile 0): 0x1000, row 0: plane low at 0x1000, plane high at 0x1008
+            // Bottom tile (tile 1): 0x1010, row 0: plane low at 0x1010, plane high at 0x1018
+            const byte topPattern1 = 0b10000000;
+            const byte topPattern2 = 0b00000000;
+            const byte bottomPattern1 = 0b00000001;
+            const byte bottomPattern = 0b00000001;
+
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) => address switch
+                {
+                    0x1000 => topPattern1,
+                    0x1008 => topPattern2,
+
+                    0x1010 => bottomPattern1,
+                    0x1018 => bottomPattern,
+
+                    0x3F11 => 5, // Palette 0, color index 1
+                    0x3F13 => 9, // Palette 0, color index 3
+                    _ => 0
+                });
+
+            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Scanline 1 (top tile row 0)
+            ppu.Run(341 * 2);
+            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
+            buffer[7].PixelColor.Should().BeNull();
+
+            // Advance 8 scanlines to scanline 9 (bottom tile row 0)
+            ppu.Run(341 * 8);
+            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer[7].Should().Be(new PPU.SpritePixelData(PPU.Palette[9], false, true));
+            buffer[0].PixelColor.Should().BeNull();
+
+            // Advance 8 scanlines to scanline 17 (past the 16 pixel height)
+            ppu.Run(341 * 8);
+            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer.Where(c => c.PixelColor != null).Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ShouldSelectPatternTableBasedOnTileIndexBit0_In8x16Mode()
+        {
+            var registers = new PPURegisters()
+            {
+                // SPRITE_PATTERNTABLE_ADDRESS normally sets 0x1000 for 8x8 sprites,
+                // but 8x16 mode should ignore this bit and use TileIndex bit 0 (0 => 0x0000 table)
+                Control = PPUControlFlagPositions.SPRITE_SIZE | PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS,
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => i switch
+                {
+                    0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(0, BehindBackground: false, false, false).ToByte(), 0, i),
+                    _ => new OamEntry(0xEF, 0, 0, 10, i)
+                });
+
+            // If bit 0 of TileIndex is 0, table 0x0000 is used
+            const byte pattern = 0b10000000;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) => address switch
+                {
+                    0x0000 => pattern,
+                    0x3F11 => 7,
+                    _ => 0
+                });
+
+            ppu.Run(341 * 2);
+
+            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[7], false, true));
+        }
+
+        [Fact]
+        public void ShouldFlip8By16SpriteVertically()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_SIZE,
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+
+            // TileIndex = 0 (table 0x0000, tile 0 and 1)
+            // VerticalFlip = true
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => i switch
+                {
+                    0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(0, BehindBackground: false, VerticalFlip: true, false).ToByte(), 0, i),
+                    _ => new OamEntry(0xEF, 0, 0, 10, i)
+                });
+
+            // When flipped vertically:
+            // Scanline 1 (sprite row 0) reads bottom row of bottom tile (row 15 => Tile 1, row 7 at 0x0017)
+            // Scanline 16 (sprite row 15) reads top row of top tile (row 0 => Tile 0, row 0 at 0x0000)
+            const byte botRowPattern = 0b10000000;
+            const byte topRowPattern = 0b00000001;
+
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) => address switch
+                {
+                    0x0017 => botRowPattern,
+                    0x0000 => topRowPattern,
+                    0x3F11 => 5,
+                    _ => 0
+                });
+
+            var spriteScanlineBufferField = typeof(PPU).GetField("_spriteScanlineBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Scanline 1: bottom tile's bottom row should be rendered
+            ppu.Run(341 * 2);
+            var buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer[0].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
+            buffer[7].PixelColor.Should().BeNull();
+
+            // Advance 15 scanlines to scanline 16: top tile's top row should be rendered
+            ppu.Run(341 * 15);
+            buffer = (PPU.SpritePixelData[])spriteScanlineBufferField!.GetValue(ppu)!;
+            buffer[7].Should().Be(new PPU.SpritePixelData(PPU.Palette[5], false, true));
+            buffer[0].PixelColor.Should().BeNull();
+        }
     }
 }

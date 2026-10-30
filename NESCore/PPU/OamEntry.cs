@@ -15,17 +15,18 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
         return spriteSize switch
         {
             SpriteSize._8x8 => (ushort)(baseAddress + (TileIndex * 16) + row),
-            SpriteSize._8x16 => _8x16(),
+            SpriteSize._8x16 => _8x16(row),
             _ => throw new InvalidOperationException($"Invalid sprite size")
         };
     }
 
-    private ushort _8x16()
+    private ushort _8x16(int row)
     {
-        // TODO: 8x16 mode
-        var patternTable = (TileIndex & 0x1) * 0x1000;
-        var tileIndex = TileIndex & 0xFE;
-        throw new NotImplementedException("8x16 sprite mode is not implemented");
+        // base address is ignored on 8x16 mode
+        var patternTableAddress = (ushort)((TileIndex & 0x1) * 0x1000);
+        var tileIndex = (TileIndex & 0xFE) + row / 8;
+        var tileRow = row % 8;
+        return (ushort)(patternTableAddress + tileIndex * 16 + tileRow);
     }
 
     public readonly record struct SpriteAttribute(byte Palette, bool BehindBackground, bool VerticalFlip, bool HorizontalFlip)

@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 
 //TODO: OAMADDR set to 0 on prerender (257-320)
 
@@ -347,8 +347,8 @@ namespace NESCore.PPU
                     break;
                 }
 
-                // Select the correct 8*1 row from the pattern table
-                var row = sprite.VerticalFlip ? 7 - (scanline - sprite.ScreenY) : scanline - sprite.ScreenY;
+                // Select the correct row from the pattern table
+                var row = sprite.VerticalFlip ? height - 1 - (scanline - sprite.ScreenY) : scanline - sprite.ScreenY;
                 var address = sprite.GetPatternTableAddress(_registers.GetSpriteSize(),
                     _registers.GetSpritePatternTableAddress(), row);
 
