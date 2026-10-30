@@ -28,12 +28,12 @@ public readonly record struct OamEntry(byte Y, byte TileIndex, byte Attributes, 
         throw new NotImplementedException("8x16 sprite mode is not implemented");
     }
 
-public readonly record struct SpriteAttribute(byte Palette, bool Priority, bool VerticalFlip, bool HorizontalFlip)
+public readonly record struct SpriteAttribute(byte Palette, bool BehindBackground, bool VerticalFlip, bool HorizontalFlip)
     {
         public byte ToByte()
         {
             return (byte)(Palette & 0b11 // Bits 0-1
-                          | (Priority ? 0x20 : 0) // bit 5
+                          | (BehindBackground ? 0x20 : 0) // bit 5
                           | (HorizontalFlip ? 0x40 : 0)
                           | (VerticalFlip ? 0x80 : 0));
         }

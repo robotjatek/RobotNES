@@ -304,8 +304,8 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
-            var result = ppu.Read(0x2007); //First result is the previously buffered data
-            result = ppu.Read(0x2007); // real data byte
+            ppu.Read(0x2007); //First result is the previously buffered data
+            var result = ppu.Read(0x2007); // real data byte
 
             result.Should().Be(0xaa);
             ppuMemory.Verify(m => m.Read(0x3c0f), Times.Once());
@@ -902,7 +902,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ShouldGetCurrentPixelPalletteAddressFromShiftRegisters()
+        public void ShouldGetCurrentPixelPaletteAddressFromShiftRegisters()
         {
             var registers = new PPURegisters { Control = 0x10 };
             var memory = new Mock<IPPUMemory>();
@@ -1389,6 +1389,78 @@ namespace NESCoreTests.Unit.PPUTest
         
         
         // TODO: sprite priority
+        [Fact]
+        public void ShouldRenderBackgroundInsteadOfSprite()
+        {
+            var registers = new PPURegisters()
+            {
+                Control = PPUControlFlagPositions.SPRITE_PATTERNTABLE_ADDRESS, // sprites on 0x1000
+                Mask = PPUMaskFlagPositions.SHOW_SPRITES | PPUMaskFlagPositions.SHOW_BACKGROUND
+            };
+            var memory = new Mock<IPPUMemory>();
+            var ppu = new PPU(registers, memory.Object, _logger);
+            
+            // Sprite setup
+            memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
+                .Returns((int i) => 
+                { 
+                    return i switch 
+                    { 
+                        // X = 0-7, Palette 3 
+                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, BehindBackground: true, false, false).ToByte(), 0, i), 
+                        _ => new OamEntry(0xEF, 0, 0, 10, i) 
+                    }; 
+                });
+            
+            const byte pattern1 = 0b10000000;
+            const byte pattern2 = 0b01000010;
+            memory.Setup(m => m.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) =>
+                {
+                    return address switch
+                    {
+                        // planes
+                        0x1000 => pattern1,
+                        0x1008 => pattern2,
+                        
+                        // palette px 1 (first sprite pixel from palette index 4)
+                        0x3F1D => 4,
+                        
+                        // palette px 2, 3
+                        //0x3F1E => 13,
+                        
+                        _ => 0
+                    };
+                });
+            
+            memory.Setup(m => m.Read(0x3F0F)).Returns(21); // Background color from palette index 21
+            
+            ppu.Run(341); // First line
+            
+            // set the background bits on the second line into the shift registers
+            typeof(PPU).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            typeof(PPU).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
+                SetValue(ppu, (ushort)0x8000);
+            
+            ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
+            
+            var bufferField = typeof(PPU).GetField("_frameBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            var buffer = (byte[])bufferField!.GetValue(ppu)!;
+          
+            // Only the background color should be rendered
+            const int pxOffset = 1 * 256 * 3; // Scanline 1, Cycle 0
+            var expectedBgColor = PPU.Palette[0x15];
+            buffer[pxOffset + 2].Should().Be(expectedBgColor.R); // R (228)
+            buffer[pxOffset + 1].Should().Be(expectedBgColor.G); // G (0)
+            buffer[pxOffset + 0].Should().Be(expectedBgColor.B); // B (88)
+        }
+        
+        
         // TODO: do not render sprites if sprite drawing is disabled
         // TODO: sprite 0 hit
     }
