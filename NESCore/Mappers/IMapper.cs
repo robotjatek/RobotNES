@@ -8,7 +8,9 @@
         byte CHRROMNumber { get; }
         int CHRROMSize { get; }
 
-        VROM CHRROM { get; }
+        RomBase Chr { get; }
+        
+        RomBase PrgRam { get; }
 
         byte Read(UInt16 address);
 

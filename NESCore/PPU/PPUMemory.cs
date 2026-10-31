@@ -1,10 +1,9 @@
 ﻿using NESCore.Cartridge;
-
 using Serilog;
 
 namespace NESCore.PPU
 {
-    public class PPUMemory : IPPUMemory
+    public class PpuMemory : IPPUMemory
     {
         private readonly ICartridge _cartridge;
         private readonly ILogger _logger;
@@ -12,7 +11,7 @@ namespace NESCore.PPU
         private readonly byte[] _paletteMemory = new byte[32];
         private readonly byte[] _oam = new byte[256];
 
-        public PPUMemory(ICartridge cartridge, ILogger logger)
+        public PpuMemory(ICartridge cartridge, ILogger logger)
         {
             _cartridge = cartridge;
             _logger = logger;
@@ -21,15 +20,15 @@ namespace NESCore.PPU
         public byte Read(ushort address)
         {
             address &= 0x3fff;
-            
+
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
-                return _cartridge.Mapper.CHRROM.Read(address);
+                return _cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInPatternTableOne(address))
             {
-                return _cartridge.Mapper.CHRROM.Read(address);
+                return _cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInNameTable(address))
             {
@@ -46,18 +45,14 @@ namespace NESCore.PPU
         public void Write(ushort address, byte data)
         {
             address &= 0x3fff;
-            
+
             if (IsInPatternTableZero(address))
             {
-                //TODO: maybe these writes are CHR-RAM writes?
-                _logger.Error("Unsupported write to pattern table 0 through ppu");
-            //    throw new NotImplementedException();
+                _cartridge.Mapper.Chr.Write(address, data);
             }
             else if (IsInPatternTableOne(address))
             {
-                //TODO: maybe these writes are CHR-RAM writes?
-                _logger.Error("Unsupported write to pattern table 1 through ppu");
-           //     throw new NotImplementedException();
+                _cartridge.Mapper.Chr.Write(address, data);
             }
             else if (IsInNameTable(address))
             {
@@ -69,11 +64,10 @@ namespace NESCore.PPU
             }
             else
             {
-                _logger.Error($"Invalid write to ppu memory address: 0x{address:X4}");
+                _logger.Error("Invalid write to ppu memory address: 0x{Address:X4}", address);
             }
-
         }
-        
+
         private int GetPaletteIndex(ushort address)
         {
             // ID 3f10, 3f14, 3f18, 3f1c mirror 3f00, 3f04, 3f08, 3f0c
@@ -98,6 +92,11 @@ namespace NESCore.PPU
             return _oam[address];
         }
 
+        public OamEntry GetOamEntry(int index)
+        {
+            return new OamEntry(_oam[index * 4], _oam[index * 4 + 1], _oam[index * 4 + 2], _oam[index * 4 + 3], index);
+        }
+
         private UInt16 UseNametableMirroring(ushort address)
         {
             if (address >= 0x3000)
@@ -105,7 +104,7 @@ namespace NESCore.PPU
                 address &= 0x2FFF;
             }
 
-            if(_cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+            if (_cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
             {
                 _logger.Error("4-screen mirroring is not supported");
                 throw new NotImplementedException();

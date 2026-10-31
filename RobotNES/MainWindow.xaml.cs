@@ -8,17 +8,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RobotNES
 {
@@ -39,7 +34,7 @@ namespace RobotNES
             _logger = CreateLogger();
         }
 
-        private readonly Dictionary<Key, IController.Keys> _keyMap = new Dictionary<Key, IController.Keys>()
+        private readonly Dictionary<Key, IController.Keys> _keyMap = new()
         {
             {Key.A, IController.Keys.A},
             {Key.S, IController.Keys.B},
@@ -51,31 +46,72 @@ namespace RobotNES
             {Key.Space, IController.Keys.SELECT}
         };
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override async void OnPreviewKeyDown(KeyEventArgs e)
         {
-            base.OnKeyDown(e);
-            if (_keyMap.TryGetValue(e.Key, out var value))
+            base.OnPreviewKeyDown(e);
+            if (_nesSystem?.Running == true)
             {
-                _nesSystem?.PressControllerButton(value);
+                if (e.Key == Key.Escape)
+                {
+                    await Stop();
+                    e.Handled = true;
+                    return;
+                }
+                
+                if (_keyMap.TryGetValue(e.Key, out var value))
+                {
+                    _nesSystem?.PressControllerButton(value);
+                    e.Handled = true;
+                }
             }
         }
 
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
-            base.OnKeyUp(e);
-            if (_keyMap.TryGetValue(e.Key, out var value))
+            base.OnPreviewKeyUp(e);
+            if (_nesSystem?.Running == true)
             {
-                _nesSystem?.ReleaseControllerButton(value);
+                if (_keyMap.TryGetValue(e.Key, out var value))
+                {
+                    _nesSystem?.ReleaseControllerButton(value);
+                    e.Handled = true;
+                }
             }
         }
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() => _nesSystem?.Stop());
-            _logger.Information("Stopped");
-            this.contentPanel.Children.RemoveAt(0);
-            this.contentPanel.Children.Add(this.fileListView);
+            await Stop();
         }
+
+        private async Task Stop()
+        {
+            if (_nesSystem?.Running == true)
+            {
+                await Task.Run(() => _nesSystem?.Stop());
+                _logger.Information("Stopped");
+                contentPanel.Children.RemoveAt(0);
+                contentPanel.Children.Add(this.fileListView);
+                SetButtonsFocusable(true);
+                this.fileListView.Focus();
+            }
+        }
+        private const string ScreenshotsDirectory = "screenshots";
+        private void Screenshot_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (_nesSystem?.Running != true) return;
+            
+            if (!Directory.Exists(ScreenshotsDirectory))
+            {
+                Directory.CreateDirectory(ScreenshotsDirectory);
+            }
+            var time = DateTime.Now;
+            var filePath = $"{ScreenshotsDirectory}/screenshot_{time:yyyy-MM-dd_HH-mm-ss}.png";
+            using var stream = new FileStream(filePath, FileMode.Create);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(_bitmap));
+            encoder.Save(stream);
+        } 
 
         private static ILogger CreateLogger()
         {
@@ -93,6 +129,12 @@ namespace RobotNES
 
             return logger;
         }
+
+        private void SetButtonsFocusable(bool focus)
+        {
+            this.StopButton.Focusable = focus;
+            this.ScreenshotButton.Focusable = focus;
+        }
         
         private async void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -102,17 +144,21 @@ namespace RobotNES
                 _nesSystem = new NesSystem(file.Path, _logger);
                 _nesSystem.FrameBufferReady += RenderFrame;
 
-                var image = new NearestScalingImage(_bitmap);
-
+                var image = new NearestScalingImage(_bitmap)
+                {
+                    Focusable = true
+                };
                 this.contentPanel.Children.Remove(this.fileListView);
                 this.contentPanel.Children.Add(image);
+                SetButtonsFocusable(false);
                 _stopwatch.Start();
                 await Task.Run(() => _nesSystem?.Run());
             }
             catch (Exception ex)
             {
-                // log any uncatched errors
-                _logger.Fatal(ex, "Unhandled error.");
+                _logger.Fatal(ex, "Unhandled error");
+                MessageBox.Show($"Unhandled error: {ex.Message}.\n{ex.StackTrace}", "Error", MessageBoxButton.OK , MessageBoxImage.Error);
+                await Stop();
             }
         }
 

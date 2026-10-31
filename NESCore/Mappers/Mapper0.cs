@@ -10,32 +10,34 @@ namespace NESCore.Mappers
 
         public int PRGRomSize { get; private set; }
 
-        private readonly ROM _lowerBank;
+        private readonly Rom _lowerBank;
 
-        private readonly ROM _upperBank;
+        private readonly Rom _upperBank;
 
         private readonly ILogger _logger;
 
-        public VROM CHRROM { get; private set; }
+        public RomBase Chr { get; private set; }
+
+        public RomBase PrgRam { get; private set; }
 
         public byte CHRROMNumber { get; private set; }
 
         public int CHRROMSize { get; private set; }
 
-        public Mapper0(List<ROM> prgRoms, List<VROM> chrROMS, ILogger logger)
+        public Mapper0(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
         {
             PRGRomNumber = (byte)prgRoms.Count;
             PRGRomSize = PRGRomNumber * 1024 * 16;
-            CHRROMNumber = (byte)chrROMS.Count;
+            CHRROMNumber = (byte)chr.Count;
             CHRROMSize = CHRROMNumber * 1024 * 8;
-
-            CHRROM = chrROMS[0];
 
             if (PRGRomNumber > 2 || PRGRomNumber == 0)
             {
                 throw new ArgumentException("Invalid number of ROMs");
             }
 
+            Chr = chr[0];
+            PrgRam = new Ram(8);
             _lowerBank = prgRoms[0];
 
             if (PRGRomNumber > 1)
@@ -50,9 +52,9 @@ namespace NESCore.Mappers
             _logger = logger;
         }
 
-        public byte Read(UInt16 address)
+        public byte Read(ushort address)
         {
-            if (address >= 0x8000 && address <= 0xBFFF)
+            if (address is >= 0x8000 and <= 0xBFFF)
             {
                 return _lowerBank.Read((UInt16)(address - 0x8000));
             }
@@ -60,21 +62,24 @@ namespace NESCore.Mappers
             {
                 return _upperBank.Read((UInt16)(address - 0xC000));
             }
-
-            //TODO: PRG RAM read
+            else if (address is >= 0x6000 and < 0x8000)
+            {
+                return PrgRam.Read((ushort)(address - 0x6000));
+            }
 
             throw new NotImplementedException($"Unsupported read from address {address:X}");
         }
 
-        public void Write(UInt16 address, byte value)
+        public void Write(ushort address, byte value)
         {
-            if (address < 0x8000)
+            if (address is >= 0x6000 and < 0x8000)
             {
-                //TODO: possible PRG RAM writes
-                throw new NotImplementedException();
+                PrgRam.Write((ushort)(address - 0x6000), value);
             }
-
-            _logger.Warning("Unsupported write to ROM area. ");
+            else
+            {
+                _logger.Warning("Unsupported write to ROM area. ");
+            }
         }
     }
 }

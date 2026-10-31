@@ -109,7 +109,7 @@
         #endregion
 
         #region CONTROL_REGISTER
-        public UInt16 GetNametableAddress() // TODO: maybe its not needed at all after imlementing loopy registers
+        public UInt16 GetNametableAddress() // TODO: maybe its not needed at all after implementing loopy registers
         {
             var map = new UInt16[4] { 0x2000, 0x2400, 0x2800, 0x2C00 };
             var index = Control & PPUControlFlagPositions.NAMETABLE_ADDRESS;

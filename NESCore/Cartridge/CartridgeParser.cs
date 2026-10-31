@@ -30,9 +30,9 @@ namespace NESCore.Cartridge
             return new Cartridge(header, mapper);
         }
 
-        private static List<ROM> CreateROMs(ReadOnlySpan<byte> romBytes)
+        private static List<Rom> CreateROMs(ReadOnlySpan<byte> romBytes)
         {
-            var roms = new List<ROM>();
+            var roms = new List<Rom>();
             for (int i = 0; i < romBytes.Length; i += 16 * 1024)
             {
                 roms.Add(CreateROM(romBytes.Slice(i, 16 * 1024)));
@@ -40,9 +40,9 @@ namespace NESCore.Cartridge
             return roms;
         }
 
-        private static List<VROM> CreateVROMs(ReadOnlySpan<byte> romBytes)
+        private static List<ChrBase> CreateVROMs(ReadOnlySpan<byte> romBytes)
         {
-            var roms = new List<VROM>();
+            var roms = new List<ChrBase>();
             for (int i = 0; i < romBytes.Length; i += 8 * 1024)
             {
                 roms.Add(CreateVROM(romBytes.Slice(i, 8 * 1024)));
@@ -50,14 +50,14 @@ namespace NESCore.Cartridge
             return roms;
         }
 
-        private static ROM CreateROM(ReadOnlySpan<byte> rawBytes)
+        private static Rom CreateROM(ReadOnlySpan<byte> rawBytes)
         {
-            return new ROM(rawBytes.ToArray());
+            return new Rom(rawBytes.ToArray());
         }
 
-        private static VROM CreateVROM(ReadOnlySpan<byte> rawBytes)
+        private static ChrRom CreateVROM(ReadOnlySpan<byte> rawBytes)
         {
-            return new VROM(rawBytes.ToArray());
+            return new ChrRom(rawBytes.ToArray());
         }
     }
 }

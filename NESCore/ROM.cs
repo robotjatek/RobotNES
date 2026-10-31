@@ -1,41 +1,65 @@
 ﻿namespace NESCore
 {
-    public class InvalidROMSizeException : Exception { }
-
-    public abstract class ROMBase
+    public class InvalidSizeException : Exception
     {
-        public int ROMSize { get; private set; }
+    }
 
-        private readonly byte[] _data;
+    public abstract class RomBase
+    {
+        public int RomSize { get; private set; }
 
-        public ROMBase(int size, byte[] rawBytes)
+        protected readonly byte[] _data;
+
+        public RomBase(int size, byte[] rawBytes)
         {
-            ROMSize = size;
-            if (rawBytes.Length != ROMSize * 1024)
+            RomSize = size;
+            if (rawBytes.Length != RomSize * 1024)
             {
-                throw new InvalidROMSizeException();
+                throw new InvalidSizeException();
             }
 
             _data = rawBytes;
         }
 
-        public byte Read(UInt16 address)
+        public byte Read(ushort address)
         {
             return _data[address];
         }
+
+        public abstract void Write(ushort address, byte value);
     }
 
-    public class ROM : ROMBase
+    public class Rom(byte[] rawBytes) : RomBase(16, rawBytes)
     {
-        public ROM(byte[] rawBytes) : base(16, rawBytes)
+        public override void Write(ushort address, byte value)
         {
+            // can be ignored
         }
     }
 
-    public class VROM : ROMBase
+    public abstract class ChrBase(int sizeKb, byte[] rawBytes) : RomBase(sizeKb, rawBytes);
+
+    public class ChrRom(byte[] rawBytes) : ChrBase(8, rawBytes)
     {
-        public VROM(byte[] rawBytes) : base(8, rawBytes)
-        { 
+        public override void Write(ushort address, byte value)
+        {
+            // can be ignored
+        }
+    }
+
+    public class ChrRam() : ChrBase(8, new byte[8 * 1024])
+    {
+        public override void Write(ushort address, byte value)
+        {
+            _data[address] = value;
+        }
+    }
+
+    public class Ram(int sizeKb) : RomBase(sizeKb, new byte[sizeKb * 1024])
+    {
+        public override void Write(ushort address, byte value)
+        {
+            _data[address] = value;
         }
     }
 }

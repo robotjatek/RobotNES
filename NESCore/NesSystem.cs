@@ -14,6 +14,7 @@ namespace NESCore
     public class NesSystem
     {
         public event FrameBufferReadyEvent? FrameBufferReady;
+        public bool Running => _running;
 
         private volatile bool _running = false;
         private ulong _cycle = 0;
@@ -24,8 +25,8 @@ namespace NESCore
         private readonly ICPU _cpu;
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
-        private readonly IController _contoller1;
-        private readonly IController _contoller2;
+        private readonly IController _controller1;
+        private readonly IController _controller2;
         private readonly IAPU _apu;
         private long _nextFrameTimestamp;
         private static readonly long FrameIntervalTicks = Stopwatch.Frequency / 60;
@@ -35,13 +36,13 @@ namespace NESCore
             _logger = logger;
             _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
 
-            _contoller1 = new Controller(_logger);
-            _contoller2 = new Controller(_logger);
+            _controller1 = new Controller(_logger);
+            _controller2 = new Controller(_logger);
             _apu = new APU.APU(_logger);
 
             _memory = new Memory();
-            _ppu = new PPU.PPU(new PPURegisters(), new PPUMemory(_cartridge, _logger), _logger);
-            _bus = new Bus(_cartridge, _memory, _ppu, _contoller1, _contoller2, _apu, _logger);
+            _ppu = new PPU.Ppu(new PPURegisters(), new PpuMemory(_cartridge, _logger), _logger);
+            _bus = new Bus(_cartridge, _memory, _ppu, _controller1, _controller2, _apu, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
@@ -71,12 +72,12 @@ namespace NESCore
 
         public void PressControllerButton(IController.Keys key)
         {
-            _contoller1.PressKey(key);
+            _controller1.PressKey(key);
         }
 
         public void ReleaseControllerButton(IController.Keys key)
         {
-            _contoller1.ReleaseKey(key);
+            _controller1.ReleaseKey(key);
         }
 
         private void OnVBlank(byte[] framebuffer)
