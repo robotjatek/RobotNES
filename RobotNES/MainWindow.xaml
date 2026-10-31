@@ -16,7 +16,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Name="contentPanel" Height="Auto">
+        <DockPanel Grid.Row="0" Name="contentPanel" Height="Auto" Focusable="True">
             <ListView DockPanel.Dock="Top" Name="fileListView" ItemsSource="{Binding NesFiles}" Height="Auto" VerticalAlignment="Stretch">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
@@ -32,7 +32,14 @@
                 </ListView.View>
             </ListView>
         </DockPanel>
-
-        <Button Click="Stop_Click" Grid.Row="1">Stop</Button>
+        
+        <Grid Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="StopButton" Click="Stop_Click" Grid.Column="0">Stop</Button>
+            <Button x:Name="ScreenshotButton" Click="Screenshot_OnClick" Grid.Column="1">Screenshot</Button>
+        </Grid>
     </Grid>
 </Window>
