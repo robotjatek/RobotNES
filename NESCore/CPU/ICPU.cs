@@ -1,10 +1,10 @@
 ﻿namespace NESCore.CPU
 {
-    public interface ICPU
+    public interface ICpu
     {
-        void HandleNMI();
+        void HandleNmi();
 
-        void HandleDMA(byte cpuPage);
+        void HandleDma(byte cpuPage);
 
         uint RunInstruction();
     }

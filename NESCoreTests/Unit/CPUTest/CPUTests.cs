@@ -14,7 +14,7 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffd))).Returns(0xde);
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffc))).Returns(0xad);
 
-            var sut = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+            var sut = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
             bus.Verify(b => b.Read(0xfffd));
             bus.Verify(b => b.Read(0xfffc));
         }
@@ -29,7 +29,7 @@ namespace NESCoreTests.Unit.CPUTest
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
-            var sut = new CPU(bus.Object, registers.Object, _instructions, _logger);
+            var sut = new Cpu(bus.Object, registers.Object, _instructions, _logger);
             try
             {
                 sut.RunInstruction();
@@ -58,9 +58,9 @@ namespace NESCoreTests.Unit.CPUTest
             registers.SetupAllProperties();
             registers.Object.STATUS = 0xee;
 
-            var cpu = new CPU(bus.Object, registers.Object, _instructions, _logger);
+            var cpu = new Cpu(bus.Object, registers.Object, _instructions, _logger);
             
-            cpu.HandleNMI();
+            cpu.HandleNmi();
             var cycles = cpu.RunInstruction();
 
             writeArgs.Should().ContainInConsecutiveOrder(new byte[] {0xde, 0xad, 0xee});
@@ -74,9 +74,9 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
 
-            var cpu = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+            var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
-            cpu.HandleDMA(0);
+            cpu.HandleDma(0);
             var cycles = cpu.RunInstruction();
             for (byte i = 0; i < 0xff; i++)
             {
@@ -91,9 +91,9 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
 
-            var cpu = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+            var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
-            cpu.HandleDMA(0x10);
+            cpu.HandleDma(0x10);
             var cycles = cpu.RunInstruction();
             for(byte i = 0; i < 0xff; i++)
             {
@@ -112,9 +112,9 @@ namespace NESCoreTests.Unit.CPUTest
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
 
-            var cpu = new CPU(bus.Object, _registers.Object, _instructions, _logger);
+            var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
-            cpu.HandleDMA(0);
+            cpu.HandleDma(0);
             var cycles = cpu.RunInstruction();
 
             cycles.Should().Be(513);
@@ -133,11 +133,11 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(opcode);
 
             var registers = new Registers();
-            var cpu = new CPU(bus.Object, registers, new NESCore.CPU.Instructions.CPUInstructions().InstructionSet, _logger);
+            var cpu = new Cpu(bus.Object, registers, new NESCore.CPU.Instructions.CPUInstructions().InstructionSet, _logger);
 
             cpu.RunInstruction().Should().Be((uint)instructionCycles);
 
-            cpu.HandleDMA(0);
+            cpu.HandleDma(0);
             var cycles = cpu.RunInstruction();
 
             cycles.Should().Be((uint)expectedDmaCycles);
