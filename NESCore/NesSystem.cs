@@ -22,7 +22,7 @@ namespace NESCore
         private readonly ILogger _logger;
         private readonly ICartridge _cartridge;
         private readonly IBUS _bus;
-        private readonly ICPU _cpu;
+        private readonly ICpu _cpu;
         private readonly IMemory _memory;
         private readonly IPPU _ppu;
         private readonly IController _controller1;
@@ -47,8 +47,8 @@ namespace NESCore
             //TODO: Move this CPU creation block to a factory
             var instructions = new CPUInstructions().InstructionSet;
             var registers = new Registers();
-            _cpu = new CPU.CPU(_bus, registers, instructions, _logger);
-            _bus.OAMDMAEvent += _cpu.HandleDMA;
+            _cpu = new CPU.Cpu(_bus, registers, instructions, _logger);
+            _bus.OAMDMAEvent += _cpu.HandleDma;
 
             _ppu.NMIEvent += OnVBlank;
         }
@@ -82,7 +82,7 @@ namespace NESCore
 
         private void OnVBlank(byte[] framebuffer)
         {
-            _cpu.HandleNMI();
+            _cpu.HandleNmi();
             FrameBufferReady?.Invoke(framebuffer);
             LimitFrameRate();
         }
