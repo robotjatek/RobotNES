@@ -90,7 +90,7 @@ namespace NESCore.CPU
             return 7;
         }
 
-        private byte DoDMA(byte cpuPage)
+        private uint DoDMA(byte cpuPage)
         {
             _dma = false;
             var address = (UInt16)(cpuPage << 8);
@@ -100,7 +100,7 @@ namespace NESCore.CPU
             }
 
             var penalty = _cycles % 2 == 1 ? 1 : 0;
-            return (byte)(513 + penalty);
+            return (uint)(513 + penalty);
         }
     }
 }

@@ -2,8 +2,6 @@
 
 Yet another Nintendo Entertainment System emulator written in C#.
 
-Project skeleton only with partially implemented bus and memory systems.
-
 ## Partially implemented
 
 - System bus
