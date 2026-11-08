@@ -271,6 +271,10 @@
         public const int NOP_DA = 0xDA;
         public const int NOP_FA = 0xFA;
         public const int NOP_IMM_80 = 0x80;
+        public const int NOP_IMM_82 = 0x82;
+        public const int NOP_IMM_89 = 0x89;
+        public const int NOP_IMM_C2 = 0xC2;
+        public const int NOP_IMM_E2 = 0xE2;
         public const int NOP_ZERO_04 = 0x04;
         public const int NOP_ZERO_44 = 0x44;
         public const int NOP_ZERO_64 = 0x64;

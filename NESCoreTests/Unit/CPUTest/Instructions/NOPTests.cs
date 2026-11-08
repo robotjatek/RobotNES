@@ -135,6 +135,54 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         }
 
         [Fact]
+        public void NOP_IMM_82()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
+            var registers = new Mock<IRegisters>();
+            var nop = _instructions[Opcodes.NOP_IMM_82];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
+            cycles.Should().Be(2);
+        }
+        
+        [Fact]
+        public void NOP_IMM_89()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
+            var registers = new Mock<IRegisters>();
+            var nop = _instructions[Opcodes.NOP_IMM_89];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
+            cycles.Should().Be(2);
+        }
+        
+        [Fact]
+        public void NOP_IMM_C2()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
+            var registers = new Mock<IRegisters>();
+            var nop = _instructions[Opcodes.NOP_IMM_C2];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
+            cycles.Should().Be(2);
+        }
+        [Fact]
+        public void NOP_IMM_E2()
+        {
+            var bus = new Mock<IBUS>();
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
+            var registers = new Mock<IRegisters>();
+            var nop = _instructions[Opcodes.NOP_IMM_E2];
+            var cycles = nop(bus.Object, registers.Object);
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
+            cycles.Should().Be(2);
+        }
+        
+
+        [Fact]
         public void NOP_ZERO_0x04()
         {
             var bus = new Mock<IBUS>();

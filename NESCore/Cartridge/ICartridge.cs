@@ -6,7 +6,7 @@ namespace NESCore.Cartridge
     {
         ICartridgeHeader Header { get; }
         IMapper Mapper { get; }
-        byte Read(ushort address);
+        bool TryRead(ushort address, out byte value);
         void Write(ushort address, byte value);
     }
 }

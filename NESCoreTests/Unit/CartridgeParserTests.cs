@@ -27,7 +27,7 @@ namespace NESCoreTests.Unit
 
             public int CHRROMSize => throw new NotImplementedException();
 
-            public byte Read(ushort address)
+            public bool TryRead(ushort address, out byte value)
             {
                 throw new NotImplementedException();
             }

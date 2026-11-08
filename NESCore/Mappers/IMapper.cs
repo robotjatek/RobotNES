@@ -12,7 +12,7 @@
         
         RomBase PrgRam { get; }
 
-        byte Read(UInt16 address);
+        bool TryRead(UInt16 address, out byte value);
 
         void Write(UInt16 address, byte value);
     }

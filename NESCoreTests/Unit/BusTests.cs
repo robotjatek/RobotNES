@@ -1,7 +1,11 @@
 ﻿using Moq;
 
 using NESCore;
+using NESCore.APU;
+using NESCore.Cartridge;
+using NESCore.Mappers;
 using NESCore.PPU;
+using Serilog;
 
 namespace NESCoreTests.Unit
 {
@@ -212,7 +216,8 @@ namespace NESCoreTests.Unit
             var memory = new Mock<IMemory>();
             var sut = new Bus(_mockCartridge.Object, memory.Object, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
             sut.Read(0x4020);
-            _mockCartridge.Verify(c => c.Read(It.Is<ushort>(a => a == 0x4020)));
+            byte discarded;
+            _mockCartridge.Verify(c => c.TryRead(It.Is<ushort>(a => a == 0x4020), out discarded));
         }
 
         [Fact]
@@ -317,5 +322,82 @@ namespace NESCoreTests.Unit
             bus.Write(0x4014, 0x10);
             monitor.Should().Raise(nameof(bus.OAMDMAEvent)).WithArgs<byte>(a => a == 0x10);
         }
+        
+        // $4100 is inside the cartridge area but outside every region Mapper0 decodes, so reads
+        // there reach the real open bus path without any mocking.
+        private static Bus CreateBusWithMapper0Cartridge(IMemory memory)
+        {
+            var prgBank = new Rom(RandomBytePattern(16));
+            var mapper = new Mapper0([prgBank], [new ChrRom(RandomBytePattern(8))], Mock.Of<ILogger>());
+            var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapper);
+            return new Bus(cartridge, memory, Mock.Of<IPPU>(), Mock.Of<IController>(), Mock.Of<IController>(),
+                Mock.Of<IAPU>(), Mock.Of<ILogger>());
+        }
+
+        [Fact]
+        public void UndecodedReadReadsTheLastValidValue()
+        {
+            var bus = CreateBusWithMapper0Cartridge(new Memory());
+
+            bus.Write(0x1000, 0x5a);
+            bus.Read(0x4100).Should().Be(0x5a);
+        }
+
+        [Fact]
+        public void UndecodedReadReturnsZeroBeforeAnyTransfer()
+        {
+            var bus = CreateBusWithMapper0Cartridge(new Memory());
+
+            bus.Read(0x4100).Should().Be(0);
+        }
+
+        [Fact]
+        public void WriteOverwritesTheValueSeenByAnUndecodedRead()
+        {
+            var bus = CreateBusWithMapper0Cartridge(new Memory());
+
+            bus.Write(0x2, 0x11);
+            bus.Read(0x4100).Should().Be(0x11);
+            bus.Write(0x2, 0x22);
+            bus.Read(0x4100).Should().Be(0x22);
+        }
+
+        [Fact]
+        public void SuccessfulReadOverwritesTheValueSeenByAnUndecodedRead()
+        {
+            var memory = new Memory();
+            var bus = CreateBusWithMapper0Cartridge(memory);
+
+            memory.Write(0x10, 0x3c);
+            bus.Read(0x10).Should().Be(0x3c);
+            bus.Read(0x4100).Should().Be(0x3c);
+        }
+
+        [Fact]
+        public void ControllerReadOnlyDrivesTheLowerFiveBits()
+        {
+            var controller = new Mock<IController>();
+            controller.Setup(c => c.ReadNextButton()).Returns(1);
+            var bus = new Bus(_mockCartridge.Object, new Memory(), _mockPPU, controller.Object,
+                _controller2.Object, _apu.Object, _logger);
+
+            bus.Write(0x6, 0x40);
+            bus.Read(0x4016).Should().Be(0x41);
+        }
+
+        [Fact]
+        public void ControllerReadRepeatsTheUpperBitsFromThePreviousTransfer()
+        {
+            var controller = new Mock<IController>();
+            controller.Setup(c => c.ReadNextButton()).Returns(0);
+            var bus = new Bus(_mockCartridge.Object, new Memory(), _mockPPU, controller.Object,
+                _controller2.Object, _apu.Object, _logger);
+
+            bus.Write(0x6, 0xb0);
+            bus.Read(0x4016).Should().Be(0xb0);
+        }
+
+        // TODO: open bus read for $4014 and $4018-$401F (Read currently returns 0 there)
+        // TODO: undecoded write should not throw
     }
 }

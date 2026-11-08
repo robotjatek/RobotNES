@@ -21,8 +21,19 @@ namespace NESCoreTests.Unit
         {
             var mapperMock = new Mock<IMapper>();
             var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapperMock.Object);
-            cartridge.Read(0x10);
-            mapperMock.Verify(m => m.Read(0x10));
+            cartridge.TryRead(0x10, out _);
+            byte mapperValue;
+            mapperMock.Verify(m => m.TryRead(It.Is<UInt16>(a => a == 0x10), out mapperValue));
+        }
+
+        [Fact]
+        public void UndecodedReadIsReportedToTheCaller()
+        {
+            var mapperMock = new Mock<IMapper>();
+            var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapperMock.Object);
+
+            cartridge.TryRead(0x4100, out var data).Should().BeFalse();
+            data.Should().Be(0);
         }
     }
 }
