@@ -11,12 +11,13 @@
             var instructions = new Func<IBUS, IRegisters, byte>[256];
             InstructionSet = instructions;
 
-            for (int i = 0; i < instructions.Length; i++)
+            for (var i = 0; i < instructions.Length; i++)
             {
                 //Sets up the instructionset to throw on an unknown instruction
-                instructions[i] = (IBUS bus, IRegisters registers) =>
+                var opcode = (byte)i;
+                instructions[i] = (_, registers) =>
                 {
-                    throw new NotImplementedException($"0x{i:X}@0x{registers.PC - 1:X2}");
+                    throw new NotImplementedException($"Unknown instruction 0x{opcode:X2}@0x{registers.PC - 1:X4}");
                 };
             }
 

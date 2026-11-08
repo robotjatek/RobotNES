@@ -52,22 +52,26 @@ namespace NESCore.Mappers
             _logger = logger;
         }
 
-        public byte Read(ushort address)
+        public bool TryRead(ushort address, out byte value)
         {
             if (address is >= 0x8000 and <= 0xBFFF)
             {
-                return _lowerBank.Read((UInt16)(address - 0x8000));
+                value = _lowerBank.Read((ushort)(address - 0x8000));
+                return true;
             }
             else if (address >= 0xC000)
             {
-                return _upperBank.Read((UInt16)(address - 0xC000));
+                value = _upperBank.Read((ushort)(address - 0xC000));
+                return true;
             }
             else if (address is >= 0x6000 and < 0x8000)
             {
-                return PrgRam.Read((ushort)(address - 0x6000));
+                value = PrgRam.Read((ushort)(address - 0x6000));
+                return true;
             }
 
-            throw new NotImplementedException($"Unsupported read from address {address:X}");
+            value = 0;
+            return false;
         }
 
         public void Write(ushort address, byte value)

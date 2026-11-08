@@ -17,7 +17,19 @@ namespace NESCore
         private readonly IController _controller2;
         private readonly IAPU _apu;
         private readonly ILogger _logger;
+        
+        private readonly BusData _busData = new();
+        
+        private class BusData
+        {
+            public byte Value { get; private set; }
 
+            public byte Drive(byte value)
+            {
+                Value = value;
+                return value;
+            }
+        }
 
         public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, IController controller1, IController controller2, IAPU apu, ILogger logger)
         {
@@ -38,7 +50,7 @@ namespace NESCore
             }
             else if (IsInCartridgeArea(address))
             {
-                return _cartridge.Read(address);
+                return _busData.Drive(_cartridge.TryRead(address, out var value) ? value : _busData.Value);
             }
             else if (IsInPpuArea(address))
             {
@@ -46,11 +58,11 @@ namespace NESCore
             }
             else if (address == 0x4016)
             {
-                return _controller1.ReadNextButton();
+                return ReadController(_controller1.ReadNextButton());
             }
             else if (address == 0x4017)
             {
-                return _controller2.ReadNextButton();
+                return ReadController(_controller2.ReadNextButton());
             }
             else if (IsInApuArea(address))
             {
@@ -58,11 +70,21 @@ namespace NESCore
             }
 
             _logger.Warning("Unsupported read from 0x{Address:X4}", address);
-            throw new NotImplementedException();
+            return 0; // TODO: i dont know if this should be an openbus read, but it crashes the emulator in AccuracyCoin openbus test if i return BusData.Value here
+        }
+
+        private byte ReadController(byte buttons)
+        {
+            // The shift register only drives bits 4-0. Bits 7-5 are left floating and repeat
+            // whatever was on them before, which is why an idle port usually reads $40 and a
+            // pressed one $41.
+            return _busData.Drive((byte)((_busData.Value & 0xF8) | (buttons & 0x07)));
         }
 
         public void Write(ushort address, byte data)
         {
+            _busData.Drive(data);
+            
             if (IsInInternalMemory(address))
             {
                 InternalMemoryWrite(address, data);
@@ -132,7 +154,7 @@ namespace NESCore
                 _logger.Warning("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
 
-            return _memory.Read(mirroredAddress);
+            return _busData.Drive(_memory.Read(mirroredAddress));
         }
 
         private void InternalMemoryWrite(UInt16 address, byte data)
@@ -152,7 +174,7 @@ namespace NESCore
             {
                 _logger.Warning("Mirrored ppu address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
-            return _ppu.Read(mirroredAddress);
+            return _busData.Drive(_ppu.Read(mirroredAddress)); // TODO: tryread for ppu
         }
 
         private void PpuWrite(ushort address, byte data)

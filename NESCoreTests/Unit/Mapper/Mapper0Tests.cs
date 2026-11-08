@@ -19,7 +19,7 @@ namespace NESCoreTests.Unit.Mapper
                 loggerMock.Object);
             for (int address = 0x8000; address <= 0xBFFF; address++)
             {
-                var data = sut.Read((ushort)address);
+                sut.TryRead((ushort)address, out var data).Should().BeTrue();
                 data.Should().Be(lowerBank.Read((ushort)(address - 0x8000)));
             }
         }
@@ -35,7 +35,7 @@ namespace NESCoreTests.Unit.Mapper
                 loggerMock.Object);
             for (int address = 0xC000; address <= 0xFFFF; address++)
             {
-                var data = sut.Read((ushort)address);
+                sut.TryRead((ushort)address, out var data).Should().BeTrue();
                 data.Should().Be(upperBank.Read((ushort)(address - 0xC000)));
             }
         }
@@ -65,9 +65,11 @@ namespace NESCoreTests.Unit.Mapper
             var sut = new Mapper0([bank], [new ChrRom(RandomBytePattern(8))], new Mock<ILogger>().Object);
 
             sut.Write(0x6000, 0xa5);
-            sut.Read(0x6000).Should().Be(0xa5);
+            sut.TryRead(0x6000, out var data).Should().BeTrue();
+            data.Should().Be(0xa5);
             sut.Write(0x7fff, 0x5a);
-            sut.Read(0x7fff).Should().Be(0x5a);
+            sut.TryRead(0x7fff, out data).Should().BeTrue();
+            data.Should().Be(0x5a);
         }
 
         [Fact]
@@ -119,6 +121,18 @@ namespace NESCoreTests.Unit.Mapper
             var sut = new Mapper0(new List<Rom>() { bank1 }, [new ChrRom(RandomBytePattern(8))],
                 new Mock<ILogger>().Object);
             sut.ID.Should().Be(0);
+        }
+
+        [Theory]
+        [InlineData(0x4020)]
+        [InlineData(0x5fff)]
+        public void ReadOutsideTheMappedAreasIsReportedAsUndecoded(int address)
+        {
+            var bank = new Rom(RandomBytePattern(16));
+            var sut = new Mapper0([bank], [new ChrRom(RandomBytePattern(8))], new Mock<ILogger>().Object);
+
+            sut.TryRead((ushort)address, out var data).Should().BeFalse();
+            data.Should().Be(0);
         }
     }
 }

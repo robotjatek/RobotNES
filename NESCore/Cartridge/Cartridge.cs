@@ -15,9 +15,9 @@ namespace NESCore.Cartridge
             Mapper = mapper;
         }
 
-        public byte Read(ushort address)
+        public bool TryRead(ushort address, out byte value)
         {
-            return Mapper.Read(address);
+            return Mapper.TryRead(address, out value);
         }
 
         public void Write(ushort address, byte value)
