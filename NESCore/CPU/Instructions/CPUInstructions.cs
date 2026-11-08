@@ -190,6 +190,10 @@
             instructions[Opcodes.NOP_DA] = NOP;
             instructions[Opcodes.NOP_FA] = NOP;
             instructions[Opcodes.NOP_IMM_80] = NOP_IMM;
+            instructions[Opcodes.NOP_IMM_82] = NOP_IMM;
+            instructions[Opcodes.NOP_IMM_89] = NOP_IMM;
+            instructions[Opcodes.NOP_IMM_C2] = NOP_IMM;
+            instructions[Opcodes.NOP_IMM_E2] = NOP_IMM;
             instructions[Opcodes.NOP_ABS_X_1C] = NOP_ABS_X;
             instructions[Opcodes.NOP_ABS_X_3C] = NOP_ABS_X;
             instructions[Opcodes.NOP_ABS_X_5C] = NOP_ABS_X;

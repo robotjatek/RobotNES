@@ -70,7 +70,7 @@ namespace NESCore
             }
 
             _logger.Warning("Unsupported read from 0x{Address:X4}", address);
-            return 0; // TODO: i dont know if this should be an openbus read, but it crashes the emulator in AccuracyCoin openbus test if i return BusData.Value here
+            return _busData.Value;
         }
 
         private byte ReadController(byte buttons)
