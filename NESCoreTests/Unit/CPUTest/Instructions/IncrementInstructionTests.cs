@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class IncrementInstructionTests : InstructionTestBase
+    public class IncrementInstructionTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public IncrementInstructionTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void DEX_decrements_Y()
         {
@@ -331,7 +327,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DEC_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xde)
+                .Returns(0xEE) // DUMMY read
+                .Returns(10);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -348,7 +347,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DEC_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xde)
+                .Returns(0xEE) // dummy read
+                .Returns(10);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -486,7 +488,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void INC_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde).Returns(10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xde)
+                .Returns(0xee) // dummy read
+                .Returns(10);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -503,7 +508,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void INC_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xff)
+                .Returns(0xee) // dummy read
+                .Returns(10);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
