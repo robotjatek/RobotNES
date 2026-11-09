@@ -4,9 +4,14 @@
     {
         private static byte BRK(IBUS bus, IRegisters registers)
         {
-            Push16(bus, registers, registers.PC); //TODO: push PC+1 instead?
-            Push8(bus, registers, (byte)(registers.STATUS | FlagPositions.BREAK)); //Push to the stack with brk flag enabled but dont change the value of the register
-            registers.PC = (UInt16)((bus.Read(0xFFFF) << 8) | bus.Read(0xFFFE));
+            var pcToPush = registers.PC;
+            bus.Read(registers.PC++);
+            Push16(bus, registers, pcToPush);
+            var statusToPush = (byte)(registers.STATUS | FlagPositions.BREAK | 0x20);
+            Push8(bus, registers, statusToPush);
+            registers.SetInterruptDisableFlag(true);
+            
+            registers.PC = (ushort)((bus.Read(0xFFFF) << 8) | bus.Read(0xFFFE));
             return 7;
         }
 
@@ -34,10 +39,11 @@
 
         private static byte JSR_ABS(IBUS bus, IRegisters registers)
         {
-            var address = Fetch16(bus, registers);
-
-            Push16(bus, registers, (ushort)(registers.PC - 1));
-            registers.PC = address;
+            var lowAddress = Fetch(bus, registers);
+            bus.Read((ushort)(0x100 | registers.SP)); // dummy read
+            Push16(bus, registers, registers.PC);
+            var highAddress = Fetch(bus, registers);
+            registers.PC = (ushort)((highAddress << 8) | lowAddress);
 
             return 6;
         }
