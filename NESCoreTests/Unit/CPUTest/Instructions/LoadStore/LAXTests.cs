@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LAXTests : InstructionTestBase
+    public class LaxTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public LAXTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void LAX_zero()
         {
@@ -17,7 +13,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.SetupAllProperties();
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)  // param
                 .Returns(0xaa);
 
@@ -39,8 +35,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.Y = 10;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)  // param
+                .Returns(0xee) // dummy read
                 .Returns(0xaa);
 
             var lax = _instructions[Opcodes.LAX_ZERO_Y];
@@ -83,8 +80,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.X = 5;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
+                .Returns(0xee) // dummy read
                 .Returns(0x0ad) //low address (at 10 + 5)
                 .Returns(0xde) // high address (at 10 + 5 + 1)
                 .Returns(0xaa); // value at location 0xdead
@@ -135,10 +133,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.Y = 5;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xff) //low address
                 .Returns(0x00) // high address
+                .Returns(0xee) // Dummy read on page cross
                 .Returns(0xaa);
 
             var lda = _instructions[Opcodes.LAX_IND_Y];
@@ -163,8 +162,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
 
-            var lax_abs = _instructions[Opcodes.LAX_ABS_Y];
-            var cycles = lax_abs(bus.Object, registers.Object);
+            var laxAbs = _instructions[Opcodes.LAX_ABS_Y];
+            var cycles = laxAbs(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
@@ -180,10 +179,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.Y = 15;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0x10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(0xee) // Dummy read on page cross
+                .Returns(0x10);
 
-            var lax_abs = _instructions[Opcodes.LAX_ABS_Y];
-            var cycles = lax_abs(bus.Object, registers.Object);
+            var laxAbs = _instructions[Opcodes.LAX_ABS_Y];
+            var cycles = laxAbs(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
