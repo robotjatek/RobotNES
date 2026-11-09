@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class ArtitmeticTests : InstructionTestBase
+    public class ArithmeticTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public ArtitmeticTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void ADC_IMM_adds_two_numbers()
         {
@@ -260,8 +256,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -305,8 +302,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
+                .Returns(0xee)
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -326,8 +324,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
+                .Returns(0xee)
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -390,9 +389,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ABS_X_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -434,9 +434,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ABS_Y_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -460,8 +461,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
+                .Returns(0xee) // dummy read
                 .Returns(0x0ad) //low address
                 .Returns(0xde) // high address
                 .Returns(0xaa); // value at location 0xdead
@@ -486,7 +488,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 1;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0x0ad) //low address
                 .Returns(0xde) // high address
@@ -512,10 +514,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 1;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xff) //low address
                 .Returns(0x00) // high address
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var adc = _instructions[Opcodes.ADC_IND_Y];
@@ -643,8 +646,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -673,7 +677,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0x0ad) //low address
                 .Returns(0xde) // high address
@@ -699,7 +703,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xff) //low address
                 .Returns(0x00) // high address
@@ -1408,8 +1412,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(5);
@@ -1434,7 +1439,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
                 .Returns(10);
 
@@ -1455,8 +1460,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
+                .Returns(0xee) // dummy read
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -1477,8 +1483,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -1499,7 +1506,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -1521,7 +1528,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -1544,9 +1551,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ABS_X_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -1567,7 +1575,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -1590,9 +1598,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_ABS_Y_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var registers = new Mock<IRegisters>();
@@ -1619,7 +1628,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0x0ad) //low address
                 .Returns(0xde) // high address
@@ -1646,10 +1655,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xff) //low address
                 .Returns(0x00) // high address
+                .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
             var sbc = _instructions[Opcodes.SBC_IND_Y];
@@ -1667,8 +1677,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1697,7 +1708,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(15); //value at 0xad
 
@@ -1721,8 +1732,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
+                .Returns(0xee) // dummy read
                 .Returns(15); //value at 0xad
 
             var registers = new Mock<IRegisters>();
@@ -1746,7 +1758,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1771,7 +1783,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1797,7 +1809,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void DCP_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1829,7 +1841,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -1852,8 +1864,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1885,7 +1898,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(15); //value at 0xad
 
@@ -1912,7 +1925,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -1973,9 +1986,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
-                .Returns(15); //value at 0xad
+                .Returns(0xee) // dummy read
+                .Returns(15); // value at 0xad
 
             var registers = new Mock<IRegisters>();
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
@@ -2059,8 +2073,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2138,7 +2153,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -2161,8 +2176,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
+                .Returns(0xee) // dummy read
                 .Returns(8); //value at 0xad
 
             var registers = new Mock<IRegisters>();
@@ -2232,8 +2248,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2334,8 +2351,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
+                .Returns(0xee) // dummy read
                 .Returns(8); //value at 0xad
 
             var registers = new Mock<IRegisters>();
@@ -2381,7 +2399,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2405,8 +2423,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2455,7 +2474,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2484,7 +2503,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -2507,8 +2526,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
+                .Returns(0xee) // dummy read
                 .Returns(8); //value at 0xad
 
             var registers = new Mock<IRegisters>();
@@ -2554,7 +2574,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2578,8 +2598,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_IND_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
+                .Returns(0xee) // dummy read
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2606,7 +2627,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(8); //value at 0xad
 
@@ -2628,7 +2649,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2657,7 +2678,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -2680,8 +2701,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
+                .Returns(0xee) // dummy read
                 .Returns(8); //value at 0xad
 
             var registers = new Mock<IRegisters>();
@@ -2703,7 +2725,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2727,7 +2749,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RRA_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
