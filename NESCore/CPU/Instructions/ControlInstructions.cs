@@ -54,8 +54,8 @@
         {
             bus.Read(registers.PC);
             bus.Read((ushort)(0x100 | registers.SP));
-            var status = Pop8(bus, registers);
-            registers.STATUS = (byte)((registers.STATUS & 0x30) | (status & 0xCF));
+            
+            registers.STATUS = Pop8(bus, registers);;
             registers.PC = Pop16(bus, registers);
 
             return 6;
