@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class STATests : InstructionTestBase
+    public class StaTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public STATests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void STA_ZERO()
         {
@@ -147,8 +143,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.A = 0xaa;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
+                .Returns(0xee) // dummy address
                 .Returns(0x0ad) //low address
                 .Returns(0xde); // high address
 
