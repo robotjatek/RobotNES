@@ -70,7 +70,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0xfe;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x00).Returns(0xde);
 
             var jsr_abs = _instructions[Opcodes.JSR_ABS];
             var cycles = jsr_abs(bus.Object, registers.Object);

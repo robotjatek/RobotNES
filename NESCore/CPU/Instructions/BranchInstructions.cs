@@ -69,14 +69,14 @@
         private static byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
         {
             byte cycles = 2;
-            sbyte offset = (sbyte)Fetch(bus, registers);
+            var offset = (sbyte)Fetch(bus, registers);
             if (condition(registers))
             {
                 var oldAddress = registers.PC;
                 registers.PC = (ushort)(registers.PC + offset);
                 cycles++;
 
-                ushort dummyAddress = (ushort)(oldAddress & 0xff00 | (registers.PC & 0x00ff));
+                var dummyAddress = (ushort)(oldAddress & 0xff00 | (registers.PC & 0x00ff));
                 bus.Read(dummyAddress);
                 
                 if ((oldAddress & 0xff00) != (registers.PC & 0xff00))

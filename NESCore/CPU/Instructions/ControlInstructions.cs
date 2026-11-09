@@ -11,7 +11,9 @@
             Push8(bus, registers, statusToPush);
             registers.SetInterruptDisableFlag(true);
             
-            registers.PC = (ushort)((bus.Read(0xFFFF) << 8) | bus.Read(0xFFFE));
+            var low = bus.Read(0xFFFE);
+            var high = bus.Read(0xFFFF);
+            registers.PC = (ushort)((high << 8) | low);
             return 7;
         }
 
@@ -28,10 +30,10 @@
             var tl = Fetch(bus, registers);
             var th = Fetch(bus, registers);
 
-            byte low = bus.Read((UInt16)((th << 8) | tl));
-            byte high = bus.Read((UInt16)((th << 8) | ((tl+1)&0xff))); //This is done this way because 6502 doesn't increment the address correctly on page boundaries
+            var low = bus.Read((ushort)((th << 8) | tl));
+            var high = bus.Read((ushort)((th << 8) | ((tl+1)&0xff))); //This is done this way because 6502 doesn't increment the address correctly on page boundaries
 
-            var address = (UInt16)((high << 8) | low);
+            var address = (ushort)((high << 8) | low);
 
             registers.PC = address;
             return 5;
@@ -50,7 +52,10 @@
 
         private static byte RTI(IBUS bus, IRegisters registers)
         {
-            registers.STATUS = Pop8(bus, registers);
+            bus.Read(registers.PC);
+            bus.Read((ushort)(0x100 | registers.SP));
+            var status = Pop8(bus, registers);
+            registers.STATUS = (byte)((registers.STATUS & 0x30) | (status & 0xCF));
             registers.PC = Pop16(bus, registers);
 
             return 6;
@@ -58,8 +63,12 @@
 
         private static byte RTS(IBUS bus, IRegisters registers)
         {
-            var address = (ushort)(Pop16(bus, registers) + 1);
-            registers.PC = address;
+            bus.Read(registers.PC);
+            bus.Read((ushort)(0x100 | registers.SP));
+            
+            var address = Pop16(bus, registers);
+            bus.Read(address);
+            registers.PC = (ushort)(address + 1);
 
             return 6;
         }

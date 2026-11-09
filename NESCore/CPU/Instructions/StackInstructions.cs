@@ -12,7 +12,7 @@
         private static byte PHP(IBUS bus, IRegisters registers)
         {
             bus.Read(registers.PC); 
-            Push8(bus, registers, registers.STATUS);
+            Push8(bus, registers, (byte)(registers.STATUS | FlagPositions.BREAK | 0x20));
             return 3;
         }
 
@@ -30,7 +30,7 @@
         {
             bus.Read((ushort)(0x100 | registers.SP));
             var value = Pop8(bus, registers) & ~FlagPositions.BREAK;
-            registers.STATUS = (byte)value;
+            registers.STATUS = (byte)((registers.STATUS & 0x30) | (value & 0xCF));
             return 4;
         }
     }
