@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class ControlInstructionTests : InstructionTestBase
+    public class ControlInstructionTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public ControlInstructionTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void JMP_ABS()
         {
@@ -17,8 +13,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
-            var jmp_abs = _instructions[Opcodes.JMP_ABS];
-            var cycles = jmp_abs(bus.Object, registers.Object);
+            var jmpAbs = _instructions[Opcodes.JMP_ABS];
+            var cycles = jmpAbs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xdead);
             cycles.Should().Be(3);
@@ -70,10 +66,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.SP = 0xfe;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x00).Returns(0xde);
 
-            var jsr_abs = _instructions[Opcodes.JSR_ABS];
-            var cycles = jsr_abs(bus.Object, registers.Object);
+            var jsrAbs = _instructions[Opcodes.JSR_ABS];
+            var cycles = jsrAbs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
             bus.Verify(b => b.Write(0x100 | 0xfd, 0x01));
@@ -110,10 +106,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
-                .Returns(0xaa) //content that goes to the STATUS register
-                .Returns(0xad) //low address byte
-                .Returns(0xde); //high address byte
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xee) // dummy
+                .Returns(0xee) // dummy 2
+                .Returns(0xaa) // content that goes to the STATUS register
+                .Returns(0xad) // low address byte
+                .Returns(0xde); // high address byte
 
             var rti = _instructions[Opcodes.RTI];
             var cycles = rti(bus.Object, registers.Object);
@@ -129,7 +127,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         {
             var writeArgs = new List<byte>();
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Write(It.IsAny<UInt16>(), Capture.In(writeArgs)));
+            bus.Setup(b => b.Write(It.IsAny<ushort>(), Capture.In(writeArgs)));
             //BRK vector:
             bus.Setup(b => b.Read(0xffff)).Returns(0xbe);
             bus.Setup(b => b.Read(0xfffe)).Returns(0xef);

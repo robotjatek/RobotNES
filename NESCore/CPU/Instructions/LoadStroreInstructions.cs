@@ -213,6 +213,8 @@
         private static byte STA_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroXAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             STA(addressingResult.Address, bus, registers);
             return addressingResult.Cycles;
         }
@@ -227,6 +229,8 @@
         private static byte STA_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteXAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             STA(addressingResult.Address, bus, registers);
             return 5; //According to https://www.pagetable.com/c64ref/6502/?tab=3#a16,Y STA_ABS_X and STA_ABS_Y are always 5 cycles regardless of page boundary crossing
         }
@@ -234,6 +238,8 @@
         private static byte STA_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteYAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             STA(addressingResult.Address,  bus, registers);
             return 5; //According to https://www.pagetable.com/c64ref/6502/?tab=3#a16,Y STA_ABS_X and STA_ABS_Y are always 5 cycles regardless of page boundary crossing
         }
@@ -248,6 +254,8 @@
         private static byte STA_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectYAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             STA(addressingResult.Address, bus, registers);
             return addressingResult.Cycles;
         }
@@ -262,6 +270,8 @@
         private static byte STX_ZERO_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroYAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             bus.Write(addressingResult.Address, registers.X);
             return addressingResult.Cycles;
         }
@@ -283,6 +293,8 @@
         private static byte STY_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroXAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             bus.Write(addressingResult.Address, registers.Y);
             return addressingResult.Cycles;
         }

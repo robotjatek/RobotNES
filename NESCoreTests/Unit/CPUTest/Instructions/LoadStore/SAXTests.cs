@@ -5,12 +5,8 @@ using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class SAXTests : InstructionTestBase
+    public class SaxTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public SAXTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void SAX_IND_X()
         {
@@ -20,7 +16,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(10).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(10)
+                .Returns(0xee) // dummy read
+                .Returns(0xad)
+                .Returns(0xde);
 
             var sax = _instructions[Opcodes.SAX_IND_X];
             var cycles = sax(bus.Object, registers.Object);
@@ -41,7 +41,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
             var sax = _instructions[Opcodes.SAX_ZERO];
             var cycles = sax(bus.Object, registers.Object);
@@ -61,7 +61,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
             var sax = _instructions[Opcodes.SAX_ZERO_Y];
             var cycles = sax(bus.Object, registers.Object);
@@ -80,7 +80,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var sax = _instructions[Opcodes.SAX_ABS];
             var cycles = sax(bus.Object, registers.Object);

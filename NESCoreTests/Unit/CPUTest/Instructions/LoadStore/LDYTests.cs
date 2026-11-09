@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LDYTests : InstructionTestBase
+    public class LdyTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public LDYTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void LDY_IMM()
         {
@@ -17,8 +13,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x10);
 
-            var ldy_imm = _instructions[Opcodes.LDY_IMM];
-            var cycles = ldy_imm(bus.Object, registers.Object);
+            var ldyImm = _instructions[Opcodes.LDY_IMM];
+            var cycles = ldyImm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
@@ -33,8 +29,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0);
 
-            var ldy_imm = _instructions[Opcodes.LDY_IMM];
-            var cycles = ldy_imm(bus.Object, registers.Object);
+            var ldyImm = _instructions[Opcodes.LDY_IMM];
+            var cycles = ldyImm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = 0);
             registers.Verify(r => r.SetZeroFlag(true));
@@ -48,8 +44,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(unchecked((byte)-1));
 
-            var ldy_imm = _instructions[Opcodes.LDY_IMM];
-            var cycles = ldy_imm(bus.Object, registers.Object);
+            var ldyImm = _instructions[Opcodes.LDY_IMM];
+            var cycles = ldyImm(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.Y = unchecked((byte)-1));
             registers.Verify(r => r.SetNegativeFlag(true));
@@ -118,10 +114,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.X = 15;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xad)
+                .Returns(0xee) // Dummy read
+                .Returns(0x10);
 
-            var ldy_zero_x = _instructions[Opcodes.LDY_ZERO_X];
-            var cycles = ldy_zero_x(bus.Object, registers.Object);
+            var ldyZeroX = _instructions[Opcodes.LDY_ZERO_X];
+            var cycles = ldyZeroX(bus.Object, registers.Object);
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
@@ -139,8 +138,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
 
-            var ldy_abs_x = _instructions[Opcodes.LDY_ABS_X];
-            var cycles = ldy_abs_x(bus.Object, registers.Object);
+            var ldyAbsX = _instructions[Opcodes.LDY_ABS_X];
+            var cycles = ldyAbsX(bus.Object, registers.Object);
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
@@ -156,10 +155,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Object.X = 15;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00).Returns(0x10);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xff)
+                .Returns(0x00)
+                .Returns(0xee) // Dummy read
+                .Returns(0x10);
 
-            var ldy_abs_x = _instructions[Opcodes.LDY_ABS_X];
-            var cycles = ldy_abs_x(bus.Object, registers.Object);
+            var ldyAbsX = _instructions[Opcodes.LDY_ABS_X];
+            var cycles = ldyAbsX(bus.Object, registers.Object);
             registers.VerifySet(r => r.Y = 0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));

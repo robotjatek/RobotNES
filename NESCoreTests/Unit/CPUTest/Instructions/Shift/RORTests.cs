@@ -5,12 +5,8 @@ using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
 {
-    public class RORTests : InstructionTestBase
+    public class RorTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public RORTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void ROR_A_shifts_value_right_by_one()
         {
@@ -187,7 +183,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
         public void ROR_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0x10).Returns(4);
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
@@ -202,14 +198,22 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
         public void ROR_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0x10) //  zero-page address 10 (+ 5 from the X register below)
+                .Returns(0xee) // Dummy read
+                .Returns(4); // The original value
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.X = 5;
 
+            var addresses = new List<ushort>();
+            var writes = new List<byte>();
+            bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
+
             var ror = _instructions[Opcodes.ROR_ZERO_X];
             var cycles = ror(bus.Object, registers.Object);
-            bus.Verify(b => b.Write(0x10 + 5, 2));
+            addresses.Should().Equal(0x15, 0x15); // 2 writes the same address (one is a dummy write with the same value)
+            writes.Should().Equal(4, 2); // the first write is the original value, the second is the rotated
 
             cycles.Should().Be(6);
         }
@@ -218,14 +222,23 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
         public void ROR_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xff) // end of the zero page (+ 5 from the X register)
+                .Returns(0xee) // dummy read
+                .Returns(4); // The original value
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.X = 5;
+            
+            var addresses = new List<ushort>();
+            var writes = new List<byte>();
+            bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
 
             var ror = _instructions[Opcodes.ROR_ZERO_X];
             var cycles = ror(bus.Object, registers.Object);
-            bus.Verify(b => b.Write(4, 2));
+            
+            addresses.Should().Equal(0x04, 0x04); // 2 writes the same address (one is a dummy write with the same value)
+            writes.Should().Equal(4, 2); // the first write is the original value, the second is the rotated
 
             cycles.Should().Be(6);
         }
@@ -249,14 +262,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
         public void ROR_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
+                .Returns(0xad)
+                .Returns(0xde)
+                .Returns(4); // The original value
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.X = 10;
+            
+            var addresses = new List<ushort>();
+            var writes = new List<byte>();
+            bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
 
             var ror = _instructions[Opcodes.ROR_ABS_X];
             var cycles = ror(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead + 10, 2));
+            
+            addresses.Should().Equal(0xdead + 10, 0xdead + 10); // 2 writes the same address (one is a dummy write with the same value)
+            writes.Should().Equal(4, 2); // the first write is the original value, the second is the rotated
 
             cycles.Should().Be(7);
         }

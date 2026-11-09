@@ -311,9 +311,14 @@
             public byte Value { get; set; }
             public ushort Address { get; init; }
             public byte Cycles { get; init; }
+            public ushort? DummyAddress { get; init; }
 
             public AddressingResult WithValueFromMemory(IBUS bus)
             {
+                if (DummyAddress.HasValue)
+                {
+                    bus.Read(DummyAddress.Value);
+                }
                 Value = bus.Read(Address);
                 return this;
             }
@@ -354,18 +359,21 @@
         private static AddressingResult AddressingAbsoluteXAddressOnly(IBUS bus, IRegisters registers)
         {
             byte cycles = 4;
-            var address = Fetch16(bus, registers);
-            var page = address & 0xff00;
-            address += registers.X;
+            var baseAddress = Fetch16(bus, registers);
+            var page = baseAddress & 0xff00;
+            var address = (ushort)(baseAddress + registers.X);
+            ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
                 cycles++;
+                dummyAddress = (ushort)(page | (address & 0x00ff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles
+                Cycles = cycles,
+                DummyAddress = dummyAddress
             };
         }
 
@@ -378,18 +386,21 @@
         private static AddressingResult AddressingAbsoluteYAddressOnly(IBUS bus, IRegisters registers)
         {
             byte cycles = 4;
-            var address = Fetch16(bus, registers);
-            var page = address & 0xff00;
-            address += registers.Y;
+            var baseAddress = Fetch16(bus, registers);
+            var page = baseAddress & 0xff00;
+            var address = (ushort)(baseAddress + registers.Y);
+            ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
                 cycles++;
+                dummyAddress = (ushort)(page | (address & 0x00ff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles
+                Cycles = cycles,
+                DummyAddress = dummyAddress
             };
         }
 
@@ -417,11 +428,13 @@
 
         private static AddressingResult AddressingZeroXAddressOnly(IBUS bus, IRegisters registers)
         {
-            var address = (byte)((Fetch(bus, registers) + registers.X) & 0xFF);
+            var baseAddress = Fetch(bus, registers);
+            var address = (byte)((baseAddress + registers.X) & 0xFF);
             return new AddressingResult
             {
                 Address = address,
                 Cycles = 4,
+                DummyAddress = baseAddress
             };
         }
 
@@ -433,11 +446,13 @@
 
         private static AddressingResult AddressingZeroYAddressOnly(IBUS bus, IRegisters registers)
         {
-            var address = (byte)((Fetch(bus, registers) + registers.Y) & 0xFF);
+            var baseAddress = Fetch(bus, registers);
+            var address = (byte)((baseAddress + registers.Y) & 0xFF);
             return new AddressingResult
             {
                 Address = address,
                 Cycles = 4,
+                DummyAddress = baseAddress
             };
         }
 
@@ -449,15 +464,19 @@
 
         private static AddressingResult AddressingIndirectXAddressOnly(IBUS bus, IRegisters registers)
         {
-            var zeropageAddress = Fetch(bus, registers) + registers.X;
-            var lowAddress = bus.Read((UInt16)(zeropageAddress & 0xff));
-            var highAddress = bus.Read((UInt16)(zeropageAddress + 1 & 0xff));
-            var address = (UInt16)(highAddress << 8 | lowAddress);
+            var baseAddress = Fetch(bus, registers);
+            bus.Read(baseAddress);
+            
+            var zeroPageAddress = (byte)((baseAddress + registers.X) & 0xff);
+            var lowAddress = bus.Read(zeroPageAddress);
+            var highAddress = bus.Read((ushort)(zeroPageAddress + 1 & 0xff));
+            var address = (ushort)(highAddress << 8 | lowAddress);
 
             return new AddressingResult
             {
                 Address = address,
                 Cycles = 6,
+                DummyAddress = null
             };
         }
 
@@ -465,20 +484,24 @@
         {
             byte cycles = 5;
             var zeroPageAddress = Fetch(bus, registers);
-            var lowAddress = bus.Read((UInt16)(zeroPageAddress & 0xff));
-            var highAddress = bus.Read((UInt16)((zeroPageAddress + 1) & 0xff));
-            var address = (UInt16)((highAddress << 8 | lowAddress) & 0xffff);
-            var page = address & 0xff00;
-            address += registers.Y;
+            var lowAddress = bus.Read((ushort)(zeroPageAddress & 0xff));
+            var highAddress = bus.Read((ushort)((zeroPageAddress + 1) & 0xff));
+            var baseAddress = (ushort)((highAddress << 8 | lowAddress) & 0xffff);
+            var page = baseAddress & 0xff00;
+            var address = (ushort)(baseAddress +registers.Y);
+            
+            ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
                 cycles++;
+                dummyAddress = (ushort)(page | (address & 0xff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles
+                Cycles = cycles,
+                DummyAddress = dummyAddress
             };
         }
 

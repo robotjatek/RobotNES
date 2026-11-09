@@ -157,6 +157,10 @@ namespace NESCore.PPU
             {
                 _registers.Mask = value;
             }
+            else if (address == 0x2002)
+            {
+                // Read-only register: NO-OP
+            }
             else if (address == 0x2003)
             {
                 _registers.OAMAddress = value;
