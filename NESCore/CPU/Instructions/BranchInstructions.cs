@@ -75,9 +75,14 @@
                 var oldAddress = registers.PC;
                 registers.PC = (ushort)(registers.PC + offset);
                 cycles++;
+
+                ushort dummyAddress = (ushort)(oldAddress & 0xff00 | (registers.PC & 0x00ff));
+                bus.Read(dummyAddress);
+                
                 if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
                 {
                     cycles++;
+                    bus.Read(registers.PC);
                 }
             }
 
