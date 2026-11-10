@@ -84,7 +84,8 @@ namespace NESCore.CPU
         private byte DoNmi()
         {
             Push16(_registers.PC);
-            Push8((byte)(_registers.STATUS | FlagPositions.INTERRUPT_DISABLE));
+            Push8(_registers.STATUS);
+            _registers.SetInterruptDisableFlag(true);
             _registers.PC = (ushort)((_bus.Read(0xFFFB) << 8) | _bus.Read(0xFFFA));
             _nmi = false;
             return 7;
