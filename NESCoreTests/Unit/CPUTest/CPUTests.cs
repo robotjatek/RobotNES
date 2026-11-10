@@ -5,7 +5,7 @@ using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest
 {
-    public class CPUTests : TestBase
+    public class CpuTests : TestBase
     {
         [Fact]
         public void CpuLoadsResetVectorFromBus()
@@ -14,7 +14,7 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffd))).Returns(0xde);
             bus.Setup(b => b.Read(It.Is<ushort>(a => a == 0xfffc))).Returns(0xad);
 
-            var sut = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
+            _ = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
             bus.Verify(b => b.Read(0xfffd));
             bus.Verify(b => b.Read(0xfffc));
         }
@@ -42,11 +42,11 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
-        public void CpuHandlesNMI()
+        public void CpuHandlesNmi()
         {
             var writeArgs = new List<byte>();
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Write(It.IsAny<UInt16>(), Capture.In(writeArgs)));
+            bus.Setup(b => b.Write(It.IsAny<ushort>(), Capture.In(writeArgs)));
             //NMI vector:
             bus.Setup(b => b.Read(0xfffb)).Returns(0xbe);
             bus.Setup(b => b.Read(0xfffa)).Returns(0xef);
@@ -54,50 +54,54 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Setup(b => b.Read(0xfffd)).Returns(0xde);
             bus.Setup(b => b.Read(0xfffc)).Returns(0xad);
 
-            var registers = new Mock<IRegisters>();
-            registers.SetupAllProperties();
-            registers.Object.STATUS = 0xee;
+            var registers = new Registers
+            {
+                STATUS = 0xee
+            };
 
-            var cpu = new Cpu(bus.Object, registers.Object, _instructions, _logger);
+            var cpu = new Cpu(bus.Object, registers, _instructions, _logger);
             
             cpu.HandleNmi();
             var cycles = cpu.RunInstruction();
 
-            writeArgs.Should().ContainInConsecutiveOrder(new byte[] {0xde, 0xad, 0xee});
-            registers.Object.PC.Should().Be(0xbeef);
+            writeArgs.Should().ContainInConsecutiveOrder(0xde, 0xad, 0xee);
+            registers.PC.Should().Be(0xbeef);
+            registers.GetInterruptDisableFlag().Should().BeTrue();
             cycles.Should().Be(7);
         }
 
         [Fact]
-        public void CpuHandlesDMA()
+        public void CpuHandlesDma()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
 
             var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
             cpu.HandleDma(0);
-            var cycles = cpu.RunInstruction();
+            cpu.RunInstruction();
             for (byte i = 0; i < 0xff; i++)
             {
-                bus.Verify(b => b.Read((UInt16)(0x0 + i)));
+                var i1 = i;
+                bus.Verify(b => b.Read((ushort)(0x0 + i1)));
             }
             bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
         }
 
         [Fact]
-        public void CpuHandlesDMA2()
+        public void CpuHandlesDma2()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
 
             var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
             cpu.HandleDma(0x10);
-            var cycles = cpu.RunInstruction();
+            cpu.RunInstruction();
             for(byte i = 0; i < 0xff; i++)
             {
-                bus.Verify(b => b.Read((UInt16)((0x10 << 8) + i)));
+                var i1 = i;
+                bus.Verify(b => b.Read((ushort)((0x10 << 8) + i1)));
             }
             bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
         }
@@ -110,7 +114,7 @@ namespace NESCoreTests.Unit.CPUTest
             // every OAM DMA, leaving it ~4.5 scanlines behind the CPU - which made
             // sprite-0-hit scroll splits land several lines too low.
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xaa);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
 
             var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
 
@@ -130,7 +134,7 @@ namespace NESCoreTests.Unit.CPUTest
             // Reset vector $C000; the opcode fetch at $C000 returns the instruction.
             bus.Setup(b => b.Read(0xfffd)).Returns(0xc0);
             bus.Setup(b => b.Read(0xfffc)).Returns(0x00);
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(opcode);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(opcode);
 
             var registers = new Registers();
             var cpu = new Cpu(bus.Object, registers, new NESCore.CPU.Instructions.CPUInstructions().InstructionSet, _logger);

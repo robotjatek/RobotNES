@@ -110,6 +110,7 @@ namespace NESCore
             else if (address == 0x4017)
             {
                 // TODO: apu
+                // TODO: needed for IRQ
             }
             else if (IsInApuArea(address))
             {
