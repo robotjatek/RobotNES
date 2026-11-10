@@ -257,7 +257,7 @@
             var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
             bus.Read(dummyAddress);
             STA(addressingResult.Address, bus, registers);
-            return addressingResult.Cycles;
+            return 6;
         }
 
         private static byte STX_ZERO(IBUS bus, IRegisters registers)
@@ -328,6 +328,8 @@
         private static byte SAX_ZERO_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroYAddressOnly(bus, registers);
+            var dummyAddress = addressingResult.DummyAddress ?? addressingResult.Address;
+            bus.Read(dummyAddress);
             bus.Write(addressingResult.Address, SAX(registers.A, registers.X));
             return addressingResult.Cycles;
         }
