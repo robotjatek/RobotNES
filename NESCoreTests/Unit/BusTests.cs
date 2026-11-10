@@ -396,8 +396,46 @@ namespace NESCoreTests.Unit
             bus.Write(0x6, 0xb0);
             bus.Read(0x4016).Should().Be(0xb0);
         }
+        
+        [Theory]
+        [InlineData(0x4000)]
+        [InlineData(0x4001)]
+        [InlineData(0x4002)]
+        [InlineData(0x4003)]
+        [InlineData(0x4004)]
+        [InlineData(0x4005)]
+        [InlineData(0x4006)]
+        [InlineData(0x4007)]
+        [InlineData(0x4008)]
+        [InlineData(0x4009)]
+        [InlineData(0x400A)]
+        [InlineData(0x400B)]
+        [InlineData(0x400C)]
+        [InlineData(0x400D)]
+        [InlineData(0x400E)]
+        [InlineData(0x4010)]
+        [InlineData(0x4011)]
+        [InlineData(0x4012)]
+        [InlineData(0x4013)]
+        [InlineData(0x4014)]
+        [InlineData(0x4018)]
+        [InlineData(0x401F)]
+        public void ApuReadsShouldReturnTheLastBusValue(ushort address)
+        {
+            var bus = CreateBusWithMapper0Cartridge(new Memory());
+            bus.Write(0x40, 0x10);
+            bus.Read(address).Should().Be(0x10);
+        }
 
-        // TODO: open bus read for $4014 and $4018-$401F (Read currently returns 0 there)
-        // TODO: undecoded write should not throw
+        [Fact]
+        public void ApuReadShouldNotDriveTheBus()
+        {
+            var ppu = new Mock<IPPU>();
+            var bus = new Bus(_mockCartridge.Object, new Memory(), ppu.Object, _controller1.Object,
+                _controller2.Object, _apu.Object, _logger);
+            ppu.Setup(p => p.Read(0x2000)).Returns(0x10);
+            bus.Read(0x3f00).Should().Be(0x10);
+            bus.Read(0x4000).Should().Be(0x10);
+        }
     }
 }
