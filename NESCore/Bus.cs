@@ -66,7 +66,8 @@ namespace NESCore
             }
             else if (IsInApuArea(address))
             {
-                return _apu.Read(address);
+                _apu.Read(address); // ignore apu reads
+                return _busData.Value; // return openbus
             }
 
             _logger.Warning("Unsupported read from 0x{Address:X4}", address);
