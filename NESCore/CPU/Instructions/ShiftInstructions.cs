@@ -13,6 +13,7 @@
 
         private static byte LSR_A(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             registers.A = LSR(registers.A, registers);
             return 2;
         }
@@ -20,36 +21,28 @@
         private static byte LSR_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = LSR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => LSR(value, registers));
             return 5;
         }
 
         private static byte LSR_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = LSR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => LSR(value, registers));
             return (byte)(addressingResult.Cycles + 2);
         }
 
         private static byte LSR_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = LSR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => LSR(value, registers));
             return 6;
         }
 
         private static byte LSR_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = LSR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => LSR(value, registers));
             return 7;
         }
 
@@ -64,6 +57,7 @@
 
         private static byte ASL_A(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             registers.A = ASL(registers.A, registers);
             return 2;
         }
@@ -71,36 +65,28 @@
         private static byte ASL_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ASL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ASL(value, registers));
             return 5;
         }
 
         private static byte ASL_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ASL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ASL(value, registers));
             return (byte)(addressingResult.Cycles + 2);
         }
 
         private static byte ASL_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ASL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ASL(value, registers));
             return 6;
         }
 
         private static byte ASL_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ASL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ASL(value, registers));
             return 7;
         }
 
@@ -120,6 +106,7 @@
 
         private static byte ROL_A(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             registers.A = ROL(registers.A, registers);
             return 2;
         }
@@ -127,36 +114,28 @@
         private static byte ROL_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROL(value, registers));
             return 5;
         }
 
         private static byte ROL_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROL(value, registers));
             return (byte)(addressingResult.Cycles + 2);
         }
 
         private static byte ROL_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROL(value, registers));
             return 6;
         }
 
         private static byte ROL_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROL(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROL(value, registers));
             return 7;
         }
 
@@ -176,6 +155,7 @@
 
         private static byte ROR_A(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             registers.A = ROR(registers.A, registers);
             return 2;
         }
@@ -183,36 +163,28 @@
         private static byte ROR_ZERO(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZero(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROR(value, registers));
             return 5;
         }
 
         private static byte ROR_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROR(value, registers));
             return (byte)(addressingResult.Cycles + 2);
         }
 
         private static byte ROR_ABS(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsolute(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROR(value, registers));
             return 6;
         }
 
         private static byte ROR_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
-            bus.Write(addressingResult.Address, addressingResult.Value);
-            var result = ROR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, result);
+            addressingResult.ReadModifyWrite(bus, value => ROR(value, registers));
             return 7;
         }
 

@@ -136,7 +136,9 @@ namespace NESCore
         public void PPUOamDMA(byte value)
         {
             _busData.Drive(value);
+            _ppu.Run(2);
             _ppu.OamDMAWrite(value);
+            _ppu.Run(1);
         }
 
         private static bool IsInInternalMemory(ushort address)

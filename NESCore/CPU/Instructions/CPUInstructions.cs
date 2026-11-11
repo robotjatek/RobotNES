@@ -264,6 +264,12 @@
             instructions[Opcodes.RRA_ABS_X] = RRA_ABS_X;
         }
 
+        // Burn one-cycle reading from the bus at the current PC without incrementing it
+        private static void IdleCycle(IBUS bus, IRegisters registers)
+        {
+            bus.Read((ushort)(registers.PC - 1));
+        }
+
         private static ushort Fetch16(IBUS bus, IRegisters registers)
         {
             var low = Fetch(bus, registers);
@@ -312,6 +318,7 @@
             public ushort Address { get; init; }
             public byte Cycles { get; init; }
             public ushort? DummyAddress { get; init; }
+            public ushort? ReadModifyWriteDummyAddress  { get; init; }
 
             public AddressingResult WithValueFromMemory(IBUS bus)
             {
@@ -321,6 +328,23 @@
                 }
                 Value = bus.Read(Address);
                 return this;
+            }
+
+            /// <summary>
+            /// RMW writes back the original value first, then proceeds with the operation
+            /// </summary>
+            public byte ReadModifyWrite(IBUS bus, Func<byte, byte> operation)
+            {
+                // do a dummy read if a page cross occured
+                if (ReadModifyWriteDummyAddress.HasValue)
+                {
+                    bus.Read(ReadModifyWriteDummyAddress.Value);
+                }
+                
+                bus.Write(Address, Value);
+                var result = operation(Value);
+                bus.Write(Address, result);
+                return result;
             }
         }
 
@@ -373,7 +397,8 @@
             {
                 Address = address,
                 Cycles = cycles,
-                DummyAddress = dummyAddress
+                DummyAddress = dummyAddress,
+                ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };
         }
 
@@ -400,7 +425,8 @@
             {
                 Address = address,
                 Cycles = cycles,
-                DummyAddress = dummyAddress
+                DummyAddress = dummyAddress,
+                ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };
         }
 
@@ -501,7 +527,8 @@
             {
                 Address = address,
                 Cycles = cycles,
-                DummyAddress = dummyAddress
+                DummyAddress = dummyAddress,
+                ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };
         }
 

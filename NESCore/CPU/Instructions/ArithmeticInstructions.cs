@@ -285,7 +285,7 @@
 
         private static void DCP(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var decResult = DEC(addressingResult.Value, registers);
+            var decResult = addressingResult.ReadModifyWrite(bus, value => DEC(value, registers));
             bus.Write(addressingResult.Address, decResult);
             CMP(decResult, registers);
         }
@@ -348,7 +348,7 @@
 
         private static void ISB(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var incResult = INC(addressingResult.Value, registers);
+            var incResult = addressingResult.ReadModifyWrite(bus, value => INC(value, registers));
             bus.Write(addressingResult.Address, incResult);
             SBC(incResult, registers);
         }
@@ -411,7 +411,7 @@
 
         private static void SLO(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var aslResult = ASL(addressingResult.Value, registers);
+            var aslResult = addressingResult.ReadModifyWrite(bus, value => ASL(value, registers));
             bus.Write(addressingResult.Address, aslResult);
             ORA(aslResult, registers);
         }
@@ -474,7 +474,7 @@
 
         private static void RLA(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var rlaResult = ROL(addressingResult.Value, registers);
+            var rlaResult = addressingResult.ReadModifyWrite(bus, value => ROL(value, registers));
             bus.Write(addressingResult.Address, rlaResult);
             AND(rlaResult, registers);
         }
@@ -537,9 +537,9 @@
 
         private static void SRE(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var rlaResult = LSR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, rlaResult);
-            EOR(rlaResult, registers);
+            var sreResult = addressingResult.ReadModifyWrite(bus, value => LSR(value, registers));
+            bus.Write(addressingResult.Address, sreResult);
+            EOR(sreResult, registers);
         }
 
         private static byte SRE_IND_X(IBUS bus, IRegisters registers)
@@ -600,9 +600,9 @@
 
         private static void RRA(AddressingResult addressingResult, IBUS bus, IRegisters registers)
         {
-            var rorResult = ROR(addressingResult.Value, registers);
-            bus.Write(addressingResult.Address, rorResult);
-            ADC(rorResult, registers);
+            var rraResult = addressingResult.ReadModifyWrite(bus, value => ROR(value, registers));
+            bus.Write(addressingResult.Address, rraResult);
+            ADC(rraResult, registers);
         }
 
         private static byte RRA_IND_X(IBUS bus, IRegisters registers)
