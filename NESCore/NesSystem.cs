@@ -60,7 +60,7 @@ namespace NESCore
             while (_running)
             {
                 var cycles = _cpu.RunInstruction();
-                _ppu.Run(cycles * 3);
+               // _ppu.Run(cycles * 3);
             }
         }
 
