@@ -15,13 +15,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xde;
 
             var bus = new Mock<IBUS>();
-            var pha = _instructions[Opcodes.PHA];
-            var cycles = pha(bus.Object, registers.Object);
+            var pha = Instructions[Opcodes.PHA];
+            pha(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x1ff, 0xde));
             registers.Object.SP.Should().Be(0xfe);
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -33,13 +31,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.STATUS = 0xAA;
 
             var bus = new Mock<IBUS>();
-            var php = _instructions[Opcodes.PHP];
-            var cycles = php(bus.Object, registers.Object);
+            var php = Instructions[Opcodes.PHP];
+            php(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x1ff, 0xAA | FlagPositions.BREAK));
             registers.Object.SP.Should().Be(0xfe);
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -52,8 +48,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(unchecked((byte)-34));
 
-            var pla = _instructions[Opcodes.PLA];
-            var cycles = pla(bus.Object, registers.Object);
+            var pla = Instructions[Opcodes.PLA];
+            pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(unchecked((byte)-34));
             registers.Object.SP.Should().Be(0xff);
@@ -73,8 +69,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -87,8 +81,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(0);
 
-            var pla = _instructions[Opcodes.PLA];
-            var cycles = pla(bus.Object, registers.Object);
+            var pla = Instructions[Opcodes.PLA];
+            pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
             registers.Object.SP.Should().Be(0xff);
@@ -108,8 +102,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -122,8 +114,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(10);
 
-            var pla = _instructions[Opcodes.PLA];
-            var cycles = pla(bus.Object, registers.Object);
+            var pla = Instructions[Opcodes.PLA];
+            pla(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(10);
             registers.Object.SP.Should().Be(0xff);
@@ -143,8 +135,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetInterruptDisableFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -158,15 +148,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(0x1ff)).Returns(0xff);
 
-            var plp = _instructions[Opcodes.PLP];
-            var cycles = plp(bus.Object, registers.Object);
+            var plp = Instructions[Opcodes.PLP];
+            plp(bus.Object, registers.Object);
 
             registers.Object.STATUS.Should().Be(0xef); //BRK flag ignored
             registers.Object.SP.Should().Be(0xff);
-
-            //All flags are set from the value of the stack
-
-            cycles.Should().Be(4);
         }
     }
 }

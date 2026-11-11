@@ -2,7 +2,7 @@
 
 namespace NESCore.CPU.Instructions
 {
-    public partial class CPUInstructions
+    public partial class CpuInstructions
     {
         private static void BIT(byte value, IRegisters registers)
         {
@@ -16,20 +16,16 @@ namespace NESCore.CPU.Instructions
             registers.SetZeroFlag(isZero);
         }
 
-        private static byte BIT_ZERO(IBUS bus, IRegisters registers)
+        private static void BIT_ZERO(IBUS bus, IRegisters registers)
         {
             var value = AddressingZero(bus, registers).Value;
-            BIT(value, registers);            
-
-            return 3;
+            BIT(value, registers);
         }
 
-        private static byte BIT_ABS(IBUS bus, IRegisters registers)
+        private static void BIT_ABS(IBUS bus, IRegisters registers)
         {
             var value = AddressingAbsolute(bus, registers).Value;
             BIT(value, registers);
-
-            return 4;
         }
 
         private static void AND(byte mask, IRegisters registers)
@@ -40,68 +36,52 @@ namespace NESCore.CPU.Instructions
             registers.SetNegativeFlag((sbyte)value < 0);
         }
 
-        private static byte AND_IMM(IBUS bus, IRegisters registers)
+        private static void AND_IMM(IBUS bus, IRegisters registers)
         {
             var mask = AddressingImmediate(bus, registers).Value;
             AND(mask, registers);
-
-            return 2;
         }
 
-        private static byte AND_IND_X(IBUS bus, IRegisters registers)
+        private static void AND_IND_X(IBUS bus, IRegisters registers)
         {
             var mask = AddressingIndirectX(bus, registers).Value;
             AND(mask, registers);
-
-            return 6;
         }
 
-        private static byte AND_ZERO(IBUS bus, IRegisters registers)
+        private static void AND_ZERO(IBUS bus, IRegisters registers)
         {
             var mask = AddressingZero(bus, registers).Value;
             AND(mask, registers);
-
-            return 3;
         }
 
-        private static byte AND_ZERO_X(IBUS bus, IRegisters registers)
+        private static void AND_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
             AND(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
-        private static byte AND_ABS(IBUS bus, IRegisters registers)
+        private static void AND_ABS(IBUS bus, IRegisters registers)
         {
             var mask = AddressingAbsolute(bus, registers).Value;
             AND(mask, registers);
-
-            return 4;
         }
 
-        private static byte AND_ABS_X(IBUS bus, IRegisters registers)
+        private static void AND_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
             AND(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
-        private static byte AND_ABS_Y(IBUS bus, IRegisters registers)
+        private static void AND_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
             AND(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
-        private static byte AND_IND_Y(IBUS bus, IRegisters registers)
+        private static void AND_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectY(bus, registers);
             AND(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
         private static void ORA(byte value, IRegisters registers)
@@ -112,67 +92,52 @@ namespace NESCore.CPU.Instructions
             registers.SetNegativeFlag((sbyte)result < 0);
         }
 
-        private static byte ORA_IMM(IBUS bus, IRegisters registers)
+        private static void ORA_IMM(IBUS bus, IRegisters registers)
         {
             var mask = AddressingImmediate(bus, registers).Value;
             ORA(mask, registers);
-
-            return 2;
         }
 
-        private static byte ORA_ZERO(IBUS bus, IRegisters registers)
+        private static void ORA_ZERO(IBUS bus, IRegisters registers)
         {
             var mask = AddressingZero(bus, registers).Value;
             ORA(mask, registers);
-
-            return 3;
         }
 
-        private static byte ORA_ZERO_X(IBUS bus, IRegisters registers)
+        private static void ORA_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
             ORA(addressingResult.Value, registers);
-            return addressingResult.Cycles;
         }
 
-        private static byte ORA_IND_X(IBUS bus, IRegisters registers)
+        private static void ORA_IND_X(IBUS bus, IRegisters registers)
         {
             var mask = AddressingIndirectX(bus, registers).Value;
             ORA(mask, registers);
-
-            return 6;
         }
 
-        private static byte ORA_ABS(IBUS bus, IRegisters registers)
+        private static void ORA_ABS(IBUS bus, IRegisters registers)
         {
             var mask = AddressingAbsolute(bus, registers).Value;
             ORA(mask, registers);
-
-            return 4;
         }
 
-        private static byte ORA_ABS_X(IBUS bus, IRegisters registers)
+        private static void ORA_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
             ORA(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
-        private static byte ORA_ABS_Y(IBUS bus, IRegisters registers)
+        private static void ORA_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
             ORA(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
-        private static byte ORA_IND_Y(IBUS bus, IRegisters registers)
+        private static void ORA_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectY(bus, registers);
             ORA(addressingResult.Value, registers);
-
-            return addressingResult.Cycles;
         }
 
         private static void EOR(byte mask, IRegisters registers)
@@ -183,60 +148,52 @@ namespace NESCore.CPU.Instructions
             registers.SetNegativeFlag((sbyte)value < 0);
         }
 
-        private static byte EOR_IMM(IBUS bus, IRegisters registers)
+        private static void EOR_IMM(IBUS bus, IRegisters registers)
         {
             var mask = AddressingImmediate(bus, registers).Value;
             EOR(mask, registers);
-            return 2;
         }
 
-        private static byte EOR_IND_X(IBUS bus, IRegisters registers)
+        private static void EOR_IND_X(IBUS bus, IRegisters registers)
         {
             var mask = AddressingIndirectX(bus, registers).Value;
             EOR(mask, registers);
-            return 6;
         }
 
-        private static byte EOR_ZERO(IBUS bus, IRegisters registers)
+        private static void EOR_ZERO(IBUS bus, IRegisters registers)
         {
             var mask = AddressingZero(bus, registers).Value;
             EOR(mask, registers);
-            return 3;
         }
 
-        private static byte EOR_ZERO_X(IBUS bus, IRegisters registers)
+        private static void EOR_ZERO_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingZeroX(bus, registers);
             EOR(addressingResult.Value, registers);
-            return addressingResult.Cycles;
         }
 
-        private static byte EOR_ABS(IBUS bus, IRegisters registers)
+        private static void EOR_ABS(IBUS bus, IRegisters registers)
         {
             var mask = AddressingAbsolute(bus, registers).Value;
             EOR(mask, registers);
-            return 4;
         }
 
-        private static byte EOR_ABS_X(IBUS bus, IRegisters registers)
+        private static void EOR_ABS_X(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteX(bus, registers);
             EOR(addressingResult.Value, registers);
-            return addressingResult.Cycles;
         }
 
-        private static byte EOR_ABS_Y(IBUS bus, IRegisters registers)
+        private static void EOR_ABS_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingAbsoluteY(bus, registers);
             EOR(addressingResult.Value, registers);
-            return addressingResult.Cycles;
         }
 
-        private static byte EOR_IND_Y(IBUS bus, IRegisters registers)
+        private static void EOR_IND_Y(IBUS bus, IRegisters registers)
         {
             var addressingResult = AddressingIndirectY(bus, registers);
             EOR(addressingResult.Value, registers);
-            return addressingResult.Cycles;
         }
     }
 }

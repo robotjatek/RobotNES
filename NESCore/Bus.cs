@@ -9,6 +9,7 @@ namespace NESCore
     public class Bus : IBUS
     {
         public event OAMDMAEventHandler? OAMDMAEvent;
+        public uint Cycles { get; private set; }
 
         private readonly ICartridge _cartridge;
         private readonly IMemory _memory;
@@ -44,6 +45,7 @@ namespace NESCore
 
         public byte Read(ushort address)
         {
+            Cycles++;
             _ppu.Run(2);
             byte data;
             
@@ -93,6 +95,7 @@ namespace NESCore
 
         public void Write(ushort address, byte data)
         {
+            Cycles++;
             _busData.Drive(data);
             _ppu.Run(2);
             if (IsInInternalMemory(address))
@@ -166,7 +169,7 @@ namespace NESCore
             var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
-                _logger.Warning("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
+                _logger.Debug("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
 
             return _busData.Drive(_memory.Read(mirroredAddress));
@@ -177,7 +180,7 @@ namespace NESCore
             var mirroredAddress = (ushort)(address & 0x7ff);
             if (address != mirroredAddress)
             {
-                _logger.Warning("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
+                _logger.Debug("Mirrored internal memory address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
             _memory.Write(mirroredAddress, data);
         }

@@ -4,13 +4,8 @@ using NESCore;
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     [Collection(nameof(InstructionsFixture))]
-    public abstract class InstructionTestBase
+    public abstract class InstructionTestBase(InstructionsFixture fixture)
     {
-        protected IReadOnlyList<Func<IBUS, IRegisters, byte>> _instructions;
-
-        public InstructionTestBase(InstructionsFixture fixture)
-        {
-            _instructions = fixture.Instructions;
-        }
+        protected readonly IReadOnlyList<Action<IBUS, IRegisters>> Instructions = fixture.Instructions;
     }
 }

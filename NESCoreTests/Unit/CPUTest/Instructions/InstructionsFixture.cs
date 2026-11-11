@@ -6,12 +6,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 {
     public class InstructionsFixture
     {
-        public IReadOnlyList<Func<IBUS, IRegisters, byte>> Instructions { get; init; }
-
-        public InstructionsFixture()
-        {
-            Instructions = new CPUInstructions().InstructionSet;
-        }
+        public IReadOnlyList<Action<IBUS, IRegisters>> Instructions { get; } = new CpuInstructions().InstructionSet;
     }
 
     [CollectionDefinition(nameof(InstructionsFixture))]

@@ -4,8 +4,11 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class LaxTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
+    public class LaxTests : InstructionTestBase
     {
+        
+        public LaxTests(InstructionsFixture fixture) : base(fixture) {}
+        
         [Fact]
         public void LAX_zero()
         {
@@ -17,14 +20,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xad)  // param
                 .Returns(0xaa);
 
-            var lax = _instructions[Opcodes.LAX_ZERO];
-            var cycles = lax(bus.Object, registers.Object);
+            var lax = Instructions[Opcodes.LAX_ZERO];
+            lax(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -40,14 +41,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xee) // dummy read
                 .Returns(0xaa);
 
-            var lax = _instructions[Opcodes.LAX_ZERO_Y];
-            var cycles = lax(bus.Object, registers.Object);
+            var lax = Instructions[Opcodes.LAX_ZERO_Y];
+            lax(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -62,14 +61,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xde)
                 .Returns(0xaa); // value at address 10
 
-            var lax = _instructions[Opcodes.LAX_ABS];
-            var cycles = lax(bus.Object, registers.Object);
+            var lax = Instructions[Opcodes.LAX_ABS];
+            lax(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -87,16 +84,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xde) // high address (at 10 + 5 + 1)
                 .Returns(0xaa); // value at location 0xdead
 
-            var lax = _instructions[Opcodes.LAX_IND_X];
-            var cycles = lax(bus.Object, registers.Object);
+            var lax = Instructions[Opcodes.LAX_IND_X];
+            lax(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -113,16 +108,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xde) // high address
                 .Returns(0xaa); // value at location final location
 
-            var lda = _instructions[Opcodes.LAX_IND_Y];
-            var cycles = lda(bus.Object, registers.Object);
+            var lda = Instructions[Opcodes.LAX_IND_Y];
+            lda(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead + 5), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -140,16 +133,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xee) // Dummy read on page cross
                 .Returns(0xaa);
 
-            var lda = _instructions[Opcodes.LAX_IND_Y];
-            var cycles = lda(bus.Object, registers.Object);
+            var lda = Instructions[Opcodes.LAX_IND_Y];
+            lda(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
             registers.Object.X.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -162,13 +153,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde).Returns(0x10);
 
-            var laxAbs = _instructions[Opcodes.LAX_ABS_Y];
-            var cycles = laxAbs(bus.Object, registers.Object);
+            var laxAbs = Instructions[Opcodes.LAX_ABS_Y];
+            laxAbs(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
             bus.Verify(b => b.Read(0xdead + 15));
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -185,13 +175,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
                 .Returns(0xee) // Dummy read on page cross
                 .Returns(0x10);
 
-            var laxAbs = _instructions[Opcodes.LAX_ABS_Y];
-            var cycles = laxAbs(bus.Object, registers.Object);
+            var laxAbs = Instructions[Opcodes.LAX_ABS_Y];
+            laxAbs(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x10);
             registers.Verify(r => r.SetNegativeFlag(false));
             registers.Verify(r => r.SetZeroFlag(false));
             bus.Verify(b => b.Read(0x00ff + 15));
-            cycles.Should().Be(5);
         }
     }
 }

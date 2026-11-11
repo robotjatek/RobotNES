@@ -7,15 +7,14 @@ namespace NESCore.CPU
     {
         private readonly IBUS _bus;
         private readonly IRegisters _registers;
-        private readonly IReadOnlyList<Func<IBUS, IRegisters, byte>> _instructions;
+        private readonly IReadOnlyList<Action<IBUS, IRegisters>> _instructions;
         private readonly ILogger _logger;
-        private int _cycles;
         private bool _nmi;
 
         private bool _dma;
         private byte _dmaCpuPage;
 
-        public Cpu(IBUS bus, IRegisters registers, IReadOnlyList<Func<IBUS, IRegisters, byte>> instructions,
+        public Cpu(IBUS bus, IRegisters registers, IReadOnlyList<Action<IBUS, IRegisters>> instructions,
             ILogger logger)
         {
             _logger = logger;
@@ -36,16 +35,18 @@ namespace NESCore.CPU
             _dmaCpuPage = cpuPage;
         }
 
-        public uint RunInstruction()
+        public void RunInstruction()
         {
             if (_nmi)
             {
-                return DoNmi();
+                DoNmi();
+                return;
             }
 
             if (_dma)
             {
-                return DoDma(_dmaCpuPage);
+                DoDma(_dmaCpuPage);
+                return;
             }
 
             var instructionCode = Fetch();
@@ -56,10 +57,7 @@ namespace NESCore.CPU
                 _logger.Debug("{RegistersPc:X4} {InstructionCode:X2}", _registers.PC - 1, instructionCode);
             }
 
-            var instructionCycles = instruction(_bus, _registers);
-            _cycles += instructionCycles;
-
-            return instructionCycles;
+            instruction(_bus, _registers);
         }
 
         private byte Fetch()
@@ -81,7 +79,7 @@ namespace NESCore.CPU
             _bus.Write((ushort)(0x100 | _registers.SP--), value);
         }
 
-        private byte DoNmi()
+        private void DoNmi()
         {
             _bus.Read(_registers.PC);
             _bus.Read(_registers.PC);
@@ -93,14 +91,14 @@ namespace NESCore.CPU
             var addressHigh = (ushort)(_bus.Read(0xfffb) << 8);
             _registers.PC = (ushort)(addressHigh | addressLow);
             _nmi = false;
-            return 7;
         }
 
-        private uint DoDma(byte cpuPage)
+        private void DoDma(byte cpuPage)
         {
             _dma = false;
+            var startedOnOdd = _bus.Cycles % 2 == 1;
             _bus.Read(_registers.PC);
-            if (_cycles % 2 == 1)
+            if (startedOnOdd)
             {
                 _bus.Read(_registers.PC);
             }
@@ -110,9 +108,6 @@ namespace NESCore.CPU
             {
                 _bus.PPUOamDMA(_bus.Read(i));
             }
-
-            var penalty = _cycles % 2 == 1 ? 1 : 0;
-            return (uint)(513 + penalty);
         }
     }
 }

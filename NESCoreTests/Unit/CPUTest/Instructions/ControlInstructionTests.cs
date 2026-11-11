@@ -13,11 +13,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
-            var jmpAbs = _instructions[Opcodes.JMP_ABS];
-            var cycles = jmpAbs(bus.Object, registers.Object);
+            var jmpAbs = Instructions[Opcodes.JMP_ABS];
+            jmpAbs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xdead);
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -28,14 +27,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde).Returns(0xef).Returns(0xbe);
 
-            var jmp = _instructions[Opcodes.JMP_INDIRECT];
-            var cycles = jmp(bus.Object, registers.Object);
+            var jmp = Instructions[Opcodes.JMP_INDIRECT];
+            jmp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(0xdead + 1), Times.Once());
             registers.Object.PC.Should().Be(0xbeef);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -46,14 +43,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0xde).Returns(0xef).Returns(0xbe);
 
-            var jmp = _instructions[Opcodes.JMP_INDIRECT];
-            var cycles = jmp(bus.Object, registers.Object);
+            var jmp = Instructions[Opcodes.JMP_INDIRECT];
+            jmp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdeff), Times.Once());
             bus.Verify(b => b.Read(0xde00), Times.Once());
             registers.Object.PC.Should().Be(0xbeef);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -68,15 +63,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0x00).Returns(0xde);
 
-            var jsrAbs = _instructions[Opcodes.JSR_ABS];
-            var cycles = jsrAbs(bus.Object, registers.Object);
+            var jsrAbs = Instructions[Opcodes.JSR_ABS];
+            jsrAbs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0x100 | 0xfe, 0xd0));
             bus.Verify(b => b.Write(0x100 | 0xfd, 0x01));
 
             registers.Object.PC.Should().Be(0xdead);
             registers.Object.STATUS.Should().Be(0);
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -90,13 +84,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Setup(b => b.Read(0x100 | 0xff)).Returns(0xde);
             bus.Setup(b => b.Read(0x100 | 0xff - 1)).Returns(0xad);
 
-            var sut = _instructions[Opcodes.RTS];
-            var cycles = sut(bus.Object, registers.Object);
+            var sut = Instructions[Opcodes.RTS];
+            sut(bus.Object, registers.Object);
 
             registers.Object.PC.Should().Be(0xdead + 1);
             registers.Object.SP.Should().Be(0xFF);
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -113,13 +105,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xad) // low address byte
                 .Returns(0xde); // high address byte
 
-            var rti = _instructions[Opcodes.RTI];
-            var cycles = rti(bus.Object, registers.Object);
+            var rti = Instructions[Opcodes.RTI];
+            rti(bus.Object, registers.Object);
             registers.Object.PC.Should().Be(0xdead);
             registers.Object.STATUS.Should().Be(0xAA);
             registers.Object.SP.Should().Be(3);
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -137,13 +127,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.STATUS = 0xee;
             registers.Object.PC = 0xdead;
 
-            var brk = _instructions[Opcodes.BRK];
+            var brk = Instructions[Opcodes.BRK];
 
-            var cycles = brk(bus.Object, registers.Object);
+            brk(bus.Object, registers.Object);
 
             writeArgs.Should().ContainInConsecutiveOrder(new byte[] { 0xde, 0xad, 0xee | FlagPositions.BREAK });
             registers.Object.PC.Should().Be(0xbeef);
-            cycles.Should().Be(7);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace NESCoreTests
         protected ILogger _logger = Mock.Of<ILogger>();
         protected Mock<ICartridge> _mockCartridge = new();
         protected IPPU _mockPPU = Mock.Of<IPPU>();
-        protected Func<IBUS, IRegisters, byte>[] _instructions = new Func<IBUS, IRegisters, byte>[255];
+        protected Action<IBUS, IRegisters>[] _instructions = new Action<IBUS, IRegisters>[255];
         protected Mock<IRegisters> _registers = new();
         protected Mock<IPPURegisters> _ppuRegisters = new();
         protected Mock<IPPUMemory> _ppuMemory = new();
