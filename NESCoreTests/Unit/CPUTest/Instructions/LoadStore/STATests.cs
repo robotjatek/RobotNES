@@ -180,7 +180,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Write(0xdead + 5, 0xaa));
 
-            cycles.Should().Be(5);
+            cycles.Should().Be(6);
         }
 
         [Fact]

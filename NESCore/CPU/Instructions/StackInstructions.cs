@@ -15,9 +15,10 @@
             Push8(bus, registers, (byte)(registers.STATUS | FlagPositions.BREAK | 0x20));
             return 3;
         }
-
+        
         private static byte PLA(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             bus.Read((ushort)(0x100 | registers.SP));
             var value = Pop8(bus, registers);
             registers.A = value;
@@ -28,6 +29,7 @@
 
         private static byte PLP(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             bus.Read((ushort)(0x100 | registers.SP));
             var value = (byte)(Pop8(bus, registers) & ~FlagPositions.BREAK);
             registers.STATUS = value;

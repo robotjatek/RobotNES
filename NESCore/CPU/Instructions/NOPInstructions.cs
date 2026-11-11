@@ -4,6 +4,7 @@
     {
         private static byte NOP(IBUS bus, IRegisters registers)
         {
+            IdleCycle(bus, registers);
             return 2;
         }
 

@@ -44,34 +44,43 @@ namespace NESCore
 
         public byte Read(ushort address)
         {
+            _ppu.Run(2);
+            byte data;
+            
             if (IsInInternalMemory(address))
             {
-                return InternalMemoryRead(address);
+                data = InternalMemoryRead(address);
             }
             else if (IsInCartridgeArea(address))
             {
-                return _busData.Drive(_cartridge.TryRead(address, out var value) ? value : _busData.Value);
+                data = _busData.Drive(_cartridge.TryRead(address, out var value) ? value : _busData.Value);
             }
             else if (IsInPpuArea(address))
             {
-                return PpuRead(address);
+                data = PpuRead(address);
             }
             else if (address == 0x4016)
             {
-                return ReadController(_controller1.ReadNextButton());
+                data = ReadController(_controller1.ReadNextButton());
             }
             else if (address == 0x4017)
             {
-                return ReadController(_controller2.ReadNextButton());
+                data = ReadController(_controller2.ReadNextButton());
             }
             else if (IsInApuArea(address))
             {
                 _apu.Read(address); // ignore apu reads
-                return _busData.Value; // return openbus
+                data = _busData.Value; // return openbus
+            }
+            else
+            {
+                _logger.Warning("Unsupported read from 0x{Address:X4}", address);
+                data = _busData.Value;
             }
 
-            _logger.Warning("Unsupported read from 0x{Address:X4}", address);
-            return _busData.Value;
+
+            _ppu.Run(1);
+            return data;
         }
 
         private byte ReadController(byte buttons)
@@ -85,7 +94,7 @@ namespace NESCore
         public void Write(ushort address, byte data)
         {
             _busData.Drive(data);
-            
+            _ppu.Run(2);
             if (IsInInternalMemory(address))
             {
                 InternalMemoryWrite(address, data);
@@ -121,11 +130,15 @@ namespace NESCore
                 _logger.Warning("Unsupported write to 0x{Address:X4}", address);
                 throw new NotImplementedException();
             }
+            _ppu.Run(1);
         }
         
         public void PPUOamDMA(byte value)
         {
+            _busData.Drive(value);
+            _ppu.Run(2);
             _ppu.OamDMAWrite(value);
+            _ppu.Run(1);
         }
 
         private static bool IsInInternalMemory(ushort address)

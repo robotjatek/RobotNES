@@ -83,10 +83,15 @@ namespace NESCore.CPU
 
         private byte DoNmi()
         {
+            _bus.Read(_registers.PC);
+            _bus.Read(_registers.PC);
+            
             Push16(_registers.PC);
             Push8(_registers.STATUS);
             _registers.SetInterruptDisableFlag(true);
-            _registers.PC = (ushort)((_bus.Read(0xFFFB) << 8) | _bus.Read(0xFFFA));
+            var addressLow = (ushort)_bus.Read(0xfffa);
+            var addressHigh = (ushort)(_bus.Read(0xfffb) << 8);
+            _registers.PC = (ushort)(addressHigh | addressLow);
             _nmi = false;
             return 7;
         }
@@ -94,6 +99,12 @@ namespace NESCore.CPU
         private uint DoDma(byte cpuPage)
         {
             _dma = false;
+            _bus.Read(_registers.PC);
+            if (_cycles % 2 == 1)
+            {
+                _bus.Read(_registers.PC);
+            }
+            
             var address = (ushort)(cpuPage << 8);
             for (var i = address; i < address + 0x100; i++)
             {

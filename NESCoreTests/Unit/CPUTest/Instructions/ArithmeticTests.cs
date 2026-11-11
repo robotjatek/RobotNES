@@ -208,7 +208,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_bug_0x80_plus_0x7f_should_set_the_overflow_flag()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x80);
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 0x7f;
@@ -232,7 +232,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_bug_adc_does_not_set_zero_flag_correctly()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0x80);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0x80);
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
             registers.Object.A = 0x7f;
@@ -282,7 +282,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
                 .Returns(10);
 
@@ -346,7 +346,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -367,7 +367,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -412,7 +412,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ADC_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -724,7 +724,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
                 .Returns(0xad);
 
@@ -744,7 +744,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ZERO_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)
                 .Returns(0xad);
 
@@ -766,7 +766,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ZERO_X_wraps()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0xad);
 
@@ -787,7 +787,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(0xad);
@@ -808,7 +808,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(0xad);
@@ -830,7 +830,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ABS_X_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
                 .Returns(0xad);
@@ -852,7 +852,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(0xad);
@@ -874,7 +874,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CMP_ABS_Y_page_cross_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xff)
                 .Returns(0x00)
                 .Returns(0xad);
@@ -1006,7 +1006,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CPX_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
                 .Returns(10);
 
@@ -1027,7 +1027,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CPX_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -1159,7 +1159,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CPY_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0x10)
                 .Returns(10);
 
@@ -1180,7 +1180,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void CPY_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(10);
@@ -1394,7 +1394,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SBC_CARRY_BUG()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xec);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xec);
 
             var registers = new Mock<IRegisters>();
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
@@ -1796,7 +1796,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var dcp = _instructions[Opcodes.DCP_ABS_X];
             var cycles = dcp(bus.Object, registers.Object);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
@@ -1822,7 +1822,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var dcp = _instructions[Opcodes.DCP_ABS_Y];
             var cycles = dcp(bus.Object, registers.Object);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
@@ -1853,7 +1853,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 14));
 
@@ -1959,7 +1959,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -1971,7 +1971,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 16));
 
@@ -2015,7 +2015,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -2030,7 +2030,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             registers.Verify(r => r.SetZeroFlag(false));
@@ -2044,7 +2044,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void ISB_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(15); //value at 0xdead
@@ -2059,7 +2059,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             registers.Verify(r => r.SetZeroFlag(false));
@@ -2102,7 +2102,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(8); //value at 0xad
 
@@ -2124,7 +2124,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2165,7 +2165,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 16));
 
@@ -2200,7 +2200,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2214,7 +2214,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             cycles.Should().Be(7);
@@ -2224,7 +2224,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SLO_ABS_X()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2238,7 +2238,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             cycles.Should().Be(7);
@@ -2277,7 +2277,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(8); //value at 0xad
 
@@ -2299,7 +2299,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_ABS()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2328,7 +2328,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
 
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(10)  // param
                 .Returns(0xad) //low address
                 .Returns(0xde) // high address
@@ -2340,7 +2340,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 16));
 
@@ -2375,7 +2375,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void RLA_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2389,7 +2389,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             cycles.Should().Be(7);
@@ -2413,7 +2413,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
 
             cycles.Should().Be(7);
@@ -2452,7 +2452,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(8); //value at 0xad
 
@@ -2515,7 +2515,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 4));
 
@@ -2550,7 +2550,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void SRE_ABS_Y()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>()))
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>()))
                 .Returns(0xad)
                 .Returns(0xde)
                 .Returns(8); //value at 0xdead
@@ -2564,7 +2564,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
 
             cycles.Should().Be(7);
@@ -2588,7 +2588,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
 
             cycles.Should().Be(7);
@@ -2690,7 +2690,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
-            bus.Verify(b => b.Read(0xdead + 5), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 4));
 
@@ -2739,7 +2739,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
 
             cycles.Should().Be(7);
@@ -2763,7 +2763,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var cycles = rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
-            bus.Verify(b => b.Read(0xdead + 10), Times.Once());
+            bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
 
             cycles.Should().Be(7);
