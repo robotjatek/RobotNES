@@ -44,7 +44,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_1A];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -58,7 +58,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_3A];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -72,7 +72,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_5A];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -86,7 +86,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_7A];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -100,7 +100,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_DA];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -114,7 +114,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var nop = _instructions[Opcodes.NOP_FA];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Never());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -123,13 +123,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_IMM_80()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(30);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
 
             var registers = new Mock<IRegisters>();
 
             var nop = _instructions[Opcodes.NOP_IMM_80];
             var cycles = nop(bus.Object, registers.Object);
-            bus.Verify(b => b.Read(It.IsAny<UInt16>()), Times.Once());
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
 
             cycles.Should().Be(2);
         }
@@ -186,7 +186,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_0x04()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
 
@@ -201,7 +201,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_0x44()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
 
@@ -216,7 +216,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_0x64()
         {
             var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<UInt16>())).Returns(0xde);
+            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
 
@@ -231,7 +231,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0x14()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -248,7 +248,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0x34()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -265,7 +265,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0x54()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -282,7 +282,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0x74()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -299,7 +299,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0xD4()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -316,7 +316,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ZERO_X_0xF4()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -333,7 +333,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_0x0C()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
 
@@ -348,7 +348,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x1C()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -365,7 +365,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x1C_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -382,7 +382,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x3C()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -399,7 +399,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x3C_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -416,7 +416,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x5C()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -433,7 +433,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x5C_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -450,7 +450,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x7C()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -467,7 +467,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0x7C_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -484,7 +484,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0xDC()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -501,7 +501,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0xDC_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -518,7 +518,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0xFC()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xad).Returns(0xde);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
@@ -535,7 +535,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
         public void NOP_ABS_X_0xFC_penalty()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0xff).Returns(0x00);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xff).Returns(0x00);
 
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
