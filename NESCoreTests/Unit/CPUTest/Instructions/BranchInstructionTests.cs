@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class BranchInstructionTests : InstructionTestBase
+    public class BranchInstructionTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public BranchInstructionTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void BCC_doesNotTakeTheBranch()
         {
@@ -19,8 +15,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcc = _instructions[Opcodes.BCC];
-            var cycles = bcc(bus.Object, registers.Object);
+            var bcc = Instructions[Opcodes.BCC];
+            bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -36,8 +32,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -50,8 +44,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = _instructions[Opcodes.BCC];
-            var cycles = bcc(bus.Object, registers.Object);
+            var bcc = Instructions[Opcodes.BCC];
+            bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -67,8 +61,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -81,8 +73,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = _instructions[Opcodes.BCC];
-            var cycles = bcc(bus.Object, registers.Object);
+            var bcc = Instructions[Opcodes.BCC]; 
+            bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -98,8 +90,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -112,8 +102,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = _instructions[Opcodes.BCC];
-            var cycles = bcc(bus.Object, registers.Object);
+            var bcc = Instructions[Opcodes.BCC];
+            bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -129,8 +119,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -143,8 +131,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var bcc = _instructions[Opcodes.BCC];
-            var cycles = bcc(bus.Object, registers.Object);
+            var bcc = Instructions[Opcodes.BCC];
+            bcc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -160,8 +148,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -172,8 +158,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var bcs = _instructions[Opcodes.BCS];
-            var cycles = bcs(bus.Object, registers.Object);
+            var bcs = Instructions[Opcodes.BCS];
+            bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -189,8 +175,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -203,8 +187,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = _instructions[Opcodes.BCS];
-            var cycles = bcs(bus.Object, registers.Object);
+            var bcs = Instructions[Opcodes.BCS];
+            bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -220,8 +204,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -234,8 +216,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = _instructions[Opcodes.BCS];
-            var cycles = bcs(bus.Object, registers.Object);
+            var bcs = Instructions[Opcodes.BCS];
+            bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -251,8 +233,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -265,8 +245,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = _instructions[Opcodes.BCS];
-            var cycles = bcs(bus.Object, registers.Object);
+            var bcs = Instructions[Opcodes.BCS];
+            bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -282,8 +262,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -296,8 +274,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var bcs = _instructions[Opcodes.BCS];
-            var cycles = bcs(bus.Object, registers.Object);
+            var bcs = Instructions[Opcodes.BCS];
+            bcs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -313,8 +291,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -325,8 +301,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var beq = _instructions[Opcodes.BEQ];
-            var cycles = beq(bus.Object, registers.Object);
+            var beq = Instructions[Opcodes.BEQ];
+            beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -342,8 +318,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -356,8 +330,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = _instructions[Opcodes.BEQ];
-            var cycles = beq(bus.Object, registers.Object);
+            var beq = Instructions[Opcodes.BEQ];
+            beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -373,8 +347,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -387,8 +359,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = _instructions[Opcodes.BEQ];
-            var cycles = beq(bus.Object, registers.Object);
+            var beq = Instructions[Opcodes.BEQ];
+            beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -404,8 +376,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -418,8 +388,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = _instructions[Opcodes.BEQ];
-            var cycles = beq(bus.Object, registers.Object);
+            var beq = Instructions[Opcodes.BEQ];
+            beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -435,8 +405,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -449,8 +417,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var beq = _instructions[Opcodes.BEQ];
-            var cycles = beq(bus.Object, registers.Object);
+            var beq = Instructions[Opcodes.BEQ];
+            beq(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -466,8 +434,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -479,8 +445,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bmi = _instructions[Opcodes.BMI];
-            var cycles = bmi(bus.Object, registers.Object);
+            var bmi = Instructions[Opcodes.BMI];
+            bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -496,8 +462,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -510,8 +474,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = _instructions[Opcodes.BMI];
-            var cycles = bmi(bus.Object, registers.Object);
+            var bmi = Instructions[Opcodes.BMI];
+            bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -527,8 +491,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -541,8 +503,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = _instructions[Opcodes.BMI];
-            var cycles = bmi(bus.Object, registers.Object);
+            var bmi = Instructions[Opcodes.BMI];
+            bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -558,8 +520,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -572,8 +532,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = _instructions[Opcodes.BMI];
-            var cycles = bmi(bus.Object, registers.Object);
+            var bmi = Instructions[Opcodes.BMI];
+            bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -589,8 +549,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -603,8 +561,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bmi = _instructions[Opcodes.BMI];
-            var cycles = bmi(bus.Object, registers.Object);
+            var bmi = Instructions[Opcodes.BMI];
+            bmi(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -620,8 +578,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -633,8 +589,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetZeroFlag()).Returns(true);
 
-            var bne = _instructions[Opcodes.BNE];
-            var cycles = bne(bus.Object, registers.Object);
+            var bne = Instructions[Opcodes.BNE];
+            bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -650,8 +606,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -664,8 +618,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = _instructions[Opcodes.BNE];
-            var cycles = bne(bus.Object, registers.Object);
+            var bne = Instructions[Opcodes.BNE];
+            bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -681,8 +635,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -695,8 +647,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = _instructions[Opcodes.BNE];
-            var cycles = bne(bus.Object, registers.Object);
+            var bne = Instructions[Opcodes.BNE];
+            bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -712,8 +664,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -726,8 +676,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = _instructions[Opcodes.BNE];
-            var cycles = bne(bus.Object, registers.Object);
+            var bne = Instructions[Opcodes.BNE];
+            bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -743,8 +693,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -757,8 +705,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
 
-            var bne = _instructions[Opcodes.BNE];
-            var cycles = bne(bus.Object, registers.Object);
+            var bne = Instructions[Opcodes.BNE];
+            bne(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -774,8 +722,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -787,8 +733,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetNegativeFlag()).Returns(true);
 
-            var bpl = _instructions[Opcodes.BPL];
-            var cycles = bpl(bus.Object, registers.Object);
+            var bpl = Instructions[Opcodes.BPL];
+            bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -804,8 +750,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -818,8 +762,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = _instructions[Opcodes.BPL];
-            var cycles = bpl(bus.Object, registers.Object);
+            var bpl = Instructions[Opcodes.BPL];
+            bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -835,8 +779,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -849,8 +791,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = _instructions[Opcodes.BPL];
-            var cycles = bpl(bus.Object, registers.Object);
+            var bpl = Instructions[Opcodes.BPL];
+            bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -866,8 +808,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -880,8 +820,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = _instructions[Opcodes.BPL];
-            var cycles = bpl(bus.Object, registers.Object);
+            var bpl = Instructions[Opcodes.BPL];
+            bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -897,8 +837,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -911,8 +849,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var bpl = _instructions[Opcodes.BPL];
-            var cycles = bpl(bus.Object, registers.Object);
+            var bpl = Instructions[Opcodes.BPL];
+            bpl(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -928,8 +866,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -941,8 +877,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvc = _instructions[Opcodes.BVC];
-            var cycles = bvc(bus.Object, registers.Object);
+            var bvc = Instructions[Opcodes.BVC];
+            bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -958,8 +894,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -972,8 +906,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = _instructions[Opcodes.BVC];
-            var cycles = bvc(bus.Object, registers.Object);
+            var bvc = Instructions[Opcodes.BVC];
+            bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -989,8 +923,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1003,8 +935,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = _instructions[Opcodes.BVC];
-            var cycles = bvc(bus.Object, registers.Object);
+            var bvc = Instructions[Opcodes.BVC];
+            bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -1020,8 +952,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1034,8 +964,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = _instructions[Opcodes.BVC];
-            var cycles = bvc(bus.Object, registers.Object);
+            var bvc = Instructions[Opcodes.BVC];
+            bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -1051,8 +981,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1065,8 +993,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var bvc = _instructions[Opcodes.BVC];
-            var cycles = bvc(bus.Object, registers.Object);
+            var bvc = Instructions[Opcodes.BVC];
+            bvc(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -1082,8 +1010,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1094,8 +1020,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.PC = 0;
 
-            var bvs = _instructions[Opcodes.BVS];
-            var cycles = bvs(bus.Object, registers.Object);
+            var bvs = Instructions[Opcodes.BVS];
+            bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 1);
 
@@ -1111,8 +1037,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1125,8 +1049,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = _instructions[Opcodes.BVS];
-            var cycles = bvs(bus.Object, registers.Object);
+            var bvs = Instructions[Opcodes.BVS];
+            bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 11);
 
@@ -1142,8 +1066,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1156,8 +1078,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 10;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = _instructions[Opcodes.BVS];
-            var cycles = bvs(bus.Object, registers.Object);
+            var bvs = Instructions[Opcodes.BVS];
+            bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 2);
 
@@ -1173,8 +1095,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1187,8 +1107,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0xfe;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = _instructions[Opcodes.BVS];
-            var cycles = bvs(bus.Object, registers.Object);
+            var bvs = Instructions[Opcodes.BVS];
+            bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 265);
 
@@ -1204,8 +1124,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1218,8 +1136,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.PC = 0x100;
             registers.Setup(r => r.GetOverflowFlag()).Returns(true);
 
-            var bvs = _instructions[Opcodes.BVS];
-            var cycles = bvs(bus.Object, registers.Object);
+            var bvs = Instructions[Opcodes.BVS];
+            bvs(bus.Object, registers.Object);
 
             registers.VerifySet(r => r.PC = 0xf4);
 
@@ -1235,8 +1153,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
     }
 }

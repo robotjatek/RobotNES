@@ -5,19 +5,15 @@ using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
-    public class NOPTests : InstructionTestBase
+    public class NopTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public NOPTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void NOP()
         {
             var bus = new Mock<IBUS>();
             var registers = new Mock<IRegisters>();
-            var nop = _instructions[Opcodes.NOP];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP];
+            nop(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Never());
             registers.Verify(r => r.SetCarryFlag(false), Times.Never());
@@ -31,8 +27,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -42,11 +36,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_1A];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_1A];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -56,11 +48,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_3A];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_3A];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -70,11 +60,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_5A];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_5A];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -84,11 +72,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_7A];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_7A];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -98,11 +84,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_DA];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_DA];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -112,11 +96,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_FA];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_FA];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -127,11 +109,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_IMM_80];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_IMM_80];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -140,10 +120,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
             var registers = new Mock<IRegisters>();
-            var nop = _instructions[Opcodes.NOP_IMM_82];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_IMM_82];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-            cycles.Should().Be(2);
         }
         
         [Fact]
@@ -152,10 +131,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
             var registers = new Mock<IRegisters>();
-            var nop = _instructions[Opcodes.NOP_IMM_89];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_IMM_89];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-            cycles.Should().Be(2);
         }
         
         [Fact]
@@ -164,10 +142,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
             var registers = new Mock<IRegisters>();
-            var nop = _instructions[Opcodes.NOP_IMM_C2];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_IMM_C2];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-            cycles.Should().Be(2);
         }
         [Fact]
         public void NOP_IMM_E2()
@@ -175,10 +152,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(30);
             var registers = new Mock<IRegisters>();
-            var nop = _instructions[Opcodes.NOP_IMM_E2];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_IMM_E2];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Once());
-            cycles.Should().Be(2);
         }
         
 
@@ -190,11 +166,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_ZERO_04];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_04];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xde), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -205,11 +179,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_ZERO_44];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_44];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xde), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -220,11 +192,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_ZERO_64];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_64];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xde), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -237,11 +207,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_14];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_14];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -254,11 +222,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_34];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_34];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -271,11 +237,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_54];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_54];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -288,11 +252,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_74];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_74];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -305,11 +267,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_D4];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_D4];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -322,11 +282,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ZERO_X_F4];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ZERO_X_F4];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xad + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -337,11 +295,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             var registers = new Mock<IRegisters>();
 
-            var nop = _instructions[Opcodes.NOP_ABS_0C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_0C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -354,11 +310,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_1C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_1C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -371,11 +325,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_1C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_1C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -388,11 +340,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_3C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_3C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -405,11 +355,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_3C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_3C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -422,11 +370,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_5C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_5C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -439,11 +385,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_5C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_5C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -456,11 +400,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_7C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_7C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -473,11 +415,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_7C];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_7C];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -490,11 +430,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_DC];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_DC];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -507,11 +445,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_DC];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_DC];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -524,11 +460,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_FC];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_FC];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -541,11 +475,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var nop = _instructions[Opcodes.NOP_ABS_X_FC];
-            var cycles = nop(bus.Object, registers.Object);
+            var nop = Instructions[Opcodes.NOP_ABS_X_FC];
+            nop(bus.Object, registers.Object);
             bus.Verify(b => b.Read(0xff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
     }
 }

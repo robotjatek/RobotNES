@@ -11,5 +11,6 @@
         event OAMDMAEventHandler OAMDMAEvent;
         
         void PPUOamDMA(byte value);
+        uint Cycles { get; }
     }
 }

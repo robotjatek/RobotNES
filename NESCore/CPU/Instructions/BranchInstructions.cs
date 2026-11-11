@@ -1,92 +1,63 @@
 ﻿namespace NESCore.CPU.Instructions
 {
-    public partial class CPUInstructions
+    public partial class CpuInstructions
     {
-        private static byte BCC(IBUS bus, IRegisters registers)
+        private static void BCC(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetCarryFlag() == false;
-            });
+            BranchInstruction(bus, registers, r => !r.GetCarryFlag());
         }
 
-        private static byte BEQ(IBUS bus, IRegisters registers)
+        private static void BEQ(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetZeroFlag() == true;
-            });
+            BranchInstruction(bus, registers, r => r.GetZeroFlag());
         }
 
-        private static byte BNE(IBUS bus, IRegisters registers)
+        private static void BNE(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetZeroFlag() == false;
-            });
+            BranchInstruction(bus, registers, r => !r.GetZeroFlag());
         }
 
-        private static byte BCS(IBUS bus, IRegisters registers)
+        private static void BCS(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetCarryFlag() == true;
-            });
+            BranchInstruction(bus, registers, r => r.GetCarryFlag());
         }
 
-        private static byte BVC(IBUS bus, IRegisters registers)
+        private static void BVC(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetOverflowFlag() == false;
-            });
+            BranchInstruction(bus, registers, r => !r.GetOverflowFlag());
         }
 
-        private static byte BVS(IBUS bus, IRegisters registers)
+        private static void BVS(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetOverflowFlag() == true;
-            });
+            BranchInstruction(bus, registers, r => r.GetOverflowFlag());
         }
 
-        private static byte BPL(IBUS bus, IRegisters registers)
+        private static void BPL(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetNegativeFlag() == false;
-            });
+            BranchInstruction(bus, registers, r => !r.GetNegativeFlag());
         }
 
-        private static byte BMI(IBUS bus, IRegisters registers)
+        private static void BMI(IBUS bus, IRegisters registers)
         {
-            return BranchInstruction(bus, registers, (r) =>
-            {
-                return r.GetNegativeFlag() == true;
-            });
+            BranchInstruction(bus, registers, r => r.GetNegativeFlag());
         }
 
-        private static byte BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
+        private static void BranchInstruction(IBUS bus, IRegisters registers, Func<IRegisters, bool> condition)
         {
-            byte cycles = 2;
             var offset = (sbyte)Fetch(bus, registers);
             if (condition(registers))
             {
                 var oldAddress = registers.PC;
                 registers.PC = (ushort)(registers.PC + offset);
-                cycles++;
 
                 var dummyAddress = (ushort)(oldAddress & 0xff00 | (registers.PC & 0x00ff));
                 bus.Read(dummyAddress);
                 
                 if ((oldAddress & 0xff00) != (registers.PC & 0xff00))
                 {
-                    cycles++;
                     bus.Read(registers.PC);
                 }
             }
-
-            return cycles;
         }
     }
 }

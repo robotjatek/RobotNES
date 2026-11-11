@@ -14,12 +14,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 4;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(8);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -30,13 +28,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x80;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -48,13 +44,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x7F;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0xFE);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -66,14 +60,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(4);
             (registers.Object.A & 0x1).Should().Be(0);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -85,14 +77,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(5);
             (registers.Object.A & 0x1).Should().Be(1);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -104,14 +94,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x6e;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0xdd);
             (registers.Object.A & 0x1).Should().NotBe(0);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -122,13 +110,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x4;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x8);
             registers.Verify(r => r.SetZeroFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -139,13 +125,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x80;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -156,13 +140,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x20;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x40);
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -174,28 +156,24 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x40;
 
-            var rol = _instructions[Opcodes.ROL_A];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_A];
+            rol(bus.Object, registers.Object);
 
             (registers.Object.A & 0x80).Should().NotBe(0);
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
         public void ROL_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0x10).Returns(4);
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
-            var rol = _instructions[Opcodes.ROL_ZERO];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_ZERO];
+            rol(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0x10, 8));
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -214,12 +192,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var writes = new List<byte>();
             bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
             
-            var rol = _instructions[Opcodes.ROL_ZERO_X];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_ZERO_X];
+            rol(bus.Object, registers.Object);
             addresses.Should().Equal(0x15, 0x15); // Two writes to the same address (one is a dummy write)
             writes.Should().Equal(4, 8); // the first write is the original value
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -238,12 +214,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var writes = new List<byte>();
             bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
             
-            var rol = _instructions[Opcodes.ROL_ZERO_X];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_ZERO_X];
+            rol(bus.Object, registers.Object);
             addresses.Should().Equal(0x4, 0x4); // writes wrapped around
             writes.Should().Equal(4, 8); // first write is the original value, the second is the rotated
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -254,11 +228,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
-            var rol = _instructions[Opcodes.ROL_ABS];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_ABS];
+            rol(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead, 8));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -270,11 +242,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.X = 10;
 
-            var rol = _instructions[Opcodes.ROL_ABS_X];
-            var cycles = rol(bus.Object, registers.Object);
+            var rol = Instructions[Opcodes.ROL_ABS_X];
+            rol(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead + 10, 8));
-
-            cycles.Should().Be(7);
         }
     }
 }

@@ -16,38 +16,33 @@ namespace NESCore
         public event FrameBufferReadyEvent? FrameBufferReady;
         public bool Running => _running;
 
-        private volatile bool _running = false;
-        private ulong _cycle = 0;
+        private volatile bool _running ;
 
         private readonly ILogger _logger;
-        private readonly ICartridge _cartridge;
         private readonly IBUS _bus;
         private readonly ICpu _cpu;
-        private readonly IMemory _memory;
         private readonly IPPU _ppu;
         private readonly IController _controller1;
-        private readonly IController _controller2;
-        private readonly IAPU _apu;
         private long _nextFrameTimestamp;
         private static readonly long FrameIntervalTicks = Stopwatch.Frequency / 60;
 
         public NesSystem(string cartridgePath, ILogger logger)
         {
             _logger = logger;
-            _cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
+            var cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
 
             _controller1 = new Controller(_logger);
-            _controller2 = new Controller(_logger);
-            _apu = new APU.APU(_logger);
+            IController controller2 = new Controller(_logger);
+            IAPU apu = new APU.APU(_logger);
 
-            _memory = new Memory();
-            _ppu = new PPU.Ppu(new PPURegisters(), new PpuMemory(_cartridge, _logger), _logger);
-            _bus = new Bus(_cartridge, _memory, _ppu, _controller1, _controller2, _apu, _logger);
+            IMemory memory = new Memory();
+            _ppu = new Ppu(new PPURegisters(), new PpuMemory(cartridge, _logger), _logger);
+            _bus = new Bus(cartridge, memory, _ppu, _controller1, controller2, apu, _logger);
 
             //TODO: Move this CPU creation block to a factory
-            var instructions = new CPUInstructions().InstructionSet;
+            var instructions = new CpuInstructions().InstructionSet;
             var registers = new Registers();
-            _cpu = new CPU.Cpu(_bus, registers, instructions, _logger);
+            _cpu = new Cpu(_bus, registers, instructions, _logger);
             _bus.OAMDMAEvent += _cpu.HandleDma;
 
             _ppu.NMIEvent += OnVBlank;
@@ -59,8 +54,7 @@ namespace NESCore
             _running = true;
             while (_running)
             {
-                var cycles = _cpu.RunInstruction();
-               // _ppu.Run(cycles * 3);
+                _cpu.RunInstruction();
             }
         }
 

@@ -14,12 +14,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 8;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(4);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -30,13 +28,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 1;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -47,13 +43,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 2;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(1);
             registers.Verify(r => r.SetCarryFlag(false));
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -64,14 +58,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0xFF;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x7F);
             registers.Verify(r => r.SetNegativeFlag(false));
             (registers.Object.A & 0x80).Should().Be(0);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -82,11 +74,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0xFF;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(false));
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -97,26 +87,22 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             registers.SetupAllProperties();
             registers.Object.A = 0x1;
 
-            var lsr = _instructions[Opcodes.LSR_A];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_A];
+            lsr(bus.Object, registers.Object);
             registers.Verify(r => r.SetZeroFlag(true));
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
         public void LSR_ZERO()
         {
             var bus = new Mock<IBUS>();
-            bus.SetupSequence(b => b.Read(It.IsAny<UInt16>())).Returns(0x10).Returns(4);
+            bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0x10).Returns(4);
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
-            var lsr = _instructions[Opcodes.LSR_ZERO];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_ZERO];
+            lsr(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0x10, 2));
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -135,12 +121,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var writes = new List<byte>();
             bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
 
-            var lsr = _instructions[Opcodes.LSR_ZERO_X];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_ZERO_X];
+            lsr(bus.Object, registers.Object);
             addresses.Should().Equal(0x15, 0x15); // two writes, one is a dummy
             writes.Should().Equal(4, 2); // first write is the original value (dummy write)
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -159,12 +143,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var writes = new List<byte>();
             bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
 
-            var lsr = _instructions[Opcodes.LSR_ZERO_X];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_ZERO_X];
+            lsr(bus.Object, registers.Object);
             addresses.Should().Equal(0x4, 0x4); // 2 writes to the same address one is a dummy write
             writes.Should().Equal(4, 2); // first write is the original value, the second is the shifted
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -175,11 +157,9 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var registers = new Mock<IRegisters>();
             registers.SetupAllProperties();
 
-            var lsr = _instructions[Opcodes.LSR_ABS];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_ABS];
+            lsr(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead, 2));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -198,14 +178,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.Shift
             var writes = new List<byte>();
             bus.Setup(b => b.Write(Capture.In(addresses), Capture.In(writes)));
 
-            var lsr = _instructions[Opcodes.LSR_ABS_X];
-            var cycles = lsr(bus.Object, registers.Object);
+            var lsr = Instructions[Opcodes.LSR_ABS_X];
+            lsr(bus.Object, registers.Object);
             bus.Verify(b => b.Write(0xdead + 10, 2));
             
             addresses.Should().Equal(0xdead + 10, 0xdead + 10);
             writes.Should().Equal(4, 2);
-
-            cycles.Should().Be(7);
         }
     }
 }

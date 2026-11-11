@@ -47,10 +47,10 @@ namespace NESCoreTests.Unit.CPUTest
             var writeArgs = new List<byte>();
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Write(It.IsAny<ushort>(), Capture.In(writeArgs)));
-            //NMI vector:
+            //NMI vector: 0xbeef
             bus.Setup(b => b.Read(0xfffb)).Returns(0xbe);
             bus.Setup(b => b.Read(0xfffa)).Returns(0xef);
-            //setup PC on startup:
+            //setup PC on startup: 0xdead
             bus.Setup(b => b.Read(0xfffd)).Returns(0xde);
             bus.Setup(b => b.Read(0xfffc)).Returns(0xad);
 
@@ -62,12 +62,24 @@ namespace NESCoreTests.Unit.CPUTest
             var cpu = new Cpu(bus.Object, registers, _instructions, _logger);
             
             cpu.HandleNmi();
-            var cycles = cpu.RunInstruction();
+            cpu.RunInstruction();
 
             writeArgs.Should().ContainInConsecutiveOrder(0xde, 0xad, 0xee);
             registers.PC.Should().Be(0xbeef);
             registers.GetInterruptDisableFlag().Should().BeTrue();
-            cycles.Should().Be(7);
+
+            // An NMI costs 7 cycles and all 7 of them are bus accesses:
+            // two dummy reads at the paused PC, the three stack pushes, then the NMI address pair.
+            bus.Verify(b => b.Read(0xdead), Times.Exactly(2), "the NMI pauses on two dummy reads at the current PC");
+            bus.Verify(b => b.Write(0x1fd, 0xde), Times.Once, "PCH has to be pushed first");
+            bus.Verify(b => b.Write(0x1fc, 0xad), Times.Once, "PCL has to be pushed second");
+            bus.Verify(b => b.Write(0x1fb, 0xee), Times.Once, "STATUS has to be pushed last");
+            bus.Verify(b => b.Read(0xfffa), Times.Once, "NMI vector");
+            bus.Verify(b => b.Read(0xfffb), Times.Once, "NMI vector");
+
+            // The 2 extra reads are from the constructor
+            bus.Verify(b => b.Read(It.IsAny<ushort>()), Times.Exactly(6));
+            bus.Verify(b => b.Write(It.IsAny<ushort>(), It.IsAny<byte>()), Times.Exactly(3));
         }
 
         [Fact]
@@ -106,45 +118,35 @@ namespace NESCoreTests.Unit.CPUTest
             bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
         }
 
-        [Fact]
-        public void DmaReportsTheFull513Cycles()
-        {
-            // DoDMA returned the cycle count as a byte, so 513 was
-            // truncated to 1. The PPU then advanced 3 cycles instead of 1539 for
-            // every OAM DMA, leaving it ~4.5 scanlines behind the CPU - which made
-            // sprite-0-hit scroll splits land several lines too low.
-            var bus = new Mock<IBUS>();
-            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
-
-            var cpu = new Cpu(bus.Object, _registers.Object, _instructions, _logger);
-
-            cpu.HandleDma(0);
-            var cycles = cpu.RunInstruction();
-
-            cycles.Should().Be(513);
-        }
-
         [Theory]
-        // NOP = 2 cycles (even) -> no penalty; JMP abs = 3 cycles (odd) -> +1 penalty.
-        [InlineData((byte)Opcodes.NOP, 2, 513)]
-        [InlineData((byte)Opcodes.JMP_ABS, 3, 514)]
-        public void DmaAddsTheAlignmentPenaltyForOddCycleInstructions(byte opcode, int instructionCycles, int expectedDmaCycles)
+        // NOP leaves the CPU on an even cycle and JMP on an odd one. Only the odd case pays the
+        // alignment penalty, and the 6502 spends it on one extra dummy read where it paused.
+        [InlineData((byte)Opcodes.NOP, 1)]
+        [InlineData((byte)Opcodes.JMP_ABS, 2)]
+        public void DmaAddsTheAlignmentPenaltyForOddCycleInstructions(byte opcode, int dummyReadsWhereItPaused)
         {
+            uint cycles = 0;
             var bus = new Mock<IBUS>();
-            // Reset vector $C000; the opcode fetch at $C000 returns the instruction.
-            bus.Setup(b => b.Read(0xfffd)).Returns(0xc0);
-            bus.Setup(b => b.Read(0xfffc)).Returns(0x00);
-            bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(opcode);
+            bus.SetupGet(b => b.Cycles).Returns(() => cycles);
+            bus.Setup(b => b.Read(It.IsAny<ushort>()))
+                .Returns((ushort address) => address switch
+                {
+                    // Reset vector $C000; the opcode fetch there returns the instruction.
+                    0xfffd => 0xc0,
+                    0xfffc => 0x00,
+                    _ => opcode
+                })
+                .Callback<ushort>(_ => cycles++);
 
             var registers = new Registers();
-            var cpu = new Cpu(bus.Object, registers, new NESCore.CPU.Instructions.CPUInstructions().InstructionSet, _logger);
+            var cpu = new Cpu(bus.Object, registers, new NESCore.CPU.Instructions.CpuInstructions().InstructionSet, _logger);
 
-            cpu.RunInstruction().Should().Be((uint)instructionCycles);
+            cpu.RunInstruction();
 
             cpu.HandleDma(0);
-            var cycles = cpu.RunInstruction();
+            cpu.RunInstruction();
 
-            cycles.Should().Be((uint)expectedDmaCycles);
+            bus.Verify(b => b.Read(registers.PC), Times.Exactly(dummyReadsWhereItPaused));
         }
     }
 }

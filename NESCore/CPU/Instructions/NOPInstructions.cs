@@ -1,41 +1,35 @@
 ﻿namespace NESCore.CPU.Instructions
 {
-    public partial class CPUInstructions
+    public partial class CpuInstructions
     {
-        private static byte NOP(IBUS bus, IRegisters registers)
+        private static void NOP(IBUS bus, IRegisters registers)
         {
             IdleCycle(bus, registers);
-            return 2;
         }
 
-        private static byte NOP_IMM(IBUS bus, IRegisters registers)
+        private static void NOP_IMM(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingImmediate(bus, registers);
-            return addressingResult.Cycles;
+            AddressingImmediate(bus, registers);
         }
 
-        private static byte NOP_ZERO(IBUS bus, IRegisters registers)
+        private static void NOP_ZERO(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingZero(bus, registers);
-            return addressingResult.Cycles;
+            AddressingZero(bus, registers);
         }
 
-        private static byte NOP_ZERO_X(IBUS bus, IRegisters registers)
-        {
-            var addressingResult = AddressingZeroX(bus, registers);
-            return addressingResult.Cycles;
+        private static void NOP_ZERO_X(IBUS bus, IRegisters registers)
+        { 
+            AddressingZeroX(bus, registers);
         }
 
-        private static byte NOP_ABS(IBUS bus, IRegisters registers)
+        private static void NOP_ABS(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsolute(bus, registers);
-            return addressingResult.Cycles;
+            AddressingAbsolute(bus, registers);
         }
 
-        private static byte NOP_ABS_X(IBUS bus, IRegisters registers)
+        private static void NOP_ABS_X(IBUS bus, IRegisters registers)
         {
-            var addressingResult = AddressingAbsoluteX(bus, registers);
-            return addressingResult.Cycles;
+            AddressingAbsoluteX(bus, registers);
         }
     }
 }

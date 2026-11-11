@@ -6,6 +6,6 @@
 
         void HandleDma(byte cpuPage);
 
-        uint RunInstruction();
+        void RunInstruction();
     }
 }

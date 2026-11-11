@@ -1,24 +1,21 @@
 ﻿namespace NESCore.CPU.Instructions
 {
-    public partial class CPUInstructions
+    public partial class CpuInstructions
     {
-        //Instructions for the CPU. All instructions return with the elapsed cycles.
+        //Instructions for the CPU
         //NOTE: inside the methods the PC points to the first parameter
-        public IReadOnlyList<Func<IBUS, IRegisters, byte>> InstructionSet { get; private set; }
+        public IReadOnlyList<Action<IBUS, IRegisters>> InstructionSet { get; private set; }
 
-        public CPUInstructions()
+        public CpuInstructions()
         {
-            var instructions = new Func<IBUS, IRegisters, byte>[256];
+            var instructions = new Action<IBUS, IRegisters>[256];
             InstructionSet = instructions;
 
             for (var i = 0; i < instructions.Length; i++)
             {
                 //Sets up the instructionset to throw on an unknown instruction
                 var opcode = (byte)i;
-                instructions[i] = (_, registers) =>
-                {
-                    throw new NotImplementedException($"Unknown instruction 0x{opcode:X2}@0x{registers.PC - 1:X4}");
-                };
+                instructions[i] = (_, registers) => throw new NotImplementedException($"Unknown instruction 0x{opcode:X2}@0x{registers.PC - 1:X4}");
             }
 
             instructions[Opcodes.BRK] = BRK;
@@ -312,11 +309,10 @@
             return bus.Read((ushort)(0x100 | sp));
         }
 
-        class AddressingResult
+        public record struct AddressingResult
         {
             public byte Value { get; set; }
             public ushort Address { get; init; }
-            public byte Cycles { get; init; }
             public ushort? DummyAddress { get; init; }
             public ushort? ReadModifyWriteDummyAddress  { get; init; }
 
@@ -353,7 +349,6 @@
             return new AddressingResult
             {
                 Value = Fetch(bus, registers),
-                Cycles = 2,
             };
         }
 
@@ -370,7 +365,6 @@
             return new AddressingResult
             {
                 Address = address,
-                Cycles = 4,
             };
         }
 
@@ -382,21 +376,18 @@
 
         private static AddressingResult AddressingAbsoluteXAddressOnly(IBUS bus, IRegisters registers)
         {
-            byte cycles = 4;
             var baseAddress = Fetch16(bus, registers);
             var page = baseAddress & 0xff00;
             var address = (ushort)(baseAddress + registers.X);
             ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
-                cycles++;
                 dummyAddress = (ushort)(page | (address & 0x00ff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles,
                 DummyAddress = dummyAddress,
                 ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };
@@ -410,21 +401,18 @@
 
         private static AddressingResult AddressingAbsoluteYAddressOnly(IBUS bus, IRegisters registers)
         {
-            byte cycles = 4;
             var baseAddress = Fetch16(bus, registers);
             var page = baseAddress & 0xff00;
             var address = (ushort)(baseAddress + registers.Y);
             ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
-                cycles++;
                 dummyAddress = (ushort)(page | (address & 0x00ff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles,
                 DummyAddress = dummyAddress,
                 ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };
@@ -442,7 +430,6 @@
             return new AddressingResult
             {
                 Address = address,
-                Cycles = 3,
             };
         }
 
@@ -459,7 +446,6 @@
             return new AddressingResult
             {
                 Address = address,
-                Cycles = 4,
                 DummyAddress = baseAddress
             };
         }
@@ -477,7 +463,6 @@
             return new AddressingResult
             {
                 Address = address,
-                Cycles = 4,
                 DummyAddress = baseAddress
             };
         }
@@ -501,14 +486,12 @@
             return new AddressingResult
             {
                 Address = address,
-                Cycles = 6,
                 DummyAddress = null
             };
         }
 
         private static AddressingResult AddressingIndirectYAddressOnly(IBUS bus, IRegisters registers)
         {
-            byte cycles = 5;
             var zeroPageAddress = Fetch(bus, registers);
             var lowAddress = bus.Read((ushort)(zeroPageAddress & 0xff));
             var highAddress = bus.Read((ushort)((zeroPageAddress + 1) & 0xff));
@@ -519,14 +502,12 @@
             ushort? dummyAddress = null;
             if ((address & 0xff00) != page)
             {
-                cycles++;
                 dummyAddress = (ushort)(page | (address & 0xff));
             }
 
             return new AddressingResult
             {
                 Address = address,
-                Cycles = cycles,
                 DummyAddress = dummyAddress,
                 ReadModifyWriteDummyAddress = dummyAddress.HasValue ? null : address
             };

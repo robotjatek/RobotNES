@@ -1,6 +1,6 @@
 ﻿using Moq;
-using NESCore.CPU;
 using NESCore;
+using NESCore.CPU;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions
 {
@@ -16,16 +16,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(30);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -39,16 +37,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(31);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once);
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -62,15 +58,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 253;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(3);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -84,16 +78,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
 
@@ -108,15 +100,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 2;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(255);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -130,15 +120,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 253;
             registers.Setup(r => r.GetNegativeFlag()).Returns(false);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(3);
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -151,16 +139,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 125;
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(128);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -173,16 +159,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 1;
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x80);
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -195,13 +179,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0x7f;
 
-            var adc = _instructions[Opcodes.ADC_IMM];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IMM];
+            adc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(unchecked((byte)-2));
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -218,7 +200,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
+            var adc = Instructions[Opcodes.ADC_IMM];
             adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xff);
 
@@ -242,7 +224,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetZeroFlag()).Returns(false);
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var adc = _instructions[Opcodes.ADC_IMM];
+            var adc = Instructions[Opcodes.ADC_IMM];
             adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0x0);
 
@@ -268,14 +250,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var adc = _instructions[Opcodes.ADC_IND_X];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IND_X];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -290,12 +270,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var adc = _instructions[Opcodes.ADC_ZERO];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ZERO];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0x10), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -312,12 +290,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var adc = _instructions[Opcodes.ADC_ZERO_X];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ZERO_X];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0x10 + 5), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -334,12 +310,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var adc = _instructions[Opcodes.ADC_ZERO_X];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ZERO_X];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(4), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -355,12 +329,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var adc = _instructions[Opcodes.ADC_ABS];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ABS];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -377,12 +349,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var adc = _instructions[Opcodes.ADC_ABS_X];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ABS_X];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -400,12 +370,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var adc = _instructions[Opcodes.ADC_ABS_X];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ABS_X];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -422,12 +390,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var adc = _instructions[Opcodes.ADC_ABS_Y];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ABS_Y];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -445,12 +411,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var adc = _instructions[Opcodes.ADC_ABS_Y];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_ABS_Y];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(30);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -468,15 +432,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(0xaa); // value at location 0xdead
 
-            var lda = _instructions[Opcodes.LDA_IND_X];
-            var cycles = lda(bus.Object, registers.Object);
+            var lda = Instructions[Opcodes.LDA_IND_X];
+            lda(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xaa);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -494,15 +456,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(10); // value at location final location
 
-            var adc = _instructions[Opcodes.ADC_IND_Y];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IND_Y];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(11);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead + 5), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -521,15 +481,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
-            var adc = _instructions[Opcodes.ADC_IND_Y];
-            var cycles = adc(bus.Object, registers.Object);
+            var adc = Instructions[Opcodes.ADC_IND_Y];
+            adc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(11);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -542,13 +500,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 26;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -561,12 +517,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 26;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -579,12 +533,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 27;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -597,12 +549,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 26;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -615,12 +565,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 26;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -633,13 +581,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 26;
 
-            var cmp = _instructions[Opcodes.CMP_IMM];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IMM];
+            cmp(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -658,14 +604,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var cmp = _instructions[Opcodes.CMP_IND_X];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IND_X];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -683,15 +627,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(10); // value at location final location
 
-            var cmp = _instructions[Opcodes.CMP_IND_Y];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IND_Y];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead + 5), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -709,15 +651,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0x00) // high address
                 .Returns(10);
 
-            var cmp = _instructions[Opcodes.CMP_IND_Y];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_IND_Y];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -732,12 +672,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var cmp = _instructions[Opcodes.CMP_ZERO];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ZERO];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(10), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -753,12 +691,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var cmp = _instructions[Opcodes.CMP_ZERO_X];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ZERO_X];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(10 + 5), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
 
@@ -775,12 +711,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var cmp = _instructions[Opcodes.CMP_ZERO_X];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ZERO_X];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(4), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -796,12 +730,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var cmp = _instructions[Opcodes.CMP_ABS];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ABS];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -818,12 +750,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var cmp = _instructions[Opcodes.CMP_ABS_X];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ABS_X];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -840,12 +770,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var cmp = _instructions[Opcodes.CMP_ABS_X];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ABS_X];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -862,12 +790,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var cmp = _instructions[Opcodes.CMP_ABS_Y];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ABS_Y];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -884,12 +810,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var cmp = _instructions[Opcodes.CMP_ABS_Y];
-            var cycles = cmp(bus.Object, registers.Object);
+            var cmp = Instructions[Opcodes.CMP_ABS_Y];
+            cmp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -902,13 +826,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 26;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -921,12 +843,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 26;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -939,12 +859,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 27;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -957,12 +875,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 26;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -975,12 +891,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 26;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -993,13 +907,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.X = 26;
 
-            var cpx = _instructions[Opcodes.CPX_IMM];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_IMM];
+            cpx(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1015,12 +927,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.X = 20;
 
-            var cpx = _instructions[Opcodes.CPX_ZERO];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_ZERO];
+            cpx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(20);
             bus.Verify(b => b.Read(0x10), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1037,12 +947,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.X = 20;
 
-            var cpx = _instructions[Opcodes.CPX_ABS];
-            var cycles = cpx(bus.Object, registers.Object);
+            var cpx = Instructions[Opcodes.CPX_ABS];
+            cpx(bus.Object, registers.Object);
             registers.Object.X.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1055,13 +963,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 26;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1074,12 +980,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 26;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1092,12 +996,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 27;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1110,12 +1012,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 26;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1128,12 +1028,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 26;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1146,13 +1044,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.Y = 26;
 
-            var cpy = _instructions[Opcodes.CPY_IMM];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_IMM];
+            cpy(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetZeroFlag(false), Times.Once());
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1168,12 +1064,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.Y = 20;
 
-            var cpy = _instructions[Opcodes.CPY_ZERO];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_ZERO];
+            cpy(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(20);
             bus.Verify(b => b.Read(0x10), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1190,12 +1084,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.Y = 20;
 
-            var cpy = _instructions[Opcodes.CPY_ABS];
-            var cycles = cpy(bus.Object, registers.Object);
+            var cpy = Instructions[Opcodes.CPY_ABS];
+            cpy(bus.Object, registers.Object);
             registers.Object.Y.Should().Be(20);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1208,12 +1100,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 10;
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(5);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1226,12 +1116,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 10;
 
-            var sub = _instructions[Opcodes.SBC_IMM_EB];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM_EB];
+            sub(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(5);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1244,12 +1132,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(4);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1262,13 +1148,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
             registers.Object.A.Should().Be(5);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1282,14 +1166,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
             registers.Setup(r => r.GetOverflowFlag()).Returns(false);
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Verify(r => r.SetCarryFlag(true), Times.Once());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
             registers.Object.A.Should().Be(0x7F);
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1302,13 +1184,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 10;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0);
             registers.Verify(r => r.SetZeroFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1321,13 +1201,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 5;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sub = _instructions[Opcodes.SBC_IMM];
-            var cycles = sub(bus.Object, registers.Object);
+            var sub = Instructions[Opcodes.SBC_IMM];
+            sub(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(unchecked((byte)-5));
             registers.Verify(r => r.SetNegativeFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1341,13 +1219,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x7F;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sbc = _instructions[Opcodes.SBC_IMM];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0xff);
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1361,13 +1237,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xd0;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sbc = _instructions[Opcodes.SBC_IMM];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(96);
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1381,13 +1255,11 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0x7F;
             registers.Setup(r => r.GetCarryFlag()).Returns(false);
 
-            var sbc = _instructions[Opcodes.SBC_IMM];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IMM];
+            sbc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0xfe);
             registers.Verify(r => r.SetOverflowFlag(true), Times.Once());
-
-            cycles.Should().Be(2);
         }
 
         [Fact]
@@ -1401,7 +1273,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 64;
 
-            var sbc = _instructions[Opcodes.SBC_IMM];
+            var sbc = Instructions[Opcodes.SBC_IMM];
             sbc(bus.Object, registers.Object);
 
             registers.Object.A.Should().Be(0x53);
@@ -1425,14 +1297,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
 
-            var sbc = _instructions[Opcodes.SBC_IND_X];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IND_X];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(15);
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -1448,12 +1318,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.A = 20;
 
-            var sbc = _instructions[Opcodes.SBC_ZERO];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ZERO];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0x10), Times.Once());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -1471,12 +1339,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var sbc = _instructions[Opcodes.SBC_ZERO_X];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ZERO_X];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0x10 + 5), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1494,12 +1360,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var sbc = _instructions[Opcodes.SBC_ZERO_X];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ZERO_X];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(4), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1516,12 +1380,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.A = 20;
 
-            var sbc = _instructions[Opcodes.SBC_ABS];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ABS];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0xdead), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1539,12 +1401,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var sbc = _instructions[Opcodes.SBC_ABS_X];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ABS_X];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1563,12 +1423,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var sbc = _instructions[Opcodes.SBC_ABS_X];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ABS_X];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1586,12 +1444,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var sbc = _instructions[Opcodes.SBC_ABS_Y];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ABS_Y];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0xdead + 10), Times.Once());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -1610,12 +1466,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var sbc = _instructions[Opcodes.SBC_ABS_Y];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_ABS_Y];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
             bus.Verify(b => b.Read(0x00ff + 10), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1634,15 +1488,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(10); // value at location final location
 
-            var sbc = _instructions[Opcodes.SBC_IND_Y];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IND_Y];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0xdead + 5), Times.Once());
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1662,15 +1514,13 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xee) // dummy read on page cross
                 .Returns(10);
 
-            var sbc = _instructions[Opcodes.SBC_IND_Y];
-            var cycles = sbc(bus.Object, registers.Object);
+            var sbc = Instructions[Opcodes.SBC_IND_Y];
+            sbc(bus.Object, registers.Object);
             registers.Object.A.Should().Be(10);
 
             bus.Verify(b => b.Read(10), Times.Once());
             bus.Verify(b => b.Read(10 + 1), Times.Once());
             bus.Verify(b => b.Read(0x00ff + 5), Times.Once());
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -1689,8 +1539,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var dcp = _instructions[Opcodes.DCP_IND_X];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_IND_X];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -1700,8 +1550,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -1716,16 +1564,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var dcp = _instructions[Opcodes.DCP_ZERO];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_ZERO];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1742,16 +1588,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var dcp = _instructions[Opcodes.DCP_ZERO_X];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_ZERO_X];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
             bus.Verify(b => b.Write(0xad + 5, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -1767,16 +1611,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 20;
 
-            var dcp = _instructions[Opcodes.DCP_ABS];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_ABS];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Write(0xdead, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -1793,16 +1635,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var dcp = _instructions[Opcodes.DCP_ABS_X];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_ABS_X];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -1819,16 +1659,14 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var dcp = _instructions[Opcodes.DCP_ABS_Y];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_ABS_Y];
+            dcp(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 14));
 
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -1847,8 +1685,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(15); // value at location final location
 
-            var dcp = _instructions[Opcodes.DCP_IND_Y];
-            var cycles = dcp(bus.Object, registers.Object);
+            var dcp = Instructions[Opcodes.DCP_IND_Y];
+            dcp(bus.Object, registers.Object);
             registers.Object.A.Should().Be(20);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -1856,8 +1694,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 14));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -1877,8 +1713,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 20;
 
-            var isb = _instructions[Opcodes.ISB_IND_X];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_IND_X];
+            isb(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -1890,8 +1726,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -1907,8 +1741,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.A = 20;
 
-            var isb = _instructions[Opcodes.ISB_ZERO];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_ZERO];
+            isb(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 16));
@@ -1917,8 +1751,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -1935,8 +1767,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Setup(r => r.GetCarryFlag()).Returns(true);
             registers.Object.A = 20;
 
-            var isb = _instructions[Opcodes.ISB_ABS];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_ABS];
+            isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
@@ -1945,8 +1777,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -1965,8 +1795,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(15); // value at location final location
 
-            var isb = _instructions[Opcodes.ISB_IND_Y];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_IND_Y];
+            isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -1978,8 +1808,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -1997,8 +1825,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 5;
 
-            var isb = _instructions[Opcodes.ISB_ZERO_X];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_ZERO_X];
+            isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
@@ -2007,8 +1835,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2026,8 +1852,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.Y = 10;
 
-            var isb = _instructions[Opcodes.ISB_ABS_Y];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_ABS_Y];
+            isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
@@ -2036,8 +1862,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2055,8 +1879,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 20;
             registers.Object.X = 10;
 
-            var isb = _instructions[Opcodes.ISB_ABS_X];
-            var cycles = isb(bus.Object, registers.Object);
+            var isb = Instructions[Opcodes.ISB_ABS_X];
+            isb(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
@@ -2065,8 +1889,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Verify(r => r.SetZeroFlag(false));
             registers.Verify(r => r.SetCarryFlag(true));
             registers.Verify(r => r.SetNegativeFlag(false));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2085,8 +1907,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0;
 
-            var slo = _instructions[Opcodes.SLO_IND_X];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_IND_X];
+            slo(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -2094,8 +1916,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Write(0xdead, 16));
             registers.Object.A.Should().Be(16);
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2110,14 +1930,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0;
 
-            var slo = _instructions[Opcodes.SLO_ZERO];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_ZERO];
+            slo(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 16));
             registers.Object.A.Should().Be(16);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -2133,15 +1951,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0;
 
-            var slo = _instructions[Opcodes.SLO_ABS];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_ABS];
+            slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Write(0xdead, 16));
-
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2159,8 +1974,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(8); // value at location final location
 
-            var slo = _instructions[Opcodes.SLO_IND_Y];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_IND_Y];
+            slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -2168,8 +1983,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 16));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2186,14 +1999,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.X = 5;
 
-            var slo = _instructions[Opcodes.SLO_ZERO_X];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_ZERO_X];
+            slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
             bus.Verify(b => b.Write(0xad + 5, 16));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2210,14 +2021,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.Y = 10;
 
-            var slo = _instructions[Opcodes.SLO_ABS_Y];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_ABS_Y];
+            slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2234,14 +2043,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.X = 10;
 
-            var slo = _instructions[Opcodes.SLO_ABS_X];
-            var cycles = slo(bus.Object, registers.Object);
+            var slo = Instructions[Opcodes.SLO_ABS_X];
+            slo(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2260,8 +2067,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0xff;
 
-            var rla = _instructions[Opcodes.RLA_IND_X];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_IND_X];
+            rla(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -2269,8 +2076,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Write(0xdead, 16));
             registers.Object.A.Should().Be(16);
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2285,14 +2090,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xff;
 
-            var rla = _instructions[Opcodes.RLA_ZERO];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_ZERO];
+            rla(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 16));
             registers.Object.A.Should().Be(16);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -2308,15 +2111,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xff;
 
-            var rla = _instructions[Opcodes.RLA_ABS];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_ABS];
+            rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Write(0xdead, 16));
-
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2334,8 +2134,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(8); // value at location final location
 
-            var rla = _instructions[Opcodes.RLA_IND_Y];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_IND_Y];
+            rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -2343,8 +2143,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 16));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2361,14 +2159,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 5;
 
-            var rla = _instructions[Opcodes.RLA_ZERO_X];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_ZERO_X];
+            rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
             bus.Verify(b => b.Write(0xad + 5, 16));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2385,14 +2181,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.Y = 10;
 
-            var rla = _instructions[Opcodes.RLA_ABS_Y];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_ABS_Y];
+            rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2409,14 +2203,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 10;
 
-            var rla = _instructions[Opcodes.RLA_ABS_X];
-            var cycles = rla(bus.Object, registers.Object);
+            var rla = Instructions[Opcodes.RLA_ABS_X];
+            rla(bus.Object, registers.Object);
             registers.Object.A.Should().Be(16);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 16));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2435,8 +2227,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0xff;
 
-            var sre = _instructions[Opcodes.SRE_IND_X];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_IND_X];
+            sre(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -2444,8 +2236,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Write(0xdead, 4));
             registers.Object.A.Should().Be(0xfb);
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2460,14 +2250,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xff;
 
-            var sre = _instructions[Opcodes.SRE_ZERO];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_ZERO];
+            sre(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 4));
             registers.Object.A.Should().Be(0xfb);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -2483,15 +2271,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0xff;
 
-            var sre = _instructions[Opcodes.SRE_ABS];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_ABS];
+            sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Write(0xdead, 4));
-
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2509,8 +2294,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(8); // value at location final location
 
-            var sre = _instructions[Opcodes.SRE_IND_Y];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_IND_Y];
+            sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -2518,8 +2303,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 4));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2536,14 +2319,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 5;
 
-            var sre = _instructions[Opcodes.SRE_ZERO_X];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_ZERO_X];
+            sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
             bus.Verify(b => b.Write(0xad + 5, 4));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2560,14 +2341,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.Y = 10;
 
-            var sre = _instructions[Opcodes.SRE_ABS_Y];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_ABS_Y];
+            sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2584,14 +2363,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0xff;
             registers.Object.X = 10;
 
-            var sre = _instructions[Opcodes.SRE_ABS_X];
-            var cycles = sre(bus.Object, registers.Object);
+            var sre = Instructions[Opcodes.SRE_ABS_X];
+            sre(bus.Object, registers.Object);
             registers.Object.A.Should().Be(0xfb);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2610,8 +2387,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.X = 5;
             registers.Object.A = 0;
 
-            var rra = _instructions[Opcodes.RRA_IND_X];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_IND_X];
+            rra(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(10 + 5), Times.Once());
             bus.Verify(b => b.Read(10 + 5 + 1), Times.Once());
@@ -2619,8 +2396,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             bus.Verify(b => b.Write(0xdead, 4));
             registers.Object.A.Should().Be(4);
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2635,14 +2410,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0;
 
-            var rra = _instructions[Opcodes.RRA_ZERO];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_ZERO];
+            rra(bus.Object, registers.Object);
 
             bus.Verify(b => b.Read(0xad), Times.Once());
             bus.Verify(b => b.Write(0xad, 4));
             registers.Object.A.Should().Be(4);
-
-            cycles.Should().Be(5);
         }
 
         [Fact]
@@ -2658,15 +2431,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.SetupAllProperties();
             registers.Object.A = 0;
 
-            var rra = _instructions[Opcodes.RRA_ABS];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_ABS];
+            rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead), Times.Once());
             bus.Verify(b => b.Write(0xdead, 4));
-
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2684,8 +2454,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
                 .Returns(0xde) // high address
                 .Returns(8); // value at location final location
 
-            var rra = _instructions[Opcodes.RRA_IND_Y];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_IND_Y];
+            rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(10), Times.Once());
@@ -2693,8 +2463,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             bus.Verify(b => b.Read(0xdead + 5), Times.Exactly(2));
 
             bus.Verify(b => b.Write(0xdead + 5, 4));
-
-            cycles.Should().Be(8);
         }
 
         [Fact]
@@ -2711,14 +2479,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.X = 5;
 
-            var rra = _instructions[Opcodes.RRA_ZERO_X];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_ZERO_X];
+            rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xad + 5), Times.Once());
             bus.Verify(b => b.Write(0xad + 5, 4));
-
-            cycles.Should().Be(6);
         }
 
         [Fact]
@@ -2735,14 +2501,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.Y = 10;
 
-            var rra = _instructions[Opcodes.RRA_ABS_Y];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_ABS_Y];
+            rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
-
-            cycles.Should().Be(7);
         }
 
         [Fact]
@@ -2759,14 +2523,12 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             registers.Object.A = 0;
             registers.Object.X = 10;
 
-            var rra = _instructions[Opcodes.RRA_ABS_X];
-            var cycles = rra(bus.Object, registers.Object);
+            var rra = Instructions[Opcodes.RRA_ABS_X];
+            rra(bus.Object, registers.Object);
             registers.Object.A.Should().Be(4);
 
             bus.Verify(b => b.Read(0xdead + 10), Times.Exactly(2));
             bus.Verify(b => b.Write(0xdead + 10, 4));
-
-            cycles.Should().Be(7);
         }
     }
 }

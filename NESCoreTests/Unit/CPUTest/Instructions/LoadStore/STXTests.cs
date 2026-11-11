@@ -4,12 +4,8 @@ using NESCore;
 
 namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
 {
-    public class STXTests : InstructionTestBase
+    public class StxTests(InstructionsFixture fixture) : InstructionTestBase(fixture)
     {
-        public STXTests(InstructionsFixture fixture) : base(fixture)
-        {
-        }
-
         [Fact]
         public void STX_ZERO()
         {
@@ -19,8 +15,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xaa);
 
-            var stx_zero = _instructions[Opcodes.STX_ZERO];
-            var cycles = stx_zero(bus.Object, registers.Object);
+            var stxZero = Instructions[Opcodes.STX_ZERO];
+            stxZero(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0xaa, 10));
 
@@ -37,8 +33,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(3);
         }
 
         [Fact]
@@ -50,8 +44,8 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.SetupSequence(b => b.Read(It.IsAny<ushort>())).Returns(0xad).Returns(0xde);
 
-            var stx_abs = _instructions[Opcodes.STX_ABS];
-            var cycles = stx_abs(bus.Object, registers.Object);
+            var stxAbs = Instructions[Opcodes.STX_ABS];
+            stxAbs(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0xdead, 10));
 
@@ -68,8 +62,6 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             registers.Verify(r => r.SetNegativeFlag(false), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(true), Times.Never());
             registers.Verify(r => r.SetOverflowFlag(false), Times.Never());
-
-            cycles.Should().Be(4);
         }
 
         [Fact]
@@ -83,12 +75,10 @@ namespace NESCoreTests.Unit.CPUTest.Instructions.LoadStore
             var bus = new Mock<IBUS>();
             bus.Setup(b => b.Read(It.IsAny<ushort>())).Returns(0xad);
 
-            var stx_zero_y = _instructions[Opcodes.STX_ZERO_Y];
-            var cycles = stx_zero_y(bus.Object, registers.Object);
+            var stxZeroY = Instructions[Opcodes.STX_ZERO_Y];
+            stxZeroY(bus.Object, registers.Object);
 
             bus.Verify(b => b.Write(0xad + 15, 10));
-
-            cycles.Should().Be(4);
         }
     }
 }

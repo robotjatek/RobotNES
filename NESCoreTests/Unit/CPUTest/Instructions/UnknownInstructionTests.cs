@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
             var unknownOpcode = 0x02;
             var registers = Mock.Of<IRegisters>();
             var bus = Mock.Of<IBUS>();
-            var instruction = _instructions[unknownOpcode];
+            var instruction = Instructions[unknownOpcode];
             var sut = () => instruction(bus, registers);
             sut.Should().Throw<NotImplementedException>();
         }
