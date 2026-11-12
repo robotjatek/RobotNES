@@ -12,15 +12,6 @@
         byte Control { get; set; }
         byte Mask { get; set; }
         byte OAMAddress { get; set; }
-        byte Scroll { get; set; }
-        byte Address { get; set; }
-        byte XScroll { get; set; }
-        byte YScroll { get; set; }
-       
-        byte FineX { get; set; }
-        ushort CoarseX { get; set; }
-        ushort FineY { get; set; }
-        ushort CoarseY { get; set; }
 
         #region STATUS_REGISTER
         void SetVBlankFlag(bool value);
@@ -31,7 +22,6 @@
         #endregion
 
         #region CONTROL_REGISTER
-        UInt16 GetNametableAddress();
         int VRAMIncrement();
         //Only relevant in 8x8 mode. Ignored in 8x16 mode
         UInt16 GetSpritePatternTableAddress();
