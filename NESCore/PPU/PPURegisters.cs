@@ -29,21 +29,13 @@
         public const byte EMPHASIZE_GREEN = 0x40;
         public const byte EMPHASIZE_BLUE = 0x80;
     }
-    
+
     public class PPURegisters : IPPURegisters
     {
         public byte Status { get; set; } = 0;
         public byte Control { get; set; } = 0;
         public byte OAMAddress { get; set; } = 0;
         public byte Mask { get; set; } = 0;
-        public byte Scroll { get; set; } = 0;
-        public byte Address { get; set; } = 0;
-        public byte XScroll { get; set; } = 0;
-        public byte YScroll { get; set; } = 0;
-        public byte FineX { get; set; } = 0;
-        public ushort CoarseX { get; set; } = 0;
-        public ushort FineY { get; set; } = 0;
-        public ushort CoarseY { get; set; } = 0;
 
         #region STATUS_REGISTER
         public void SetVBlankFlag(bool value)
@@ -109,13 +101,6 @@
         #endregion
 
         #region CONTROL_REGISTER
-        public UInt16 GetNametableAddress() // TODO: maybe its not needed at all after implementing loopy registers
-        {
-            var map = new UInt16[4] { 0x2000, 0x2400, 0x2800, 0x2C00 };
-            var index = Control & PPUControlFlagPositions.NAMETABLE_ADDRESS;
-
-            return map[index];
-        }
 
         public int VRAMIncrement()
         {

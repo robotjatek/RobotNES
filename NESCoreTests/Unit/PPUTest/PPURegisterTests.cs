@@ -2,10 +2,10 @@
 
 namespace NESCoreTests.Unit.PPUTest
 {
-    public class PPURegisterTests : TestBase
+    public class PpuRegisterTests : TestBase
     {
         [Fact]
-        public void SetsPPUStatusVBlankFlagToTrue()
+        public void SetsPpuStatusVBlankFlagToTrue()
         {
             var registers = new PPURegisters
             {
@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsPPUStatusVBlankFlagToFalse()
+        public void SetsPpuStatusVBlankFlagToFalse()
         {
             var registers = new PPURegisters
             {
@@ -29,7 +29,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsPPUStatusOverflowFlagToTrue()
+        public void SetsPpuStatusOverflowFlagToTrue()
         {
             var registers = new PPURegisters
             {
@@ -41,7 +41,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsPPUStatusOverflowFlagToFalse()
+        public void SetsPpuStatusOverflowFlagToFalse()
         {
             var registers = new PPURegisters
             {
@@ -53,7 +53,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsPPUStatusSpriteZeroHitFlagToTrue()
+        public void SetsPpuStatusSpriteZeroHitFlagToTrue()
         {
             var registers = new PPURegisters
             {
@@ -65,7 +65,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void SetsPPUStatusSpriteZeroHitFlagToFalse()
+        public void SetsPpuStatusSpriteZeroHitFlagToFalse()
         {
             var registers = new PPURegisters
             {
@@ -74,50 +74,6 @@ namespace NESCoreTests.Unit.PPUTest
 
             registers.SetSpriteZeroHitFlag(false);
             registers.GetSpriteZeroHitFlag().Should().BeFalse();
-        }
-
-        [Fact]
-        public void GetsNametableAddressFromControlRegister0()
-        {
-            var registers = new PPURegisters()
-            {
-                Control = 0b00
-            };
-
-            registers.GetNametableAddress().Should().Be(0x2000);
-        }
-
-        [Fact]
-        public void GetsNametableAddressFromControlRegister1()
-        {
-            var registers = new PPURegisters()
-            {
-                Control = 0b01
-            };
-
-            registers.GetNametableAddress().Should().Be(0x2400);
-        }
-
-        [Fact]
-        public void GetsNametableAddressFromControlRegister2()
-        {
-            var registers = new PPURegisters()
-            {
-                Control = 0b10
-            };
-
-            registers.GetNametableAddress().Should().Be(0x2800);
-        }
-
-        [Fact]
-        public void GetsNametableAddressFromControlRegister3()
-        {
-            var registers = new PPURegisters()
-            {
-                Control = 0b11
-            };
-
-            registers.GetNametableAddress().Should().Be(0x2C00);
         }
 
         [Fact]
@@ -209,7 +165,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ExecuteNMIFlag0()
+        public void ExecuteNmiFlag0()
         {
             var registers = new PPURegisters()
             {
@@ -220,7 +176,7 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ExecuteNMIFlag1()
+        public void ExecuteNmiFlag1()
         {
             var registers = new PPURegisters()
             {

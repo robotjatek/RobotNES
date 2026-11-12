@@ -9,6 +9,7 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
         private readonly IPPUMemory _ppuMemory;
+        private readonly LoopyRegisters _loopyRegisters = new LoopyRegisters();
         private readonly SpriteEvaluator _spriteEvaluator;
 
         private int _cycles;
@@ -16,9 +17,6 @@ namespace NESCore.PPU
         private int _scanlineCycles;
 
         private byte _ppuDataBus;
-        private ushort _ppuAddress; // v: 0 yyy NN YYYYY XXXXX 
-        private ushort _tempAddress; // t
-        private bool _addressLatch;
         private byte _dataBuffer;
 
         private byte _ntId;
@@ -54,8 +52,6 @@ namespace NESCore.PPU
         ];
 
 
-        const ushort CoarseYMask = 0x03E0;
-
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
 
         public event NMIEventHandler? NMIEvent;
@@ -75,7 +71,7 @@ namespace NESCore.PPU
             address = (ushort)(0x2000 + (address & 0x0007));
 
             //TODO: replace this branching with an indexed array (_ppuMemory[address & 0x7])
-            if (address == 0x2000)
+            if (address == 0x2000) // control
             {
                 _logger.Warning("PPU control register read 0x2000. Normally this should not happen");
                 return _ppuDataBus;
@@ -85,11 +81,11 @@ namespace NESCore.PPU
                 _logger.Warning("PPU mask register read 0x2001. Normally this should not happen");
                 return _ppuDataBus;
             }
-            else if (address == 0x2002)
+            else if (address == 0x2002) // status
             {
                 _ppuDataBus = (byte)((_registers.Status & 0xE0) | (_ppuDataBus & 0x1F));
                 _registers.SetVBlankFlag(false);
-                _addressLatch = false;
+                _loopyRegisters.ReadStatus();
                 return _ppuDataBus;
             }
             else if (address == 0x2003)
@@ -114,19 +110,19 @@ namespace NESCore.PPU
             }
             else if (address == 0x2007)
             {
-                if (_ppuAddress < 0x3f00)
+                if (!_loopyRegisters.IsPaletteAccess())
                 {
                     var result = _dataBuffer;
-                    _dataBuffer = _ppuMemory.Read(_ppuAddress);
-                    _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    _dataBuffer = _ppuMemory.Read(_loopyRegisters.V);
+                    _loopyRegisters.IncrementAddress(_registers);
                     _ppuDataBus = result;
                     return result;
                 }
                 else
                 {
-                    var result = _ppuMemory.Read(_ppuAddress);
-                    _dataBuffer = _ppuMemory.Read((ushort)(_ppuAddress - 0x1000));
-                    _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3FFF);
+                    var result = _ppuMemory.Read(_loopyRegisters.V);
+                    _dataBuffer = _ppuMemory.Read(_loopyRegisters.GetPaletteMirrorAddress());
+                    _loopyRegisters.IncrementAddress(_registers);
                     _ppuDataBus = result;
                     return result;
                 }
@@ -147,11 +143,10 @@ namespace NESCore.PPU
             address = (ushort)(0x2000 + (address & 0x0007));
             _ppuDataBus = value;
 
-            if (address == 0x2000)
+            if (address == 0x2000) // Control register
             {
                 _registers.Control = value;
-                _tempAddress = (ushort)((_tempAddress & 0xF3FF) 
-                                           | (value & 0x03) << 10);
+                _loopyRegisters.WriteControl(value);
             }
             else if (address == 0x2001)
             {
@@ -172,46 +167,16 @@ namespace NESCore.PPU
             }
             else if (address == 0x2005)
             {
-                _registers.Scroll = value;
-                if (_addressLatch == false)
-                {
-                    _registers.XScroll = value;
-                    _registers.FineX = (byte)(value & 0x07);
-                    _registers.CoarseX = (ushort)((value) >> 3);
-                    _tempAddress = (ushort)((_tempAddress & 0xffe0) | _registers.CoarseX);
-                }
-                else
-                {
-                    _registers.YScroll = value;
-                    //FGH..AB CDE..... <- d: ABCDEFGH
-                    _registers.FineY = (ushort)(value & 0x07);
-                    _registers.CoarseY = (ushort)(value >> 3);
-                    _tempAddress = (ushort)((_tempAddress & 0x8C1F) // mask out fineY and coarseY
-                                            | (_registers.FineY << 12)
-                                            | (_registers.CoarseY << 5));
-                }
-
-                _addressLatch = !_addressLatch;
+                _loopyRegisters.ScrollWrite(value);
             }
             else if (address == 0x2006)
             {
-                _registers.Address = value;
-                if (_addressLatch == false)
-                {
-                    _tempAddress = (ushort)((_tempAddress & 0x00ff) | ((value & 0x3f) << 8));
-                    _addressLatch = true;
-                }
-                else
-                {
-                    _tempAddress = (ushort)((_tempAddress & 0xff00) | value);
-                    _ppuAddress = _tempAddress;
-                    _addressLatch = false;
-                }
+                _loopyRegisters.WriteAddress(value);
             }
             else if (address == 0x2007)
             {
-                _ppuMemory.Write(_ppuAddress, value);
-                _ppuAddress = (ushort)((_ppuAddress + _registers.VRAMIncrement()) & 0x3fff);
+                _ppuMemory.Write(_loopyRegisters.V, value);
+                _loopyRegisters.IncrementAddress(_registers);
             }
             else
             {
@@ -228,9 +193,12 @@ namespace NESCore.PPU
             }
         }
 
+        // The shift registers hold the next 16 pixels, so fine x indexes them from the top down
+        private int CurrentPixelBitPosition => 15 - _loopyRegisters.FineX;
+
         private ushort GetCurrentPixelPaletteAddress()
         {
-            var bitPosition = 15 - _registers.FineX;
+            var bitPosition = CurrentPixelBitPosition;
             var colorIndex = GetBgColorPaletteId();
 
             if (colorIndex == 0)
@@ -246,7 +214,7 @@ namespace NESCore.PPU
         
         private ushort GetBgColorPaletteId()
         {
-            var bitPosition = 15 - _registers.FineX;
+            var bitPosition = CurrentPixelBitPosition;
 
             var colorIndex = ((_shiftRegisterLo >> bitPosition) & 0x01) |
                              (((_shiftRegisterHi >> bitPosition) & 0x01) << 1);
@@ -256,57 +224,7 @@ namespace NESCore.PPU
 
         internal ushort GetCurrentPixelPaletteAddressTest() => GetCurrentPixelPaletteAddress();
 
-        private void IncrementCoarseX()
-        {
-            // From https://www.nesdev.org/wiki/PPU_scrolling
-            // wrap around:
-            if ((_ppuAddress & 0b11111) == 31)
-            {
-                _ppuAddress &= 0xFFE0; // zero out the bottom 5 bits (coarse x part of the address)
-                _ppuAddress ^= 0x0400; // Switch to next nametable
-
-                _registers.CoarseX = 0;
-            }
-            else
-            {
-                _ppuAddress = (ushort)(_ppuAddress + 1);
-                _registers.CoarseX++;
-            }
-        }
-
-        private void IncrementY()
-        {
-            // increment fineY at the end of the scanline
-            var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
-            if (fineY < 7)
-            {
-                _ppuAddress += 0x1000; // increment fineY
-            }
-            else
-            {
-                var coarseY = (ushort)((_ppuAddress & CoarseYMask) >> 5);
-                _ppuAddress &= 0x8FFF;
-
-                if (coarseY == 29)
-                {
-                    // end of the nametable => change NT
-                    // coarseY = 0;
-                    // NT++
-                    coarseY = 0;
-                    _ppuAddress ^= 0x0800;
-                }
-                else if (coarseY == 31)
-                {
-                    coarseY = 0;
-                }
-                else
-                {
-                    coarseY++;
-                }
-
-                _ppuAddress = (ushort)((_ppuAddress & ~CoarseYMask) | (coarseY << 5));
-            }
-        }
+        internal LoopyRegisters Loopy => _loopyRegisters;
 
         private void MoveShiftRegisters()
         {
@@ -379,15 +297,12 @@ namespace NESCore.PPU
                     var phase = _scanlineCycles % 8;
                     if (phase == 1)
                     {
-                        var ntAddress = (ushort)(0x2000 | (_ppuAddress & 0x0FFF));
+                        var ntAddress = _loopyRegisters.GetNametableAddress();
                         _ntId = _ppuMemory.Read(ntAddress);
                     }
                     else if (phase == 3)
                     {
-                        // Fetch attribute table
-                        // attribute address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
-                        var atAddress = (ushort)(0x23C0 | (_ppuAddress & 0x0C00) | ((_ppuAddress >> 4) & 0x0038) |
-                                                 ((_ppuAddress >> 2) & 0x0007));
+                        var atAddress = _loopyRegisters.GetAttributeAddress();
                         _attributeId = _ppuMemory.Read(atAddress);
                     }
                     else if (phase == 5)
@@ -395,7 +310,7 @@ namespace NESCore.PPU
                         // pattern table low
                         // address is based on the control register
                         var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
-                        var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+                        var fineY = (ushort)_loopyRegisters.GetFineYScroll();
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16);
                         _patternLow = _ppuMemory.Read(ptAddress);
                     }
@@ -404,18 +319,15 @@ namespace NESCore.PPU
                         // pattern table low
                         // address is based on the control register
                         var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
-                        var fineY = (ushort)((_ppuAddress >> 12) & 0x07);
+                        var fineY = (ushort)_loopyRegisters.GetFineYScroll();
                         var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
                         _patternHigh = _ppuMemory.Read(ptAddress);
 
                         // Reload shift registers (lower 8 bits)
                         _shiftRegisterLo = (ushort)((_shiftRegisterLo & 0xFF00) | _patternLow);
                         _shiftRegisterHi = (ushort)((_shiftRegisterHi & 0xFF00) | _patternHigh);
-
-                        // Reload attribute registers (lower 8 bits with 8 duplicated bits)
-                        var coarseXBit1 = (_ppuAddress & 0x0002);
-                        var coarseYBit1 = (_ppuAddress & 0x0040) >> 4;
-                        var shiftAmount = coarseYBit1 | coarseXBit1;
+                        
+                        var shiftAmount = _loopyRegisters.GetAttributeShift();
 
                         var paletteBits = (_attributeId >> shiftAmount) & 0x03;
                         var attrLo = (byte)((paletteBits & 1) != 0 ? 0xFF : 0x00);
@@ -423,18 +335,18 @@ namespace NESCore.PPU
                         _attributeRegisterLo = (ushort)((_attributeRegisterLo & 0xFF00) | attrLo);
                         _attributeRegisterHi = (ushort)((_attributeRegisterHi & 0xFF00) | attrHi);
 
-                        IncrementCoarseX();
+                        _loopyRegisters.IncrementCoarseX();
                     }
 
                     if (_scanlineCycles == 255)
                     {
-                        IncrementY();
+                        _loopyRegisters.IncrementY();
                     }
                 }
                 else if (renderingEnabled && _scanlineCycles == 256)
                 {
                     // Reset horizontal scroll (coarse X and NT horizontal bit)
-                    _ppuAddress = (ushort)((_ppuAddress & ~0x041F) | (_tempAddress & 0x041F));
+                    _loopyRegisters.ResetHorizontalScroll();
                 }
 
                 // Pre-render line specific actions
@@ -449,8 +361,7 @@ namespace NESCore.PPU
 
                     if (_scanlineCycles >= 280 && _scanlineCycles <= 304 && renderingEnabled)
                     {
-                        // Reset vertical scroll
-                        _ppuAddress = (ushort)((_ppuAddress & ~0x7BE0) | (_tempAddress & 0x7BE0));
+                        _loopyRegisters.ResetVerticalScroll();
                     }
                 }
             }
