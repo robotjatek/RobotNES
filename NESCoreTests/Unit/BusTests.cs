@@ -331,7 +331,7 @@ namespace NESCoreTests.Unit
             var mapper = new Mapper0([prgBank], [new ChrRom(RandomBytePattern(8))], Mock.Of<ILogger>());
             var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapper);
             return new Bus(cartridge, memory, Mock.Of<IPPU>(), Mock.Of<IController>(), Mock.Of<IController>(),
-                Mock.Of<IAPU>(), Mock.Of<ILogger>());
+                Mock.Of<IApu>(), Mock.Of<ILogger>());
         }
 
         [Fact]

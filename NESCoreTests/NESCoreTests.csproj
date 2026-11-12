@@ -85,4 +85,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Unit\APUTest\" />
+  </ItemGroup>
+
 </Project>

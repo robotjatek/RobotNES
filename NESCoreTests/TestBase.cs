@@ -30,7 +30,7 @@ namespace NESCoreTests
         protected Mock<IPPUMemory> _ppuMemory = new();
         protected Mock<IController> _controller1 = new();
         protected Mock<IController> _controller2 = new();
-        protected Mock<IAPU> _apu = new();
+        protected Mock<IApu> _apu = new();
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
         {

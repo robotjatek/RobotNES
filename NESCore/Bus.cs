@@ -16,7 +16,7 @@ namespace NESCore
         private readonly IPPU _ppu;
         private readonly IController _controller1;
         private readonly IController _controller2;
-        private readonly IAPU _apu;
+        private readonly IApu _apu;
         private readonly ILogger _logger;
         
         private readonly BusData _busData = new();
@@ -32,7 +32,7 @@ namespace NESCore
             }
         }
 
-        public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, IController controller1, IController controller2, IAPU apu, ILogger logger)
+        public Bus(ICartridge cartridge, IMemory memory, IPPU ppu, IController controller1, IController controller2, IApu apu, ILogger logger)
         {
             _logger = logger;
             _cartridge = cartridge;
@@ -47,6 +47,7 @@ namespace NESCore
         {
             Cycles++;
             _ppu.Run(2);
+            _apu.Tick();
             byte data;
             
             if (IsInInternalMemory(address))
@@ -98,6 +99,8 @@ namespace NESCore
             Cycles++;
             _busData.Drive(data);
             _ppu.Run(2);
+            _apu.Tick();
+            
             if (IsInInternalMemory(address))
             {
                 InternalMemoryWrite(address, data);
@@ -121,6 +124,8 @@ namespace NESCore
             }
             else if (address == 0x4017)
             {
+                // APU frame counter register
+                _apu.Write(address, data);
                 // TODO: apu
                 // TODO: needed for IRQ
             }
