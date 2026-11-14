@@ -11,7 +11,8 @@ Yet another Nintendo Entertainment System emulator written in C#.
 - Controller implementation (Controller 1: A, S, Up, Down, Left, Right, Space, Enter)
 - PPU implementation
 - PPU clocked by bus accesses
-- Fake APU implementation (disregards any reads or writes)
+- 4-step frame counter IRQ is implemented in APU, otherwise its NO-OP
+- Tests from pages 1-9 in AccuracyCoin.nes fully pass 
 
 Only works with NROM (mapper 0) games
 
@@ -26,5 +27,6 @@ Tested with: Donkey Kong, Donkey Kong Jr., Donkey Kong3, Excitebike, Galaga, Gal
 ![Galaga](./img/galaga.png)
 ![SM](./img/sm1.png)
 ![SM](./img/sm2.png)
+![AccuracyCoin Tests](./img/ac.png)
 
 Files in `NesCoreTests/TestROMs/` are dumps of real games, but all of their data content are randomized to avoid any copyright issues, only the header data kept intact. (Except nestest.nes which is a freely available test ROM)

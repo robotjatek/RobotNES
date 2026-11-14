@@ -7,5 +7,6 @@
         void OamWrite(byte address, byte data);
         byte OamRead(byte address);
         OamEntry GetOamEntry(int index);
+        OamEntry GetOamEntryAtAddress(ushort address, int index);
     }
 }
