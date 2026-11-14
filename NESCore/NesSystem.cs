@@ -43,10 +43,9 @@ namespace NESCore
             var instructions = new CpuInstructions().InstructionSet;
             var registers = new Registers();
             _cpu = new Cpu(_bus, registers, instructions, _logger);
-            _bus.OAMDMAEvent += _cpu.HandleDma;
+            _bus.OamDmaEvent += _cpu.HandleDma;
 
             _ppu.NMIEvent += OnVBlank;
-            //_apu.OnIrq += OnIrq;
         }
 
         public void Run()

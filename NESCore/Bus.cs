@@ -8,8 +8,9 @@ namespace NESCore
 {
     public class Bus : IBUS
     {
-        public event OAMDMAEventHandler? OAMDMAEvent;
+        public event OamDmaEventHandler? OamDmaEvent;
         public uint Cycles { get; private set; }
+        public bool Irq => _apu.IrqFlag;
 
         private readonly ICartridge _cartridge;
         private readonly IMemory _memory;
@@ -115,7 +116,7 @@ namespace NESCore
             }
             else if (address == 0x4014)
             {
-                OAMDMAEvent?.Invoke(data);
+                OamDmaEvent?.Invoke(data);
             }
             else if (address == 0x4016)
             {
@@ -126,8 +127,6 @@ namespace NESCore
             {
                 // APU frame counter register
                 _apu.Write(address, data);
-                // TODO: apu
-                // TODO: needed for IRQ
             }
             else if (IsInApuArea(address))
             {
@@ -141,12 +140,13 @@ namespace NESCore
             _ppu.Run(1);
         }
         
-        public void PPUOamDMA(byte value)
+        public void PpuOamDma(byte value)
         {
             _busData.Drive(value);
             _ppu.Run(2);
             _ppu.OamDMAWrite(value);
             _ppu.Run(1);
+            _apu.Tick();
         }
 
         private static bool IsInInternalMemory(ushort address)

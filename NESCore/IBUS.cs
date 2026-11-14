@@ -1,16 +1,17 @@
 ﻿namespace NESCore
 {
-    public delegate void OAMDMAEventHandler(byte cpuPage);
+    public delegate void OamDmaEventHandler(byte cpuPage);
 
     public interface IBUS
     {
-        void Write(UInt16 address, byte data);
+        void Write(ushort address, byte data);
 
-        byte Read(UInt16 address);
+        byte Read(ushort address);
 
-        event OAMDMAEventHandler OAMDMAEvent;
+        event OamDmaEventHandler OamDmaEvent;
         
-        void PPUOamDMA(byte value);
+        void PpuOamDma(byte value);
         uint Cycles { get; }
+        bool Irq { get; }
     }
 }

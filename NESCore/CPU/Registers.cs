@@ -2,13 +2,14 @@
 {
     public class FlagPositions
     {
-        public const byte CARRY = 0b00000001;
-        public const byte ZERO = 0b00000010;
-        public const byte INTERRUPT_DISABLE = 0b00000100;
-        public const byte DECIMAL = 0b00001000;
-        public const byte BREAK = 0b00010000;
-        public const byte OVERFLOW = 0b01000000;
-        public const byte NEGATIVE = 0b10000000;
+        public const byte CARRY =               0b0000_0001;
+        public const byte ZERO =                0b0000_0010;
+        public const byte INTERRUPT_DISABLE =   0b0000_0100;
+        public const byte DECIMAL =             0b0000_1000;
+        public const byte BREAK =               0b0001_0000;
+        public const byte UNUSED =              0b0010_0000;
+        public const byte OVERFLOW =            0b0100_0000;
+        public const byte NEGATIVE =            0b1000_0000;
     }
 
     public class Registers : IRegisters
@@ -24,14 +25,8 @@
 
         public byte STATUS
         {
-            get
-            {
-                return (byte)(_status | 0x20);
-            }
-            set
-            {
-                _status = (byte)(value | 0x20);
-            }
+            get => (byte)(_status | 0x20);
+            set => _status = value;
         }
 
         public byte SP { get; set; } = 0xFD;
@@ -111,13 +106,11 @@
         private void EnableFlag(byte mask)
         {
             STATUS |= mask;
-            STATUS |= 0x20;
         }
 
         private void DisableFlag(byte mask)
         {
             STATUS &= (byte)~mask;
-            STATUS |= 0x20;
         }
 
         public bool GetCarryFlag()

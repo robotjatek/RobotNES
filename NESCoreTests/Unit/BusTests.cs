@@ -309,7 +309,7 @@ namespace NESCoreTests.Unit
             using var monitor = bus.Monitor<IBUS>();
 
             bus.Write(0x4014, 0x0);
-            monitor.Should().Raise(nameof(bus.OAMDMAEvent)).WithArgs<byte>(a => a == 0);
+            monitor.Should().Raise(nameof(bus.OamDmaEvent)).WithArgs<byte>(a => a == 0);
         }
 
         [Fact]
@@ -320,7 +320,7 @@ namespace NESCoreTests.Unit
             using var monitor = bus.Monitor<IBUS>();
 
             bus.Write(0x4014, 0x10);
-            monitor.Should().Raise(nameof(bus.OAMDMAEvent)).WithArgs<byte>(a => a == 0x10);
+            monitor.Should().Raise(nameof(bus.OamDmaEvent)).WithArgs<byte>(a => a == 0x10);
         }
         
         // $4100 is inside the cartridge area but outside every region Mapper0 decodes, so reads

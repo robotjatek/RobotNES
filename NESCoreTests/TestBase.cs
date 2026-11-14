@@ -4,6 +4,7 @@ using NESCore;
 using NESCore.APU;
 using NESCore.Cartridge;
 using NESCore.CPU;
+using NESCore.CPU.Instructions;
 using NESCore.PPU;
 
 using Serilog;
@@ -24,7 +25,7 @@ namespace NESCoreTests
         protected ILogger _logger = Mock.Of<ILogger>();
         protected Mock<ICartridge> _mockCartridge = new();
         protected IPPU _mockPPU = Mock.Of<IPPU>();
-        protected Action<IBUS, IRegisters>[] _instructions = new Action<IBUS, IRegisters>[255];
+        protected Action<IBUS, IRegisters>[] _instructions = [.. new CpuInstructions().InstructionSet];
         protected Mock<IRegisters> _registers = new();
         protected Mock<IPPURegisters> _ppuRegisters = new();
         protected Mock<IPPUMemory> _ppuMemory = new();
