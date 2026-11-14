@@ -15,6 +15,8 @@ namespace NESCore.APU
         
         private bool _latch;
         private uint _counter;
+        private int _counterResetDelay = -1;
+        private bool _clearIrqBit;
         private bool _4StepMode = true;
         private bool _irqInhibit;
 
@@ -23,7 +25,24 @@ namespace NESCore.APU
 
         public void Tick()
         {
+            _latch = !_latch;
+            
+            if (_clearIrqBit && !_latch)
+            {
+                _status = unchecked((byte)(_status & (byte)~STATUS_FRAME_COUNTER_FLAG));
+                _clearIrqBit = false;
+            }
+            
             _counter++;
+            if (_counterResetDelay > 0)
+            {
+                _counterResetDelay--;
+                if (_counterResetDelay == 0)
+                {
+                    _counter = 0;
+                    _counterResetDelay = -1;
+                }
+            }
             
             // IRQ only happens in 4-step mode, when IRQs are not inhibited
             if (_4StepMode)
@@ -45,8 +64,6 @@ namespace NESCore.APU
                     _counter = 0;
                 }
             }
-            
-            _latch = !_latch;
         }
 
         public byte Read(ushort address)
@@ -54,8 +71,7 @@ namespace NESCore.APU
             if (address == 0x4015)
             {
                 var result = _status;
-                // clear the frame counter bit
-                _status = unchecked((byte)(_status & (byte)~STATUS_FRAME_COUNTER_FLAG));
+                _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
             
@@ -91,7 +107,8 @@ namespace NESCore.APU
                 // "When the mode is disabled, the frame counter counts its own ≈60Hz cycle that is not synchronized with the Vsync signal from PPU."
                 // "When it's enabled, it expects the CPU to manually synchronize the internal counter with the external timing source that the CPU uses."
 
-                _counter = 0; // TODO: delay after write
+                // 3 cycles delay to reset when write occurs on odd cycles, 4 on even cycles
+                _counterResetDelay = _latch ? 3 : 4;
                 
                 return;
             }

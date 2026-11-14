@@ -71,6 +71,12 @@ namespace NESCore
             {
                 data = ReadController(_controller2.ReadNextButton());
             }
+            else if (address == 0x4015)
+            {
+                // 0x4015 does not drive the bus!
+                var apuStatus = _apu.Read(address);
+                data = (byte)((apuStatus & 0b1101_1111) | (_busData.Value & 0b0010_0000));
+            }
             else if (IsInApuArea(address))
             {
                 _apu.Read(address); // ignore apu reads

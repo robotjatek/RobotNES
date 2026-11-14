@@ -5,8 +5,8 @@ namespace NESCoreTests.Unit.APUTest;
 
 public class ApuTests : TestBase
 {
-    private const byte CONTROL_MODE_FLAG = 0x80;
-    private const byte CONTROL_INHIBIT_FLAG = 0x40;
+    private const byte ControlModeFlag = 0x80;
+    private const byte ControlInhibitFlag = 0x40;
     
     [Fact]
     public void GeneratesIrqEveryFrameInFreerunMode()
@@ -14,14 +14,20 @@ public class ApuTests : TestBase
         // Internally the PPU ticks every second CPU clock
         var sut = new Apu(_logger);
         sut.Write(0x4017, 0); // Freerun mode, IRQ NOT inhibited
-        
-        ((sut.Read(0x4015) & Apu.STATUS_FRAME_COUNTER_FLAG) > 0).Should().BeFalse(); 
+
+        ReadFrameCounterFlag(sut).Should().BeFalse();
 
         for (var i = 0; i < 29830; i++)
         {
             sut.Tick();
         }
 
+        // Fix: needs 3 cycles of extra delay
+        ReadFrameCounterFlag(sut).Should().BeFalse();
+        for (var i = 0; i < 3; i++)
+        {
+            sut.Tick();
+        }
         ReadFrameCounterFlag(sut).Should().BeTrue();
     }
 
@@ -32,7 +38,13 @@ public class ApuTests : TestBase
         var sut = new Apu(_logger);
         sut.Write(0x4017, 0); // Freerun mode, IRQ NOT inhibited
         
-        ((sut.Read(0x4015) & Apu.STATUS_FRAME_COUNTER_FLAG) > 0).Should().BeFalse();
+        ReadFrameCounterFlag(sut).Should().BeFalse();
+        
+        // Fix 3 cycle delay
+        for (var i = 0; i < 3; i++)
+        {
+            sut.Tick();
+        }
 
         for (var j = 0; j < 10; j++)
         {
@@ -40,7 +52,6 @@ public class ApuTests : TestBase
             {
                 sut.Tick();
             }
-
             ReadFrameCounterFlag(sut).Should().BeTrue();
         }
     }
@@ -52,12 +63,21 @@ public class ApuTests : TestBase
         var sut = new Apu(_logger);
         sut.Write(0x4017, 0); // Freerun mode, IRQ NOT inhibited
         
+        // fix: 4 cycle delay when on even phase
+        for (var i = 0; i < 4; i++)
+        {
+            sut.Tick();
+        }
+        
         for (var i = 0; i < 29830; i++)
         {
             sut.Tick();
         }
 
         ReadFrameCounterFlag(sut).Should().BeTrue();
+        
+        sut.Tick();
+        sut.Tick();
         // second read should return false as the first read deleted the flag
         ReadFrameCounterFlag(sut).Should().BeFalse();
     }
@@ -66,7 +86,7 @@ public class ApuTests : TestBase
     public void IrqShouldNotHappenIfIrqInhibitIsTrue()
     {
         var sut = new Apu(_logger);
-        sut.Write(0x4017, CONTROL_INHIBIT_FLAG); // Freerun mode, IRQ inhibited
+        sut.Write(0x4017, ControlInhibitFlag); // Freerun mode, IRQ inhibited
 
         for (var i = 0; i < 29830; i++)
         {
@@ -80,7 +100,7 @@ public class ApuTests : TestBase
     public void IrqShouldNotHappenInExternalSyncMode()
     {
         var sut = new Apu(_logger);
-        sut.Write(0x4017, CONTROL_MODE_FLAG); // External mode (5-step)
+        sut.Write(0x4017, ControlModeFlag); // External mode (5-step)
 
         for (var i = 0; i < 29830; i++)
         {
@@ -104,7 +124,7 @@ public class ApuTests : TestBase
             sut.Tick();
         }
 
-        sut.Write(0x4017, CONTROL_INHIBIT_FLAG);
+        sut.Write(0x4017, ControlInhibitFlag);
         ReadFrameCounterFlag(sut).Should().BeFalse();
     }
 
