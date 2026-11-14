@@ -1,7 +1,5 @@
 using Serilog;
 
-//TODO: OAMADDR set to 0 on prerender (257-320)
-
 namespace NESCore.PPU
 {
     public class Ppu : IPPU
@@ -145,8 +143,14 @@ namespace NESCore.PPU
 
             if (address == 0x2000) // Control register
             {
+                var prevNmi = _registers.GetEnableNMI();
                 _registers.Control = value;
                 _loopyRegisters.WriteControl(value);
+
+                if (!prevNmi && _registers.GetEnableNMI() && _registers.GetVBlankFlag())
+                {
+                    NMIEvent?.Invoke(_frameBuffer);
+                }
             }
             else if (address == 0x2001)
             {
@@ -352,6 +356,11 @@ namespace NESCore.PPU
                 // Pre-render line specific actions
                 if (isPreRenderScanline)
                 {
+                    if (renderingEnabled && _scanlineCycles is >= 257 and <= 320)
+                    {
+                        _registers.OAMAddress = 0;
+                    }
+                    
                     if (_scanlineCycles == 1)
                     {
                         _registers.SetVBlankFlag(false);

@@ -3,19 +3,11 @@ using Serilog;
 
 namespace NESCore.PPU
 {
-    public class PpuMemory : IPPUMemory
+    public class PpuMemory(ICartridge cartridge, ILogger logger) : IPPUMemory
     {
-        private readonly ICartridge _cartridge;
-        private readonly ILogger _logger;
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
         private readonly byte[] _oam = new byte[256];
-
-        public PpuMemory(ICartridge cartridge, ILogger logger)
-        {
-            _cartridge = cartridge;
-            _logger = logger;
-        }
 
         public byte Read(ushort address)
         {
@@ -24,11 +16,11 @@ namespace NESCore.PPU
             if (IsInPatternTableZero(address))
             {
                 //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
-                return _cartridge.Mapper.Chr.Read(address);
+                return cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInPatternTableOne(address))
             {
-                return _cartridge.Mapper.Chr.Read(address);
+                return cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInNameTable(address))
             {
@@ -48,11 +40,11 @@ namespace NESCore.PPU
 
             if (IsInPatternTableZero(address))
             {
-                _cartridge.Mapper.Chr.Write(address, data);
+                cartridge.Mapper.Chr.Write(address, data);
             }
             else if (IsInPatternTableOne(address))
             {
-                _cartridge.Mapper.Chr.Write(address, data);
+                cartridge.Mapper.Chr.Write(address, data);
             }
             else if (IsInNameTable(address))
             {
@@ -64,7 +56,7 @@ namespace NESCore.PPU
             }
             else
             {
-                _logger.Error("Invalid write to ppu memory address: 0x{Address:X4}", address);
+                logger.Error("Invalid write to ppu memory address: 0x{Address:X4}", address);
             }
         }
 
@@ -94,29 +86,39 @@ namespace NESCore.PPU
 
         public OamEntry GetOamEntry(int index)
         {
-            return new OamEntry(_oam[index * 4], _oam[index * 4 + 1], _oam[index * 4 + 2], _oam[index * 4 + 3], index);
+            return GetOamEntryAtAddress((byte)(index * 4), index);
         }
 
-        private UInt16 UseNametableMirroring(ushort address)
+        public OamEntry GetOamEntryAtAddress(ushort address, int index)
+        {
+            return new OamEntry(
+                _oam[address],
+                _oam[(byte)(address + 1)],
+                _oam[(byte)(address + 2)],
+                _oam[(byte)(address + 3)],
+                index);
+        }
+
+        private ushort UseNametableMirroring(ushort address)
         {
             if (address >= 0x3000)
             {
                 address &= 0x2FFF;
             }
 
-            if (_cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+            if (cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
             {
-                _logger.Error("4-screen mirroring is not supported");
+                logger.Error("4-screen mirroring is not supported");
                 throw new NotImplementedException();
             }
 
-            if (_cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
+            if (cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
             {
-                return (UInt16)(address & 0x7ff);
+                return (ushort)(address & 0x7ff);
             }
-            else if (_cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
+            else if (cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
             {
-                return (UInt16)(((address & 0x800) >> 1) | (address & 0x3ff));
+                return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
             }
 
             throw new NotImplementedException("Unsupported address");

@@ -11,15 +11,23 @@ public class SpriteEvaluator(IPPURegisters registers, IPPUMemory ppuMemory)
     public void EvaluateSprites(int scanline)
     {
         // TODO: make it cycle correct: https://www.nesdev.org/wiki/PPU_sprite_evaluation#Details
+        // TODO: other quirks like the internal n[0-63] (6 bits), m[0-3] (2 bits) variables
         Array.Clear(SpriteScanlineBuffer, 0, SpriteScanlineBuffer.Length);
         _secondaryOam.Clear();
 
         var spriteSize = registers.GetSpriteSize();
         var height = spriteSize == SpriteSize._8x8 ? 8 : 16;
 
-        for (var i = 0; i < 64; i++)
+        var startAddress = (int)registers.OAMAddress;
+        var spriteIndex = 0;
+
+        for (var addr = startAddress; addr <= 252; addr += 4)
         {
-            var sprite = ppuMemory.GetOamEntry(i);
+            var sprite = startAddress == 0
+                ? ppuMemory.GetOamEntry(spriteIndex)
+                : ppuMemory.GetOamEntryAtAddress((byte)addr, spriteIndex);
+            spriteIndex++;
+
             var top = sprite.ScreenY;
             var bottom = top + height;
 
