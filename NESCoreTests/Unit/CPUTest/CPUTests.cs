@@ -83,6 +83,43 @@ namespace NESCoreTests.Unit.CPUTest
         }
 
         [Fact]
+        public void CpuHandlesIrq()
+        {
+            var writeArgs = new List<byte>();
+            var bus = new Mock<IBUS>();
+            bus.Setup(b => b.Write(It.IsAny<ushort>(), Capture.In(writeArgs)));
+            bus.SetupAllProperties();
+            // NMI vector:
+            bus.Setup(b => b.Read(0xffff)).Returns(0xbe);
+            bus.Setup(b => b.Read(0xfffe)).Returns(0xef);
+            //setup PC on startup: 0xdead
+            bus.Setup(b => b.Read(0xfffd)).Returns(0xde);
+            bus.Setup(b => b.Read(0xfffc)).Returns(0xad);
+            bus.Setup(b => b.Read(0xbeef)).Returns(Opcodes.NOP);
+            bus.Setup(b => b.Irq).Returns(true);
+            
+            var registers = new Registers
+            {
+                STATUS = 0x80 // Negative flag set (1), Interrupt disable is unset (0)
+            };
+            registers.GetInterruptDisableFlag().Should().BeFalse();
+            
+            var cpu = new Cpu(bus.Object, registers, _instructions, _logger);
+            cpu.RunInstruction();
+            
+            writeArgs.Should().ContainInConsecutiveOrder(0xde, 0xad, 0xA0); // should save pc and status to stack
+            registers.PC.Should().Be(0xbeef);
+            registers.GetInterruptDisableFlag().Should().BeTrue();
+            
+            bus.Verify(b => b.Read(0xdead), Times.Exactly(2), "the IRQ pauses on two dummy reads at the current PC");
+            bus.Verify(b => b.Write(0x1fd, 0xde), Times.Once, "PCH has to be pushed first");
+            bus.Verify(b => b.Write(0x1fc, 0xad), Times.Once, "PCL has to be pushed second");
+            bus.Verify(b => b.Write(0x1fb, 0xA0), Times.Once, "STATUS has to be pushed last");
+            bus.Verify(b => b.Read(0xfffe), Times.Once, "IRQ vector");
+            bus.Verify(b => b.Read(0xffff), Times.Once, "IRQ vector");
+        }
+
+        [Fact]
         public void CpuHandlesDma()
         {
             var bus = new Mock<IBUS>();
@@ -97,7 +134,7 @@ namespace NESCoreTests.Unit.CPUTest
                 var i1 = i;
                 bus.Verify(b => b.Read((ushort)(0x0 + i1)));
             }
-            bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
+            bus.Verify(b => b.PpuOamDma(0xaa), Times.Exactly(256));
         }
 
         [Fact]
@@ -115,7 +152,7 @@ namespace NESCoreTests.Unit.CPUTest
                 var i1 = i;
                 bus.Verify(b => b.Read((ushort)((0x10 << 8) + i1)));
             }
-            bus.Verify(b => b.PPUOamDMA(0xaa), Times.Exactly(256));
+            bus.Verify(b => b.PpuOamDma(0xaa), Times.Exactly(256));
         }
 
         [Theory]

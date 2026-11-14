@@ -33,7 +33,7 @@ namespace NESCore
 
             _controller1 = new Controller(_logger);
             IController controller2 = new Controller(_logger);
-            IAPU apu = new APU.APU(_logger);
+            IApu apu = new Apu(_logger);
 
             IMemory memory = new Memory();
             _ppu = new Ppu(new PPURegisters(), new PpuMemory(cartridge, _logger), _logger);
@@ -43,7 +43,7 @@ namespace NESCore
             var instructions = new CpuInstructions().InstructionSet;
             var registers = new Registers();
             _cpu = new Cpu(_bus, registers, instructions, _logger);
-            _bus.OAMDMAEvent += _cpu.HandleDma;
+            _bus.OamDmaEvent += _cpu.HandleDma;
 
             _ppu.NMIEvent += OnVBlank;
         }

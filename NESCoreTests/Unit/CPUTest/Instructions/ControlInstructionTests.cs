@@ -131,7 +131,7 @@ namespace NESCoreTests.Unit.CPUTest.Instructions
 
             brk(bus.Object, registers.Object);
 
-            writeArgs.Should().ContainInConsecutiveOrder(new byte[] { 0xde, 0xad, 0xee | FlagPositions.BREAK });
+            writeArgs.Should().ContainInConsecutiveOrder(0xde, 0xad, 0xee | FlagPositions.BREAK);
             registers.Object.PC.Should().Be(0xbeef);
         }
     }

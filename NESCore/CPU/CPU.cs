@@ -49,6 +49,12 @@ namespace NESCore.CPU
                 return;
             }
 
+            if (_bus.Irq && !_registers.GetInterruptDisableFlag())
+            {
+                DoIrq();
+                return;
+            }
+
             var instructionCode = Fetch();
             var instruction = _instructions[instructionCode];
 
@@ -85,12 +91,28 @@ namespace NESCore.CPU
             _bus.Read(_registers.PC);
             
             Push16(_registers.PC);
-            Push8(_registers.STATUS);
+            var statusToPush = (byte)((_registers.STATUS & ~FlagPositions.BREAK) | FlagPositions.UNUSED);
+            Push8(statusToPush);
             _registers.SetInterruptDisableFlag(true);
             var addressLow = (ushort)_bus.Read(0xfffa);
             var addressHigh = (ushort)(_bus.Read(0xfffb) << 8);
             _registers.PC = (ushort)(addressHigh | addressLow);
             _nmi = false;
+        }
+
+        private void DoIrq()
+        {
+            _bus.Read(_registers.PC);
+            _bus.Read(_registers.PC);
+            
+            Push16(_registers.PC);
+            // BREAK bit (bit 4) = 0, UNUSED bit (bit 5) = 1
+            var statusToPush = (byte)((_registers.STATUS & ~FlagPositions.BREAK) | FlagPositions.UNUSED);
+            Push8(statusToPush);
+            _registers.SetInterruptDisableFlag(true);
+            var addressLow = (ushort)_bus.Read(0xfffe);
+            var addressHigh = (ushort)(_bus.Read(0xffff) << 8);
+            _registers.PC = (ushort)(addressHigh | addressLow);
         }
 
         private void DoDma(byte cpuPage)
@@ -106,7 +128,7 @@ namespace NESCore.CPU
             var address = (ushort)(cpuPage << 8);
             for (var i = address; i < address + 0x100; i++)
             {
-                _bus.PPUOamDMA(_bus.Read(i));
+                _bus.PpuOamDma(_bus.Read(i));
             }
         }
     }
