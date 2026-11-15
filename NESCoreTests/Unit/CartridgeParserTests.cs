@@ -9,11 +9,11 @@ namespace NESCoreTests.Unit
     {
         private class StubMapper : IMapper
         {
-            public int ID => throw new NotImplementedException();
+            public int Id => throw new NotImplementedException();
 
-            public byte PRGRomNumber => throw new NotImplementedException();
+            public byte PrgRomNumber => throw new NotImplementedException();
 
-            public int PRGRomSize => throw new NotImplementedException();
+            public int PrgRomSize => throw new NotImplementedException();
 
             public Rom LowerBank => throw new NotImplementedException();
 
@@ -23,9 +23,9 @@ namespace NESCoreTests.Unit
 
             public RomBase PrgRam => throw new NotImplementedException();
 
-            public byte CHRROMNumber => throw new NotImplementedException();
+            public byte ChrRomNumber => throw new NotImplementedException();
 
-            public int CHRROMSize => throw new NotImplementedException();
+            public int ChrRomSize => throw new NotImplementedException();
 
             public bool TryRead(ushort address, out byte value)
             {
@@ -238,8 +238,8 @@ namespace NESCoreTests.Unit
         {
             var sut = new CartridgeParser(new MapperFactory(_logger));
             var cartridge = sut.LoadCartridge(MARIO_BROS_ROM_PATH);
-            cartridge.Mapper.PRGRomNumber.Should().Be(1);
-            cartridge.Mapper.PRGRomSize.Should().Be(1 * 16 * 1024); // 16k
+            cartridge.Mapper.PrgRomNumber.Should().Be(1);
+            cartridge.Mapper.PrgRomSize.Should().Be(1 * 16 * 1024); // 16k
         }
 
         [Fact]
@@ -247,8 +247,8 @@ namespace NESCoreTests.Unit
         {
             var sut = new CartridgeParser(new MapperFactory(_logger));
             var cartridge = sut.LoadCartridge(SUPER_MARIO_ROM_PATH);
-            cartridge.Mapper.PRGRomNumber.Should().Be(2);
-            cartridge.Mapper.PRGRomSize.Should().Be(2 * 16 * 1024); // 32k
+            cartridge.Mapper.PrgRomNumber.Should().Be(2);
+            cartridge.Mapper.PrgRomSize.Should().Be(2 * 16 * 1024); // 32k
         }
 
         [Fact]
@@ -256,8 +256,8 @@ namespace NESCoreTests.Unit
         {
             var sut = new CartridgeParser(new MapperFactory(_logger));
             var cartridge = sut.LoadCartridge(DONKEY_KONG_ROM_PATH);
-            cartridge.Mapper.CHRROMNumber.Should().Be(1);
-            cartridge.Mapper.CHRROMSize.Should().Be(1 * 8 * 1024);
+            cartridge.Mapper.ChrRomNumber.Should().Be(1);
+            cartridge.Mapper.ChrRomSize.Should().Be(1 * 8 * 1024);
         }
 
         [Fact]

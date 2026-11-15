@@ -4,11 +4,11 @@ namespace NESCore.Mappers
 {
     public class Mapper0 : IMapper
     {
-        public int ID => 0;
+        public int Id => 0;
 
-        public byte PRGRomNumber { get; private set; }
+        public byte PrgRomNumber { get; private set; }
 
-        public int PRGRomSize { get; private set; }
+        public int PrgRomSize { get; private set; }
 
         private readonly Rom _lowerBank;
 
@@ -20,18 +20,18 @@ namespace NESCore.Mappers
 
         public RomBase PrgRam { get; private set; }
 
-        public byte CHRROMNumber { get; private set; }
+        public byte ChrRomNumber { get; private set; }
 
-        public int CHRROMSize { get; private set; }
+        public int ChrRomSize { get; private set; }
 
         public Mapper0(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
         {
-            PRGRomNumber = (byte)prgRoms.Count;
-            PRGRomSize = PRGRomNumber * 1024 * 16;
-            CHRROMNumber = (byte)chr.Count;
-            CHRROMSize = CHRROMNumber * 1024 * 8;
+            PrgRomNumber = (byte)prgRoms.Count;
+            PrgRomSize = PrgRomNumber * 1024 * 16;
+            ChrRomNumber = (byte)chr.Count;
+            ChrRomSize = ChrRomNumber * 1024 * 8;
 
-            if (PRGRomNumber > 2 || PRGRomNumber == 0)
+            if (PrgRomNumber > 2 || PrgRomNumber == 0)
             {
                 throw new ArgumentException("Invalid number of ROMs");
             }
@@ -40,7 +40,7 @@ namespace NESCore.Mappers
             PrgRam = new Ram(8);
             _lowerBank = prgRoms[0];
 
-            if (PRGRomNumber > 1)
+            if (PrgRomNumber > 1)
             {
                 _upperBank = prgRoms[1];
             }

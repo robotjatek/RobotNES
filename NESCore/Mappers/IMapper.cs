@@ -2,18 +2,18 @@
 {
     public interface IMapper
     {
-        int ID { get; }
-        byte PRGRomNumber { get; }
-        int PRGRomSize { get; }
-        byte CHRROMNumber { get; }
-        int CHRROMSize { get; }
+        int Id { get; }
+        byte PrgRomNumber { get; }
+        int PrgRomSize { get; }
+        byte ChrRomNumber { get; }
+        int ChrRomSize { get; }
 
         RomBase Chr { get; }
         
         RomBase PrgRam { get; }
 
-        bool TryRead(UInt16 address, out byte value);
+        bool TryRead(ushort address, out byte value);
 
-        void Write(UInt16 address, byte value);
+        void Write(ushort address, byte value);
     }
 }

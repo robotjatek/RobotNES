@@ -16,17 +16,15 @@ namespace NESCore.Mappers
 
             if (header.MapperID == 0)
             {
-                List<ChrBase> chr;
-                if (chrRoms.Count == 0)
-                {
-                    chr = [new ChrRam()];
-                }
-                else
-                {
-                    chr = chrRoms;
-                }
+                var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
 
                 return new Mapper0(prgRoms, chr, logger);
+            } 
+            else if (header.MapperID == 2)
+            {
+                // I don't think unrom should support chr ram
+                var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                return new UnRom(prgRoms, chr, logger);
             }
 
             throw new UnknownMapperException(header.MapperID);
