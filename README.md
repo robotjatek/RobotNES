@@ -14,9 +14,9 @@ Yet another Nintendo Entertainment System emulator written in C#.
 - 4-step frame counter IRQ is implemented in APU, otherwise its NO-OP
 - Tests from pages 1-9 in AccuracyCoin.nes fully pass 
 
-Works with NROM (mapper 0) and UxROM (mapper 2) games
+Works with NROM (mapper 0), UxROM (mapper 2) and CNROM (mapper 3) games
 
-Tested with: Donkey Kong, Donkey Kong Jr., Donkey Kong3, Excitebike, Galaga, Galaxian, Bomberman, Magic Jewelry, Mario Bros., Super Mario Bros. 1, F1 Race, Pinball, 1942, Baseball, Battle City, Kungfu, Karateka, Macross, Ice Climber, Road Fighter, Soccer, Megaman, Contra, Ducktales
+Tested with: Donkey Kong, Donkey Kong Jr., Donkey Kong3, Excitebike, Galaga, Galaxian, Bomberman, Magic Jewelry, Mario Bros., Super Mario Bros. 1, F1 Race, Pinball, 1942, Baseball, Battle City, Kungfu, Karateka, Macross, Ice Climber, Road Fighter, Soccer, Megaman, Contra, Ducktales, Arkanoid, Track & Field, Gradius 
 
 # Screenshots
 
