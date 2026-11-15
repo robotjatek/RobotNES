@@ -120,7 +120,7 @@ namespace NESCoreTests.Unit.Mapper
             var bank1 = new Rom(RandomBytePattern(16));
             var sut = new Mapper0(new List<Rom>() { bank1 }, [new ChrRom(RandomBytePattern(8))],
                 new Mock<ILogger>().Object);
-            sut.ID.Should().Be(0);
+            sut.Id.Should().Be(0);
         }
 
         [Theory]
