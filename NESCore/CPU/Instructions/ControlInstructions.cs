@@ -4,9 +4,8 @@
     {
         private static void BRK(IBUS bus, IRegisters registers)
         {
-            var pcToPush = registers.PC;
             bus.Read(registers.PC++);
-            Push16(bus, registers, pcToPush);
+            Push16(bus, registers, registers.PC);
             var statusToPush = (byte)(registers.STATUS | FlagPositions.BREAK | 0x20);
             Push8(bus, registers, statusToPush);
             registers.SetInterruptDisableFlag(true);
