@@ -7,25 +7,19 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
         private readonly IPPUMemory _ppuMemory;
-        private readonly LoopyRegisters _loopyRegisters = new LoopyRegisters();
+        private readonly LoopyRegisters _loopyRegisters = new();
         private readonly SpriteEvaluator _spriteEvaluator;
+        private readonly BackgroundEvaluator _backgroundEvaluator;
+        internal LoopyRegisters Loopy => _loopyRegisters;
 
+        // Test-only hook for render tests comparing the framebuffer output (see InternalsVisibleTo).
+        internal byte[] FrameBuffer => _frameBuffer;
         private int _cycles;
         private int _scanlines;
         private int _scanlineCycles;
 
         private byte _ppuDataBus;
         private byte _dataBuffer;
-
-        private byte _ntId;
-        private byte _attributeId;
-        private byte _patternLow;
-        private byte _patternHigh;
-        
-        private ushort _shiftRegisterHi;
-        private ushort _shiftRegisterLo;
-        private ushort _attributeRegisterLo;
-        private ushort _attributeRegisterHi;
 
         public readonly record struct Color(byte R, byte G, byte B);
 
@@ -48,8 +42,7 @@ namespace NESCore.PPU
             new(0xE4, 0xF4, 0xB0), new(0xB4, 0xFA, 0xB4), new(0xB4, 0xF4, 0xD8), new(0x00, 0xFA, 0xFA),
             new(0xCC, 0xCC, 0xCC), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00)
         ];
-
-
+        
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
 
         public event NMIEventHandler? NMIEvent;
@@ -59,8 +52,8 @@ namespace NESCore.PPU
             _logger = logger;
             _registers = registers;
             _ppuMemory = ppuMemory;
+            _backgroundEvaluator = new BackgroundEvaluator(_loopyRegisters, _ppuMemory, _registers);
             _spriteEvaluator = new SpriteEvaluator(registers, ppuMemory);
-
             Array.Fill(_frameBuffer, (byte)0);
         }
 
@@ -196,49 +189,7 @@ namespace NESCore.PPU
                 Cycle();
             }
         }
-
-        // The shift registers hold the next 16 pixels, so fine x indexes them from the top down
-        private int CurrentPixelBitPosition => 15 - _loopyRegisters.FineX;
-
-        private ushort GetCurrentPixelPaletteAddress()
-        {
-            var bitPosition = CurrentPixelBitPosition;
-            var colorIndex = GetBgColorPaletteId();
-
-            if (colorIndex == 0)
-            {
-                return 0x3F00;
-            }
-
-            var paletteId = (((_attributeRegisterLo >> bitPosition) & 0x01) |
-                             (((_attributeRegisterHi >> bitPosition) & 0x01) << 1));
-
-            return (ushort)(0x3F00 | (paletteId << 2) | colorIndex);
-        }
         
-        private ushort GetBgColorPaletteId()
-        {
-            var bitPosition = CurrentPixelBitPosition;
-
-            var colorIndex = ((_shiftRegisterLo >> bitPosition) & 0x01) |
-                             (((_shiftRegisterHi >> bitPosition) & 0x01) << 1);
-
-            return (ushort)(colorIndex);
-        }
-
-        internal ushort GetCurrentPixelPaletteAddressTest() => GetCurrentPixelPaletteAddress();
-
-        internal LoopyRegisters Loopy => _loopyRegisters;
-
-        private void MoveShiftRegisters()
-        {
-            _shiftRegisterLo <<= 1;
-            _shiftRegisterHi <<= 1;
-
-            _attributeRegisterLo <<= 1;
-            _attributeRegisterHi <<= 1;
-        }
-
         private void Cycle()
         {
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
@@ -257,35 +208,31 @@ namespace NESCore.PPU
                     // Only output pixels to the framebuffer on visible scanlines (0..239)
                     if (isRenderScanline && _scanlineCycles < 256)
                     {
-                        var paletteAddress = GetCurrentPixelPaletteAddress();
-                        var paletteId = _ppuMemory.Read(paletteAddress) & 0x3F;
                         var pxOffset = (_scanlineCycles + _scanlines * 256) * 3;
 
                         var showBg = _registers.ShowBackground() &&
                                      (_scanlineCycles >= 8 || _registers.ShowBackgroundInLeftColumn());
                         var showSpr = _registers.ShowSprites() &&
                                       (_scanlineCycles >= 8 || _registers.ShowSpritesInLeftColumn());
-                        var bgPx = showBg
-                            ? Palette[paletteId]
-                            : Palette[_ppuMemory.Read(0x3F00)]; // Render the default background color
-                        var bgOpaque = showBg && GetBgColorPaletteId() != 0;
+                        var bgPx = _backgroundEvaluator.NextPixel(_scanlineCycles);
+                        
                         var sprData = _spriteEvaluator.SpriteScanlineBuffer[_scanlineCycles];
                         var sprOpaque = showSpr && sprData.PixelColor is not null;
 
                         Color pixel;
-                        if (sprOpaque && (!bgOpaque || !sprData.BehindBackground))
+                        if (sprOpaque && (!bgPx.opaque || !sprData.BehindBackground))
                         {
                             pixel = sprData.PixelColor!.Value;
                         }
                         else
                         {
-                            pixel = bgPx;
+                            pixel = bgPx.pixel;
                         }
                         
                         // Sprite 0 Hit: both pixels must be opaque
                         if (showBg && showSpr && 
                             sprData is { PixelColor: not null, Zero: true } &&
-                            GetBgColorPaletteId() != 0 &&
+                            bgPx.opaque &&
                             _scanlineCycles < 255)
                         {
                             _registers.SetSpriteZeroHitFlag(true);
@@ -296,56 +243,7 @@ namespace NESCore.PPU
                         _frameBuffer[pxOffset + 0] = pixel.B;
                     }
 
-                    MoveShiftRegisters();
-
-                    var phase = _scanlineCycles % 8;
-                    if (phase == 1)
-                    {
-                        var ntAddress = _loopyRegisters.GetNametableAddress();
-                        _ntId = _ppuMemory.Read(ntAddress);
-                    }
-                    else if (phase == 3)
-                    {
-                        var atAddress = _loopyRegisters.GetAttributeAddress();
-                        _attributeId = _ppuMemory.Read(atAddress);
-                    }
-                    else if (phase == 5)
-                    {
-                        // pattern table low
-                        // address is based on the control register
-                        var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
-                        var fineY = (ushort)_loopyRegisters.GetFineYScroll();
-                        var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16);
-                        _patternLow = _ppuMemory.Read(ptAddress);
-                    }
-                    else if (phase == 7)
-                    {
-                        // pattern table low
-                        // address is based on the control register
-                        var patternBaseAddress = _registers.GetbackgroundPatternTableAddress();
-                        var fineY = (ushort)_loopyRegisters.GetFineYScroll();
-                        var ptAddress = (ushort)(patternBaseAddress + fineY + _ntId * 16 + 8);
-                        _patternHigh = _ppuMemory.Read(ptAddress);
-
-                        // Reload shift registers (lower 8 bits)
-                        _shiftRegisterLo = (ushort)((_shiftRegisterLo & 0xFF00) | _patternLow);
-                        _shiftRegisterHi = (ushort)((_shiftRegisterHi & 0xFF00) | _patternHigh);
-                        
-                        var shiftAmount = _loopyRegisters.GetAttributeShift();
-
-                        var paletteBits = (_attributeId >> shiftAmount) & 0x03;
-                        var attrLo = (byte)((paletteBits & 1) != 0 ? 0xFF : 0x00);
-                        var attrHi = (byte)(((paletteBits >> 1) & 1) != 0 ? 0xFF : 0x00);
-                        _attributeRegisterLo = (ushort)((_attributeRegisterLo & 0xFF00) | attrLo);
-                        _attributeRegisterHi = (ushort)((_attributeRegisterHi & 0xFF00) | attrHi);
-
-                        _loopyRegisters.IncrementCoarseX();
-                    }
-
-                    if (_scanlineCycles == 255)
-                    {
-                        _loopyRegisters.IncrementY();
-                    }
+                    _backgroundEvaluator.Tick(_scanlineCycles);
                 }
                 else if (renderingEnabled && _scanlineCycles == 256)
                 {
