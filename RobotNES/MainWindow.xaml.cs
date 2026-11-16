@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using NESCore.APU;
 
 namespace RobotNES
 {
@@ -27,6 +28,7 @@ namespace RobotNES
         private readonly ILogger _logger;
         private readonly WriteableBitmap _bitmap = new(256, 240, 96.0, 96.0, PixelFormats.Bgr24, null);
         private readonly Int32Rect bitmapRect = new(0, 0, 256, 240);
+        private readonly AudioPlayer _audioPlayer = new();
 
         public MainWindow()
         {
@@ -94,6 +96,8 @@ namespace RobotNES
                 contentPanel.Children.Add(this.fileListView);
                 SetButtonsFocusable(true);
                 this.fileListView.Focus();
+                _nesSystem.Apu.SamplesReady -= _audioPlayer.AddSamples;
+                _audioPlayer.Clear();
             }
         }
         private const string ScreenshotsDirectory = "screenshots";
@@ -143,6 +147,7 @@ namespace RobotNES
                 var file = (NesFile)((ListViewItem)sender).Content;
                 _nesSystem = new NesSystem(file.Path, _logger);
                 _nesSystem.FrameBufferReady += RenderFrame;
+                _nesSystem.Apu.SamplesReady += _audioPlayer.AddSamples;
 
                 var image = new NearestScalingImage(_bitmap)
                 {

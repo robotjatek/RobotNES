@@ -21,6 +21,14 @@ namespace NESCore.APU
         private bool _irqInhibit;
 
         private byte _status;
+        
+        private const double CpuCyclesPerSample = 1.789773 * 1000 * 1000 / 44100.0; // NTSC cpu clock
+        private double _sampleTimer;
+        private readonly float[] _sampleBuffer = new float[735]; // 44 100 Hz / 60 FPS = 735
+        private int _sampleIndex;
+        private float _phase;
+        public event IApu.SamplesReadyHandler? SamplesReady;
+        
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
         public void Tick()
@@ -62,6 +70,23 @@ namespace NESCore.APU
                 if (_counter >= 37282)
                 {
                     _counter = 0;
+                }
+            }
+            
+            // test audio sample
+            _sampleTimer += 1.0;
+            if (_sampleTimer >= CpuCyclesPerSample)
+            {
+                _sampleTimer -= CpuCyclesPerSample;
+
+                _phase += 440.0f / 44100.0f;
+                if (_phase >= 1.0f) _phase -= 1.0f;
+                _sampleBuffer[_sampleIndex++] = _phase < 0.5f ? 0.05f : -0.05f;
+
+                if (_sampleIndex >= _sampleBuffer.Length)
+                {
+                    SamplesReady?.Invoke(_sampleBuffer, _sampleIndex);
+                    _sampleIndex = 0;
                 }
             }
         }

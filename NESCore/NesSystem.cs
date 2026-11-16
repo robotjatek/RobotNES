@@ -22,6 +22,7 @@ namespace NESCore
         private readonly IBUS _bus;
         private readonly ICpu _cpu;
         private readonly IPPU _ppu;
+        public IApu Apu { get; private set; }
         private readonly IController _controller1;
         private long _nextFrameTimestamp;
         private static readonly long FrameIntervalTicks = Stopwatch.Frequency / 60;
@@ -33,11 +34,11 @@ namespace NESCore
 
             _controller1 = new Controller(_logger);
             IController controller2 = new Controller(_logger);
-            IApu apu = new Apu(_logger);
+            Apu = new Apu(_logger);
 
             IMemory memory = new Memory();
             _ppu = new Ppu(new PPURegisters(), new PpuMemory(cartridge, _logger), _logger);
-            _bus = new Bus(cartridge, memory, _ppu, _controller1, controller2, apu, _logger);
+            _bus = new Bus(cartridge, memory, _ppu, _controller1, controller2, Apu, _logger);
 
             //TODO: Move this CPU creation block to a factory
             var instructions = new CpuInstructions().InstructionSet;
@@ -89,14 +90,28 @@ namespace NESCore
 
         private void LimitFrameRate()
         {
-            var remainingTicks = _nextFrameTimestamp - Stopwatch.GetTimestamp();
+            var now = Stopwatch.GetTimestamp();
+            var remainingTicks = _nextFrameTimestamp - now;
+
             if (remainingTicks > 0)
             {
-                var remainingMilliseconds = (int)Math.Ceiling(remainingTicks * 1000.0 / Stopwatch.Frequency);
-                Task.Delay(remainingMilliseconds).GetAwaiter().GetResult();
+                var twoMsTicks = Stopwatch.Frequency / 500;
+                while (_nextFrameTimestamp - Stopwatch.GetTimestamp() > twoMsTicks)
+                {
+                    Thread.Sleep(1);
+                }
+
+                while (Stopwatch.GetTimestamp() < _nextFrameTimestamp)
+                {
+                    Thread.SpinWait(10);
+                }
             }
 
             _nextFrameTimestamp += FrameIntervalTicks;
+            if (_nextFrameTimestamp < Stopwatch.GetTimestamp())
+            {
+                _nextFrameTimestamp = Stopwatch.GetTimestamp() + FrameIntervalTicks;
+            }
         }
     }
 }
