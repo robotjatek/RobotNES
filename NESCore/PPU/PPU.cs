@@ -12,6 +12,8 @@ namespace NESCore.PPU
         private readonly BackgroundEvaluator _backgroundEvaluator;
         internal LoopyRegisters Loopy => _loopyRegisters;
 
+        // Test-only hook for render tests comparing the framebuffer output (see InternalsVisibleTo).
+        internal byte[] FrameBuffer => _frameBuffer;
         private int _cycles;
         private int _scanlines;
         private int _scanlineCycles;
