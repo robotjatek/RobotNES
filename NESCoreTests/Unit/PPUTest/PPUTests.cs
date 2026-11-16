@@ -1054,53 +1054,56 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new Ppu(registers, memory.Object, _logger);
             
             // Sprite setup:
-            // There is a sprite at X = 0-7, Palette 3, but sprite rendering is disabled
+            // Sprite 0 covering scanline 8 (OamEntry.ScreenY = Y + 1, so Y=7 draws on rows 8..15),
+            // X = 0-7, Palette 3, in front of the background.
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => 
                 { 
                     return i switch 
                     { 
-                        // X = 0-7, Palette 3 
-                        0 => new OamEntry(0, 0, new OamEntry.SpriteAttribute(3, BehindBackground: false, false, false).ToByte(), 0, i), 
+                        0 => new OamEntry(7, 0, new OamEntry.SpriteAttribute(3, BehindBackground: false, false, false).ToByte(), 0, i), 
                         _ => new OamEntry(0xEF, 0, 0, 10, i) 
                     }; 
                 });
             
             const byte pattern1 = 0b10000000;
             const byte pattern2 = 0b01000000;
+            // Background opaque on scanline 8: the fetch (V coarseY=1, coarseX 0/1) reads the nametable
+            // at 0x2020/0x2021 -> tile 1. Bg pattern base 0x0000, tile 1 planes 0x0010/0x0018 all set =>
+            // color index 3 (opaque). Attribute 0 => palette 0 => NextPixel reads 0x3F03.
             memory.Setup(m => m.Read(It.IsAny<ushort>()))
                 .Returns((ushort address) =>
                 {
                     return address switch
                     {
-                        // planes
+                        // sprite 0 pattern row 0 (sprite ScreenY=8 => row = scanline - 8)
                         0x1000 => pattern1,
                         0x1008 => pattern2,
-                        
+
+                        // tile 1 (opaque, color index 3) at every coarseX the fetch may hit
+                        0x2020 => 1,
+                        0x2021 => 1,
+                        0x2000 => 1,
+                        0x2001 => 1,
+                        0x0010 => 0xFF, // tile 1 plane low
+                        0x0018 => 0xFF, // tile 1 plane high
+                        0x23C0 => 0x00, // attribute: palette 0
+                        0x3F03 => 0x0F, // palette 0, color index 3 => opaque
+
                         // palette px 1 (first sprite pixel from palette index 4)
                         0x3F1D => 4,
-                        
+
                         _ => 0
                     };
                 });
-            
-            memory.Setup(m => m.Read(0x3F0F)).Returns(21); // Background color from palette index 21
-            
+
             ppu.Run(341); // First line
             registers.GetSpriteZeroHitFlag().Should().BeFalse();
-            
-            // set the background bits on the second line into the shift registers
-            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
-                SetValue(ppu, (ushort)0x8000);
-            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
-                SetValue(ppu, (ushort)0x8000);
-            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.
-                SetValue(ppu, (ushort)0x8000);
-            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.
-                SetValue(ppu, (ushort)0x8000);
-            
-            ppu.Run(1); // Draw the first pixel of the second line (first visible sprite scanline)
-            
+
+            // Land on scanline 8, cycle 8: bg shift registers reloaded with the opaque tile, sprite 0 covers x=0..7,
+            // so the pixel is sprite 0 over an opaque background -> the sprite-0 hit flag gets set.
+            ppu.Run(341 * 7 + 9); // scanline 8, cycle 8
+
             registers.GetSpriteZeroHitFlag().Should().BeTrue();
         }
         
