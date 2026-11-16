@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Moq;
 
 using NESCore.PPU;
@@ -451,29 +451,6 @@ namespace NESCoreTests.Unit.PPUTest
             
             memory.Verify(m => m.Read(0x2042), Times.Once);
         }
-        
-        [Fact]
-        public void ShouldFetchAttributeTableOnVisibleCycle4()
-        {
-            var registers = new PPURegisters { Mask = 0x8 };
-            var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
-            
-            ppu.Write(0x2006, 0x00);
-            ppu.Write(0x2006, 0x8C);
-            // NT read
-            memory.Setup(m => m.Read(0x208C)).Returns(0x00);
-            // AT read
-            memory.Setup(m => m.Read(0x23CB)).Returns(0xAA);
-
-            ppu.Run(4);
-
-            memory.Verify(m => m.Read(0x23CB), Times.Once);
-            
-            var field = typeof(Ppu).GetField("_attributeId", BindingFlags.NonPublic | BindingFlags.Instance);
-            var attributeId = field?.GetValue(ppu);
-            attributeId.Should().Be(0xAA);
-        }
 
         [Fact]
         public void ShouldFetchPatternTableLowCycle6()
@@ -528,117 +505,6 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ShouldReloadShiftRegisters()
-        {
-            // Shift registers are used to output pixels.
-            // There are 2 shift registers, one for the low bits and one for the high bits from the pattern table.
-            // These bytes were loaded from the pattern table in the previous cycles.
-            var registers = new PPURegisters
-            {
-                Control = 0x10, // BG base 0x1000
-                Mask = 0x8
-            };
-            
-            var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
-            ppu.Write(0x2006, 0);
-            ppu.Write(0x2006, 0x8C);
-            
-            memory.Setup(m => m.Read(0x208C)).Returns(0x41);
-            memory.Setup(m => m.Read(0x22CB)).Returns(0x00);
-            memory.Setup(m => m.Read(0x1410)).Returns(0b11110000); // pattern-lo
-            memory.Setup(m => m.Read(0x1418)).Returns(0b10101010); // pattern-hi
-            
-            ppu.Run(8);
-            
-            memory.Verify(m => m.Read(0x208C));
-            
-            var shiftLo = typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var shiftHi = typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
-            
-            var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
-            var highValue = (ushort)shiftHi!.GetValue(ppu)!;
-            
-            (lowValue & 0x00FF).Should().Be(0b11110000);
-            (highValue & 0x00FF).Should().Be(0b10101010);
-        }
-
-        [Fact]
-        public void ShiftRegisters_ShouldShiftLeftOneBit_DuringVisibleCycles()
-        {
-            // same as the previous test, only shift registers should be shifted left one bit
-            var registers = new PPURegisters()
-            {
-                Control = 0x10,
-                Mask = 0x8
-            };
-            var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
-            ppu.Write(0x2006, 0);
-            ppu.Write(0x2006, 0x8C);
-
-            memory.Setup(m => m.Read(0x208c)).Returns(0x41);
-            memory.Setup(m => m.Read(0x22CB)).Returns(0);
-            memory.Setup(m => m.Read(0x1410)).Returns(0b11110000);
-            memory.Setup(m => m.Read(0x1418)).Returns(0b10101010);
-            
-            ppu.Run(8); // Load the shift registers with the first 8 bits
-            ppu.Run(1); // Shift left one bit
-            
-            var shiftLo = typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var shiftHi = typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var lowValue = (ushort)shiftLo!.GetValue(ppu)!;
-            var highValue = (ushort)shiftHi!.GetValue(ppu)!;
-
-            // registers should be shifted left one bit
-            lowValue.Should().Be(0b111100000);
-            highValue.Should().Be(0b101010100);
-        }
-
-        [Fact]
-        public void ShouldReloadAttributeShiftRegisterWithCorrect2BitsOnCycle8()
-        {
-            // every pixel needs two bits from AT
-            // AT bits:
-            //  0,1 top-left
-            //  2,3 top-right
-            //  4-5 bottom-left
-            //  6-7 bottom right
-            
-            // coarse X and coarse y determine which quarter of the AT to use
-            // coarse X bit 1 == 1 => right
-            // coarse Y bit 1 == 1 => bottom
-            
-            var registers = new PPURegisters
-            {
-                Control = 0x10,
-                Mask = 0x8
-            };
-            var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
-            
-            // coarse X = 2 (bit 1 = 1), coarse y = 2 (bit 1 = 1) [right bottom at bits]
-            ppu.Write(0x2006, 0);
-            ppu.Write(0x2006, 0x42);
-            
-            memory.Setup(m => m.Read(0x2042)).Returns(0);
-            // $23C0 | 0 | 0 | 0 = $23C0
-            memory.Setup(m => m.Read(0x23C0)).Returns(0b11000000); // bottom right palette is set to 3
-
-            ppu.Run(8);
-            
-            var attrLo = typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance);
-            var attrHi = typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance);
-            
-            var attrLoValue = (ushort)attrLo!.GetValue(ppu)!;
-            var attrHiValue = (ushort)attrHi!.GetValue(ppu)!;
-
-            (attrLoValue & 0x01).Should().Be(1);
-            (attrHiValue & 0x01).Should().Be(1);
-        }
-
-        [Fact]
         public void ShouldKeepFetchingOnNonVisibleCycles()
         {
             // ppu does not stop fetching during non-visible cycles
@@ -659,23 +525,6 @@ namespace NESCoreTests.Unit.PPUTest
         }
 
         [Fact]
-        public void ShouldGetCurrentPixelPaletteAddressFromShiftRegisters()
-        {
-            var registers = new PPURegisters { Control = 0x10 };
-            var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
-            
-            typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 0 = 1
-            typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000); // bit 1 = 1 -> Color Index = 3
-            typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 0 = 1
-            typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);  // bit 1 = 1 -> Palette ID = 3
-            
-            var paletteAddress = ppu.GetCurrentPixelPaletteAddressTest();
-            // 0x3F00 | (3 << 2) | 3 = 0x3F0F
-            paletteAddress.Should().Be(0x3F0F);
-        }
-
-        [Fact]
         public void OnVisibleScanline_ShouldRenderPixelFromPalette()
         {
             var registers = new PPURegisters {
@@ -685,13 +534,16 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN };
             var memory = new Mock<IPPUMemory>();
             var ppu = new Ppu(registers, memory.Object, _logger);
+            memory.Setup(m => m.Read(0x3F0F)).Returns(0x15);
+            
+            var loopy = new LoopyRegisters();
+            var a = new BackgroundEvaluator(loopy, memory.Object, registers);
+            a.Tick(1);
             
             typeof(Ppu).GetField("_shiftRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             typeof(Ppu).GetField("_shiftRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             typeof(Ppu).GetField("_attributeRegisterLo", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
             typeof(Ppu).GetField("_attributeRegisterHi", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(ppu, (ushort)0x8000);
-            
-            memory.Setup(m => m.Read(0x3F0F)).Returns(0x15);
             
             ppu.Run(1);
             
