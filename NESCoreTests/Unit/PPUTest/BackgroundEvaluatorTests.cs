@@ -5,10 +5,6 @@ namespace NESCoreTests.Unit.PPUTest;
 
 public class BackgroundEvaluatorTests : TestBase
 {
-    
-    
-    
-    //---------------------------------------
     [Fact]
     public void ShouldFetchNametableOnPhase1()
     {
@@ -381,5 +377,47 @@ public class BackgroundEvaluatorTests : TestBase
         var (opaque7, pixel7) = bgEvaluator.NextPixel(7);
         opaque7.Should().BeFalse();
         pixel7.Should().Be(Ppu.Palette[0x0F]);
+    }
+
+    [Fact]
+    public void NextPixel_ShouldMapPaletteIndexToNtscRgb()
+    {
+        // Ported from PPUTests.OnVisibleScanline_ShouldRenderPixelFromPalette: the background
+        // pipeline must resolve a palette index to the exact NTSC RGB triple from Ppu.Palette.
+        // Palette index 0x15 is NTSC (228, 0, 88).
+        var loopy = new LoopyRegisters();
+
+        var registers = new PPURegisters
+        {
+            Mask = PPUMaskFlagPositions.SHOW_BACKGROUND | PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN
+        };
+
+        // Make the first pixel opaque with color index 1 in palette 0, whose entry is 0x15.
+        // Nametable at V=0 -> 0x2000 -> tile 1; bg pattern base 0x0000 -> planes 0x0010/0x0018;
+        // attribute 0 -> palette 0; the palette read is 0x3F01.
+        var memory = new Mock<IPPUMemory>();
+        memory.Setup(m => m.Read(0x2000)).Returns(1);   // tile 1
+        memory.Setup(m => m.Read(0x23C0)).Returns(0x00); // attribute: palette 0
+        memory.Setup(m => m.Read(0x0010)).Returns(0b10000000); // plane low  -> color index 1
+        memory.Setup(m => m.Read(0x0018)).Returns(0b00000000); // plane high -> color index 1
+        memory.Setup(m => m.Read(0x3F01)).Returns(0x15);        // palette 0, color 1 -> NTSC index 0x15
+        memory.Setup(m => m.Read(0x3F00)).Returns(0x0F);        // backdrop
+
+        var bgEvaluator = new BackgroundEvaluator(loopy, memory.Object, registers);
+
+        // Tick a tile's worth of cycles so the pattern loaded at Tick(7) shifts up to where
+        // the pixel is read, then read the pixel back through the public API only.
+        for (var cycle = 0; cycle < 16; cycle++)
+        {
+            bgEvaluator.Tick(cycle);
+        }
+
+        var (opaque, pixel) = bgEvaluator.NextPixel(8);
+
+        opaque.Should().BeTrue();
+        pixel.Should().Be(Ppu.Palette[0x15]);
+        pixel.R.Should().Be(228);
+        pixel.G.Should().Be(0);
+        pixel.B.Should().Be(88);
     }
 }
