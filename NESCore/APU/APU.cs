@@ -65,6 +65,11 @@ namespace NESCore.APU
             // IRQ only happens in 4-step mode, when IRQs are not inhibited
             if (_4StepMode)
             {
+                if (_counter is 14913 or 29829)
+                {
+                    ClockHalfFrame();
+                }
+                
                 if (_counter is 29828 or 29829 or 29830 && !_irqInhibit)
                 {
                     _status |= STATUS_FRAME_COUNTER_FLAG; // No auto-ACK from the interrupt handler. F bit stays on until it is cleared manually!
@@ -77,6 +82,11 @@ namespace NESCore.APU
             }
             else // 5-step mode
             {
+                if (_counter is 14913 or 37281)
+                {
+                    ClockHalfFrame();
+                }
+                
                 if (_counter >= 37282)
                 {
                     _counter = 0;
@@ -104,8 +114,8 @@ namespace NESCore.APU
             if (address == 0x4015)
             {
                 var result = _status;
-                if (_pulseChannel1.Enabled) result |= 0x01; // TODO: _pulse.LenghtCounter
-                if (_pulseChannel2.Enabled) result |= 0x02; // TODO: _pulse.LenghtCounter
+                if (_pulseChannel1.LengthCounter > 0) result |= 0x01;
+                if (_pulseChannel2.LengthCounter > 0) result |= 0x02;
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
@@ -160,10 +170,21 @@ namespace NESCore.APU
 
                 // 3 cycles delay to reset when write occurs on odd cycles, 4 on even cycles
                 _counterResetDelay = _latch ? 3 : 4;
+
+                if (!_4StepMode)
+                {
+                    ClockHalfFrame();
+                }
                 
                 return;
             }
             logger.Debug("Write to APU address 0x{Address:X4} is ignored. Value: 0x{Data:X2}", address, data);
+        }
+
+        private void ClockHalfFrame()
+        {
+            _pulseChannel1.TickLenghtCounter();
+            _pulseChannel2.TickLenghtCounter();
         }
     }
 }
