@@ -65,6 +65,11 @@ namespace NESCore
             _logger.Information("Stopping emulation...");
         }
 
+        public void Start()
+        {
+            _running = true;
+        }
+
         public void PressControllerButton(IController.Keys key)
         {
             _controller1.PressKey(key);

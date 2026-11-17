@@ -22,7 +22,7 @@
                 <MenuItem Header="File">
                     <MenuItem Header="Save state" InputGestureText="F1"></MenuItem>
                     <MenuItem Header="Load state" InputGestureText="F3"></MenuItem>
-                    <MenuItem Header="Controls"></MenuItem>
+                    <MenuItem Header="Controls" Click="OpenSettingsWindow"></MenuItem>
                 </MenuItem>
             </Menu>
             <ListView DockPanel.Dock="Top" Name="fileListView" ItemsSource="{Binding NesFiles}" Height="Auto" VerticalAlignment="Stretch">

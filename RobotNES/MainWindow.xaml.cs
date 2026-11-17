@@ -130,6 +130,15 @@ namespace RobotNES
                 _audioPlayer.Clear();
             }
         }
+
+        private async Task Resume()
+        {
+            if (_nesSystem?.Running == true)
+                return;
+
+            await Task.Run(() => _nesSystem?.Run());
+        }
+        
         private const string ScreenshotsDirectory = "screenshots";
         private void Screenshot_OnClick(object sender, RoutedEventArgs e)
         {
@@ -227,12 +236,22 @@ namespace RobotNES
         {
             base.OnDeactivated(e);
             _gamepadListener.Stop();
+            
+            if (_nesSystem?.Running == true)
+                _nesSystem!.Stop();
         }
 
-        protected override void OnActivated(EventArgs e)
+        protected override async void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
             _gamepadListener.Start();
+            await Resume();
+        }
+
+        private void OpenSettingsWindow(object sender, RoutedEventArgs args)
+        {
+            var settings = new Settings();
+            settings.ShowDialog();
         }
     }
 }
