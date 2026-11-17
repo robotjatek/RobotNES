@@ -6,6 +6,7 @@
 /// 0: 12.5%, 1: 25.0%, 2: 50.0%, 3: 75.0%
 /// Every tick it decrements its internal timer. It is returning the currently set duty value until the timer is >0 then increments the dutyStep
 /// The smaller the time, the faster we step to the next value => the higher the pitch
+/// Its output is either 0 or VOLUME (0-15), or volume scaled by the envelope. The length of a note is determined by the length counter
 /// </summary>
 public class PulseChannel(bool channelOne)
 {

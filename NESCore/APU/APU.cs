@@ -113,7 +113,11 @@ namespace NESCore.APU
                 var tOut = triangle == 0 ? 0f : 159.79f / ((1.0f / (triangle / 8227.0f)) + 100.0f);
                 var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
                 var pulseOut = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
-                _sampleBuffer[_sampleIndex++] = (pulseOut + tOut) * 0.3f;
+                var sample = (pulseOut + tOut) * 0.3f;
+                var filtered = sample - _prevInput + 0.995f * _prevOutput;
+                _prevInput = sample;
+                _prevOutput = filtered;
+                _sampleBuffer[_sampleIndex++] = filtered;
 
                 if (_sampleIndex >= _sampleBuffer.Length)
                 {
@@ -122,6 +126,9 @@ namespace NESCore.APU
                 }
             }
         }
+
+        private float _prevInput;
+        private float _prevOutput;
 
         public byte Read(ushort address)
         {

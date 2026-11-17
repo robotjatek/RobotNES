@@ -1,5 +1,9 @@
 ﻿namespace NESCore.APU;
 
+/**
+ * Has a sequence table which is similar to the duty table but triangle has no concept of duty cycles or volume,
+ * so possible return values are hardcoded into the table 
+ */
 public class TriangleChannel
 {
     private bool _halt;
