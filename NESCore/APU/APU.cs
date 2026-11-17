@@ -65,8 +65,13 @@ namespace NESCore.APU
             // IRQ only happens in 4-step mode, when IRQs are not inhibited
             if (_4StepMode)
             {
-                if (_counter is 14913 or 29829)
+                if (_counter is 7457 or 22371)
                 {
+                    ClockQuarterFrame();
+                }
+                else if (_counter is 14913 or 29829)
+                {
+                    ClockQuarterFrame();
                     ClockHalfFrame();
                 }
                 
@@ -82,8 +87,13 @@ namespace NESCore.APU
             }
             else // 5-step mode
             {
-                if (_counter is 14913 or 37281)
+                if (_counter is 7457 or 22371)
                 {
+                    ClockQuarterFrame();
+                }
+                else if (_counter is 14913 or 37281)
+                {
+                    ClockQuarterFrame();
                     ClockHalfFrame();
                 }
                 
@@ -174,6 +184,7 @@ namespace NESCore.APU
                 if (!_4StepMode)
                 {
                     ClockHalfFrame();
+                    ClockQuarterFrame();
                 }
                 
                 return;
@@ -186,5 +197,11 @@ namespace NESCore.APU
             _pulseChannel1.TickLenghtCounter();
             _pulseChannel2.TickLenghtCounter();
         }
+        
+        private void ClockQuarterFrame()
+        {
+            _pulseChannel1.TickEnvelope();
+            _pulseChannel2.TickEnvelope();
+        } 
     }
 }

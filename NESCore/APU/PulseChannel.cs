@@ -27,19 +27,25 @@ public class PulseChannel
     private ushort _timerValue;
     private byte _dutyStep;
     
+    // https://www.nesdev.org/wiki/APU_Envelope
+    private bool _constantMode;
+    private bool _envelopeStart;
+    private byte _envelopeCounter;
+    private byte _envelopeDivider;
+    
+    
     // "Once loaded with a value, it can optionally count down (when the length counter halt flag is clear). Once it reaches zero, the corresponding channel is silenced." https://www.nesdev.org/wiki/APU_Length_Counter
     public byte LengthCounter { get; private set; } // clocked by the frame counter
     private bool _lengthHalt;
     private static readonly byte[] LengthCounterTable = [10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14, 12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30]; // from nesdev wiki
 
-    private bool _enabled;
     public bool Enabled
     {
-        get => _enabled;
+        get;
         set
         {
-            _enabled = value;
-            if (!_enabled)
+            field = value;
+            if (!field)
             {
                 LengthCounter = 0;
             }
@@ -57,8 +63,9 @@ public class PulseChannel
                 // C: Constant volume flag (override envelope with V)
                 // V: volume
                 _mode = (byte)((value >> 6) & 0x03);
-                _volume = (byte)(value & 0x0f);
+                _volume = (byte)(value & 0x0f); // volume / envelope period
                 _lengthHalt = (value & 0b00100000) > 0;
+                _constantMode = (value & 0b00010000) > 0;
                 break;
             case 1:
                 // Sweep
@@ -74,6 +81,7 @@ public class PulseChannel
                 if (Enabled)
                     LengthCounter = LengthCounterTable[(value >> 3) & 0b11111]; // only can be set when enabled
                 _dutyStep = 0; // restart phase
+                _envelopeStart = true; // restart the envelope on a new sound
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(register));
@@ -108,11 +116,43 @@ public class PulseChannel
         LengthCounter--;
     }
 
+    public void TickEnvelope()
+    {
+        if (_envelopeStart)
+        {
+            // "When the divider is clocked while at 0, it is loaded with V and clocks the decay level counter."
+            _envelopeStart = false;
+            _envelopeCounter = 15;
+            _envelopeDivider = _volume;
+            return;
+        }
+        
+        if (_envelopeDivider > 0)
+        {
+            _envelopeDivider--;
+        }
+        else
+        {
+            _envelopeDivider = _volume;
+            if (_envelopeCounter > 0)
+            {
+                _envelopeCounter--;
+            }
+            else if (_lengthHalt)
+            {
+                _envelopeCounter = 15;
+            }
+        }
+    }
+
     public byte GetOutput()
     {
         if (!Enabled || _timerPeriod < 8 || LengthCounter == 0)
             return 0;
-        
-        return DutyTable[_mode][_dutyStep] == 1 ? _volume : (byte)0;
+
+        if (DutyTable[_mode][_dutyStep] == 0)
+            return 0;
+
+        return _constantMode ? _volume : _envelopeCounter;
     }
 }
