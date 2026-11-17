@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using NESCore.APU;
+﻿using NESCore.APU;
 
 namespace NESCoreTests.Unit.APUTest;
 

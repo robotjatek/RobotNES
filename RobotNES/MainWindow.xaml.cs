@@ -17,16 +17,17 @@ using System.Windows.Media.Imaging;
 
 namespace RobotNES
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private readonly Stopwatch _stopwatch = new();
-        private int _frameIndex = 0;
+        private int _frameIndex;
         private readonly double[] _frameTimes = new double[60];
 
         private NesSystem? _nesSystem;
         private readonly ILogger _logger;
         private readonly WriteableBitmap _bitmap = new(256, 240, 96.0, 96.0, PixelFormats.Bgr24, null);
-        private readonly Int32Rect bitmapRect = new(0, 0, 256, 240);
+        private readonly Int32Rect _bitmapRect = new(0, 0, 256, 240);
+        private readonly AudioPlayer _audioPlayer = new();
 
         public MainWindow()
         {
@@ -49,34 +50,31 @@ namespace RobotNES
         protected override async void OnPreviewKeyDown(KeyEventArgs e)
         {
             base.OnPreviewKeyDown(e);
-            if (_nesSystem?.Running == true)
+            if (_nesSystem?.Running != true) return;
+            
+            if (e.Key == Key.Escape)
             {
-                if (e.Key == Key.Escape)
-                {
-                    await Stop();
-                    e.Handled = true;
-                    return;
-                }
+                await Stop();
+                e.Handled = true;
+                return;
+            }
                 
-                if (_keyMap.TryGetValue(e.Key, out var value))
-                {
-                    _nesSystem?.PressControllerButton(value);
-                    e.Handled = true;
-                }
+            if (_keyMap.TryGetValue(e.Key, out var value))
+            {
+                _nesSystem?.PressControllerButton(value);
+                e.Handled = true;
             }
         }
 
         protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
             base.OnPreviewKeyUp(e);
-            if (_nesSystem?.Running == true)
-            {
-                if (_keyMap.TryGetValue(e.Key, out var value))
-                {
-                    _nesSystem?.ReleaseControllerButton(value);
-                    e.Handled = true;
-                }
-            }
+            
+            if (_nesSystem?.Running != true) return;
+            if (!_keyMap.TryGetValue(e.Key, out var value)) return;
+            
+            _nesSystem?.ReleaseControllerButton(value);
+            e.Handled = true;
         }
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
@@ -94,6 +92,8 @@ namespace RobotNES
                 contentPanel.Children.Add(this.fileListView);
                 SetButtonsFocusable(true);
                 this.fileListView.Focus();
+                _nesSystem.Apu.SamplesReady -= _audioPlayer.AddSamples;
+                _audioPlayer.Clear();
             }
         }
         private const string ScreenshotsDirectory = "screenshots";
@@ -143,6 +143,7 @@ namespace RobotNES
                 var file = (NesFile)((ListViewItem)sender).Content;
                 _nesSystem = new NesSystem(file.Path, _logger);
                 _nesSystem.FrameBufferReady += RenderFrame;
+                _nesSystem.Apu.SamplesReady += _audioPlayer.AddSamples;
 
                 var image = new NearestScalingImage(_bitmap)
                 {
@@ -167,23 +168,22 @@ namespace RobotNES
             Dispatcher.BeginInvoke(() =>
             {
                 _bitmap.Lock();
-                _bitmap.AddDirtyRect(bitmapRect);
+                _bitmap.AddDirtyRect(_bitmapRect);
                 var pixels = _bitmap.BackBuffer;
                 Marshal.Copy(frameBuffer, 0, pixels, frameBuffer.Length);
                 _bitmap.Unlock();
 
-                CountFPS();
+                CountFps();
             });
         }
 
-        private void CountFPS()
+        private void CountFps()
         {
             _stopwatch.Stop();
             var frametime = _stopwatch.Elapsed.TotalMilliseconds;
             _frameTimes[_frameIndex] = frametime;
             _frameIndex = (_frameIndex + 1) % _frameTimes.Length;
-
-
+            
             var fps = 1000 / _frameTimes.Average();
             Title = $"RobotNES | {fps} FPS";
             _stopwatch.Restart();

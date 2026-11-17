@@ -2,9 +2,11 @@
 {
     public interface IApu
     {
+        public delegate void SamplesReadyHandler(float[] samples, int count);
+        event SamplesReadyHandler? SamplesReady;
         bool IrqFlag { get; }
         void Tick();
-        void Write(UInt16 address, byte data);
-        byte Read(UInt16 address);
+        void Write(ushort address, byte data);
+        byte Read(ushort address);
     }
 }

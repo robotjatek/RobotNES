@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Runtime.Serialization;
+using Serilog;
 
 namespace NESCore.APU
 {
@@ -21,11 +22,28 @@ namespace NESCore.APU
         private bool _irqInhibit;
 
         private byte _status;
+        
+        private const double CpuCyclesPerSample = 1.789773 * 1000 * 1000 / 44100.0; // NTSC cpu clock
+        private double _sampleTimer;
+        private readonly float[] _sampleBuffer = new float[735]; // 44 100 Hz / 60 FPS = 735
+        private int _sampleIndex;
+        private float _phase;
+        public event IApu.SamplesReadyHandler? SamplesReady;
+        
+        private readonly PulseChannel _pulseChannel1 = new(true);
+        private readonly PulseChannel _pulseChannel2 = new(false);
+        
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
         public void Tick()
         {
             _latch = !_latch;
+
+            if (!_latch)
+            {
+                _pulseChannel1.Tick();
+                _pulseChannel2.Tick(); 
+            }
             
             if (_clearIrqBit && !_latch)
             {
@@ -47,6 +65,16 @@ namespace NESCore.APU
             // IRQ only happens in 4-step mode, when IRQs are not inhibited
             if (_4StepMode)
             {
+                if (_counter is 7457 or 22371)
+                {
+                    ClockQuarterFrame();
+                }
+                else if (_counter is 14913 or 29829)
+                {
+                    ClockQuarterFrame();
+                    ClockHalfFrame();
+                }
+                
                 if (_counter is 29828 or 29829 or 29830 && !_irqInhibit)
                 {
                     _status |= STATUS_FRAME_COUNTER_FLAG; // No auto-ACK from the interrupt handler. F bit stays on until it is cleared manually!
@@ -59,9 +87,34 @@ namespace NESCore.APU
             }
             else // 5-step mode
             {
+                if (_counter is 7457 or 22371)
+                {
+                    ClockQuarterFrame();
+                }
+                else if (_counter is 14913 or 37281)
+                {
+                    ClockQuarterFrame();
+                    ClockHalfFrame();
+                }
+                
                 if (_counter >= 37282)
                 {
                     _counter = 0;
+                }
+            }
+            
+            _sampleTimer += 1.0;
+            if (_sampleTimer >= CpuCyclesPerSample)
+            {
+                _sampleTimer -= CpuCyclesPerSample;
+                var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
+                var sample = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
+                _sampleBuffer[_sampleIndex++] = sample * 0.3f;
+
+                if (_sampleIndex >= _sampleBuffer.Length)
+                {
+                    SamplesReady?.Invoke(_sampleBuffer, _sampleIndex);
+                    _sampleIndex = 0;
                 }
             }
         }
@@ -71,6 +124,8 @@ namespace NESCore.APU
             if (address == 0x4015)
             {
                 var result = _status;
+                if (_pulseChannel1.LengthCounter > 0) result |= 0x01;
+                if (_pulseChannel2.LengthCounter > 0) result |= 0x02;
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
@@ -81,7 +136,23 @@ namespace NESCore.APU
 
         public void Write(ushort address, byte data)
         {
-            if (address == 0x4017)
+            if (address is >= 0x4000 and <= 0x4003)
+            {
+                _pulseChannel1.Write((ushort)(address - 0x4000), data);
+                return;
+            }
+            else if (address is >= 0x4004 and <= 0x4007)
+            {
+                _pulseChannel2.Write((ushort)(address - 0x4004), data);
+                return;
+            }
+            else if (address == 0x4015)
+            {
+                // ---D NT21
+                _pulseChannel1.Enabled = (data & 0b1) > 0;
+                _pulseChannel2.Enabled = (data & 0b10) > 0;
+            }
+            else if (address == 0x4017)
             {
                 // MI-- ----
                 // M: 0 = freerun 1 = external
@@ -109,10 +180,30 @@ namespace NESCore.APU
 
                 // 3 cycles delay to reset when write occurs on odd cycles, 4 on even cycles
                 _counterResetDelay = _latch ? 3 : 4;
+
+                if (!_4StepMode)
+                {
+                    ClockHalfFrame();
+                    ClockQuarterFrame();
+                }
                 
                 return;
             }
             logger.Debug("Write to APU address 0x{Address:X4} is ignored. Value: 0x{Data:X2}", address, data);
         }
+
+        private void ClockHalfFrame()
+        {
+            _pulseChannel1.TickLenghtCounter();
+            _pulseChannel1.TickSweep();
+            _pulseChannel2.TickLenghtCounter();
+            _pulseChannel2.TickSweep();
+        }
+        
+        private void ClockQuarterFrame()
+        {
+            _pulseChannel1.TickEnvelope();
+            _pulseChannel2.TickEnvelope();
+        } 
     }
 }
