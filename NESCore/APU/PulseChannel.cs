@@ -34,7 +34,6 @@ public class PulseChannel(bool channelOne)
     private byte _envelopeCounter;
     private byte _envelopeDivider;
 
-    private readonly bool _channelOne = channelOne;
     private bool _sweepEnable;
     private byte _sweepPeriod;
     private bool _sweepNegate;
@@ -186,7 +185,7 @@ public class PulseChannel(bool channelOne)
         var change = _timerPeriod >> _sweepShift;
         if (_sweepNegate)
         {
-            return _timerPeriod - change - (_channelOne ? 1 : 0);
+            return _timerPeriod - change - (channelOne ? 1 : 0);
         }
 
         return _timerPeriod + change;

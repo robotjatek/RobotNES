@@ -103,8 +103,9 @@ public class TriangleChannel
     
     public byte GetOutput()
     {
-        if (_timerPeriod < 2)
+        if (_timerPeriod < 2 || !Enabled)
             return 0;
+        
         return SequenceTable[_sequenceStep];
     }
 }
