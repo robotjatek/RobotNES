@@ -157,10 +157,12 @@ namespace NESCore.APU
                 _pulseChannel1.Enabled = (data & 0b1) > 0;
                 _pulseChannel2.Enabled = (data & 0b10) > 0;
                 _triangleChannel.Enabled = (data & 0b100) > 0;
+                return;
             }
             else if (address is >= 0x4008 and <= 0x400B)
             {
                 _triangleChannel.Write((ushort)(address - 0x4008), data);
+                return;
             }
             else if (address == 0x4017)
             {
@@ -208,13 +210,14 @@ namespace NESCore.APU
             _pulseChannel1.TickSweep();
             _pulseChannel2.TickLenghtCounter();
             _pulseChannel2.TickSweep();
-            _triangleChannel.TickLenghtCounter();
+            _triangleChannel.TickLengthCounter();
         }
         
         private void ClockQuarterFrame()
         {
             _pulseChannel1.TickEnvelope();
             _pulseChannel2.TickEnvelope();
+            _triangleChannel.TickLinearCounter();
         } 
     }
 }

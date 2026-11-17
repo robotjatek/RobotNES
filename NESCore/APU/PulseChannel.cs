@@ -193,7 +193,7 @@ public class PulseChannel(bool channelOne)
 
     private bool SweepMuting()
     {
-        return _timerPeriod < 8 || CalculateSweepTarget() > 0x7FFF;
+        return _timerPeriod < 8 || CalculateSweepTarget() > 0x7FF;
     }
 
     public byte GetOutput()

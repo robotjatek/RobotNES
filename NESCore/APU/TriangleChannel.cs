@@ -6,7 +6,9 @@ public class TriangleChannel
     private ushort _timerPeriod;
     private ushort _timerValue;
     private int _sequenceStep;
-    
+    private byte _linearCounter;
+    private byte _linearReloadValue;
+    private bool _linearReload;
     
     public byte LenghtCounter { get; private set; }
     public bool Enabled { 
@@ -34,7 +36,7 @@ public class TriangleChannel
         switch (register)
         {
             case 0:
-          //      _linearCounter = (byte)(value & 0x7F);
+                _linearReloadValue = (byte)(value & 0x7F);
                 _halt = (value & 0x80) > 0;
                 break;
             case 1:
@@ -47,6 +49,7 @@ public class TriangleChannel
                 _timerPeriod = (ushort)(( _timerPeriod & 0x00ff) | (value & 0b111) << 8);
                 if (Enabled)
                     LenghtCounter = LengthCounterTable[(value >> 3) & 0b11111];
+                _linearReload = true;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(register), register, null);
@@ -58,7 +61,7 @@ public class TriangleChannel
         if (_timerValue == 0)
         {
             _timerValue = _timerPeriod;
-            if (LenghtCounter > 0)
+            if (LenghtCounter > 0 && _linearCounter > 0)
             {
                 _sequenceStep = (byte)(_sequenceStep + 1) & 0x1F;
             }
@@ -69,12 +72,29 @@ public class TriangleChannel
         }
     }
 
-    public void TickLenghtCounter()
+    public void TickLengthCounter()
     {
         if (LenghtCounter == 0 || _halt)
             return;
 
         LenghtCounter--;
+    }
+
+    public void TickLinearCounter()
+    {
+        if (_linearReload)
+        {
+            _linearCounter = _linearReloadValue;
+        }
+        else if (_linearCounter > 0)
+        {
+            _linearCounter--;
+        }
+
+        if (!_halt)
+        {
+            _linearReload = false;
+        }
     }
     
     public byte GetOutput()
