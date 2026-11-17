@@ -81,7 +81,7 @@ public class NoiseChannel
         }
     }
 
-    public void TickLenghtCounter()
+    public void TickLengthCounter()
     {
         if (LengthCounter == 0 || _halt)
         {

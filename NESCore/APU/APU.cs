@@ -42,11 +42,11 @@ namespace NESCore.APU
             _latch = !_latch;
 
             _triangleChannel.Tick();
+            _noiseChannel.Tick();
             if (!_latch)
             {
                 _pulseChannel1.Tick();
                 _pulseChannel2.Tick();
-                _noiseChannel.Tick();
             }
             
             if (_clearIrqBit && !_latch)
@@ -114,14 +114,14 @@ namespace NESCore.APU
                 var triangle = _triangleChannel.GetOutput();
                 var noise = _noiseChannel.GetOutput();
                 var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
-                var tndDenom = (triangle / 8227.0f) + (noise / 12241.0f);
-                var tOut = tndDenom == 0f ? 0f : 159.79f / ((1.0f / tndDenom) + 100.0f);
+                var tndDenominator = (triangle / 8227.0f) + (noise / 12241.0f);
+                var tOut = tndDenominator == 0f ? 0f : 159.79f / ((1.0f / tndDenominator) + 100.0f);
                 var pulseOut = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
-                var sample = (pulseOut + tOut) * 0.3f;
-                var filtered = sample - _prevInput + 0.995f * _prevOutput;
+                var sample = (pulseOut + tOut) * 1.5f;
+                var filtered = sample - _prevInput + 0.9985f * _prevOutput;
                 _prevInput = sample;
                 _prevOutput = filtered;
-                _sampleBuffer[_sampleIndex++] = filtered;
+                _sampleBuffer[_sampleIndex++] = Math.Clamp(filtered, -1f, 1f);
 
                 if (_sampleIndex >= _sampleBuffer.Length)
                 {
@@ -229,7 +229,7 @@ namespace NESCore.APU
             _pulseChannel2.TickLenghtCounter();
             _pulseChannel2.TickSweep();
             _triangleChannel.TickLengthCounter();
-            _noiseChannel.TickLenghtCounter();
+            _noiseChannel.TickLengthCounter();
         }
         
         private void ClockQuarterFrame()
