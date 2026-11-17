@@ -33,6 +33,7 @@ namespace NESCore.APU
         private readonly PulseChannel _pulseChannel1 = new(true);
         private readonly PulseChannel _pulseChannel2 = new(false);
         private readonly TriangleChannel _triangleChannel = new();
+        private readonly NoiseChannel _noiseChannel = new();
         
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
@@ -44,7 +45,8 @@ namespace NESCore.APU
             if (!_latch)
             {
                 _pulseChannel1.Tick();
-                _pulseChannel2.Tick(); 
+                _pulseChannel2.Tick();
+                _noiseChannel.Tick();
             }
             
             if (_clearIrqBit && !_latch)
@@ -110,8 +112,10 @@ namespace NESCore.APU
             {
                 _sampleTimer -= CpuCyclesPerSample;
                 var triangle = _triangleChannel.GetOutput();
-                var tOut = triangle == 0 ? 0f : 159.79f / ((1.0f / (triangle / 8227.0f)) + 100.0f);
+                var noise = _noiseChannel.GetOutput();
                 var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
+                var tndDenom = (triangle / 8227.0f) + (noise / 12241.0f);
+                var tOut = tndDenom == 0f ? 0f : 159.79f / ((1.0f / tndDenom) + 100.0f);
                 var pulseOut = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
                 var sample = (pulseOut + tOut) * 0.3f;
                 var filtered = sample - _prevInput + 0.995f * _prevOutput;
@@ -138,6 +142,7 @@ namespace NESCore.APU
                 if (_pulseChannel1.LengthCounter > 0) result |= 0x01;
                 if (_pulseChannel2.LengthCounter > 0) result |= 0x02;
                 if (_triangleChannel.LenghtCounter > 0) result |= 0x04;
+                if (_noiseChannel.LengthCounter > 0) result |= 0x08;
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
@@ -164,11 +169,17 @@ namespace NESCore.APU
                 _pulseChannel1.Enabled = (data & 0b1) > 0;
                 _pulseChannel2.Enabled = (data & 0b10) > 0;
                 _triangleChannel.Enabled = (data & 0b100) > 0;
+                _noiseChannel.Enabled = (data & 0b1000) > 0;
                 return;
             }
             else if (address is >= 0x4008 and <= 0x400B)
             {
                 _triangleChannel.Write((ushort)(address - 0x4008), data);
+                return;
+            }
+            else if (address is >= 0x400C and <= 0x400F)
+            {
+                _noiseChannel.Write((ushort)(address - 0x400C), data);
                 return;
             }
             else if (address == 0x4017)
@@ -218,6 +229,7 @@ namespace NESCore.APU
             _pulseChannel2.TickLenghtCounter();
             _pulseChannel2.TickSweep();
             _triangleChannel.TickLengthCounter();
+            _noiseChannel.TickLenghtCounter();
         }
         
         private void ClockQuarterFrame()
@@ -225,6 +237,7 @@ namespace NESCore.APU
             _pulseChannel1.TickEnvelope();
             _pulseChannel2.TickEnvelope();
             _triangleChannel.TickLinearCounter();
+            _noiseChannel.TickEnvelope();
         } 
     }
 }
