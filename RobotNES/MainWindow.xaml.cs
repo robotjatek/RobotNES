@@ -14,44 +14,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace RobotNES
 {
     public partial class MainWindow
     {
-        [StructLayout(LayoutKind.Sequential)]
-        struct XINPUT_GAMEPAD
-        {
-            public ushort wButtons;
-            public byte bLeftTrigger;
-            public byte bRightTrigger;
-            public short sThumbLX;
-            public short sThumbLY;
-            public short sThumbRX;
-            public short sThumbRY;
-        }
-        
-        [StructLayout(LayoutKind.Sequential)]
-        struct XINPUT_STATE
-        {
-            public uint dwPacketNumber;
-            public XINPUT_GAMEPAD Gamepad;
-        }
-        
-        static class XInput
-        {
-            [DllImport("xinput1_4.dll")]
-            public static extern uint XInputGetState(
-                uint dwUserIndex,
-                out XINPUT_STATE pState);
-        }
-        
-        private readonly DispatcherTimer _timer = new()
-        {
-            Interval = TimeSpan.FromMilliseconds(16)
-        };
-        
         private readonly Stopwatch _stopwatch = new();
         private int _frameIndex;
         private readonly double[] _frameTimes = new double[60];
@@ -61,49 +28,20 @@ namespace RobotNES
         private readonly WriteableBitmap _bitmap = new(256, 240, 96.0, 96.0, PixelFormats.Bgr24, null);
         private readonly Int32Rect _bitmapRect = new(0, 0, 256, 240);
         private readonly AudioPlayer _audioPlayer = new();
-        
-        private GamepadButtons _previousButtons;
 
+        private NearestScalingImage? _image;
+        private readonly GamepadListener _gamepadListener = new();
+        
         public MainWindow()
         {
             InitializeComponent();
             _logger = CreateLogger();
-            _timer.Tick += (_,_) => PollController();
-            _timer.Start();
+            _gamepadListener.ButtonDown += ButtonDown;
+            _gamepadListener.ButtonUp += ButtonUp;
         }
 
-        private void PollController()
-        {
-            for (uint i = 0; i < 4; i++)
-            {
-                if (XInput.XInputGetState(i, out var state) != 0)
-                    continue;
-
-                var current = (GamepadButtons)state.Gamepad.wButtons;
-                var pressed = current & ~_previousButtons;
-                var released = _previousButtons & ~current;
-
-                foreach (var button in Enum.GetValues<GamepadButtons>())
-                {
-                    if (button == 0)
-                        continue;
-
-                    if ((pressed & button) != 0)
-                    {
-                        ButtonDown(button);
-                    }
-
-                    if ((released & button) != 0)
-                    {
-                        ButtonUp(button);
-                    }
-                }
-                
-                _previousButtons = current;
-            }
-        }
-
-        void ButtonDown(GamepadButtons button)
+        
+        private void ButtonDown(GamepadListener.GamepadButtons button)
         {
             if (_controllerMap.TryGetValue(button, out var value))
             {
@@ -111,41 +49,24 @@ namespace RobotNES
             }
         }
 
-        void ButtonUp(GamepadButtons button)
+        private void ButtonUp(GamepadListener.GamepadButtons button)
         {
             if (_controllerMap.TryGetValue(button, out var value))
             {
                 _nesSystem?.ReleaseControllerButton(value);
             }
         }
-        
-        [Flags]
-        enum GamepadButtons : ushort
-        {
-            DPadUp    = 0x0001,
-            DPadDown  = 0x0002,
-            DPadLeft  = 0x0004,
-            DPadRight = 0x0008,
-            Start     = 0x0010,
-            Back      = 0x0020,
-            A         = 0x1000,
-            B         = 0x2000,
-            X         = 0x4000,
-            Y         = 0x8000,
-            LB = 0x0100,
-            RB = 0x0200
-        }
 
-        private readonly Dictionary<GamepadButtons, IController.Keys> _controllerMap = new()
+        private readonly Dictionary<GamepadListener.GamepadButtons, IController.Keys> _controllerMap = new()
         {
-            { GamepadButtons.A, IController.Keys.A },
-            { GamepadButtons.X, IController.Keys.B },
-            { GamepadButtons.Start, IController.Keys.START },
-            { GamepadButtons.Back, IController.Keys.SELECT },
-            { GamepadButtons.DPadDown,  IController.Keys.DOWN },
-            { GamepadButtons.DPadLeft,  IController.Keys.LEFT },
-            { GamepadButtons.DPadRight, IController.Keys.RIGHT },
-            { GamepadButtons.DPadUp, IController.Keys.UP }
+            { GamepadListener.GamepadButtons.A, IController.Keys.A },
+            { GamepadListener.GamepadButtons.X, IController.Keys.B },
+            { GamepadListener.GamepadButtons.Start, IController.Keys.START },
+            { GamepadListener.GamepadButtons.Back, IController.Keys.SELECT },
+            { GamepadListener.GamepadButtons.DPadDown,  IController.Keys.DOWN },
+            { GamepadListener.GamepadButtons.DPadLeft,  IController.Keys.LEFT },
+            { GamepadListener.GamepadButtons.DPadRight, IController.Keys.RIGHT },
+            { GamepadListener.GamepadButtons.DPadUp, IController.Keys.UP }
         };
         
         private readonly Dictionary<Key, IController.Keys> _keyMap = new()
@@ -201,7 +122,7 @@ namespace RobotNES
             {
                 await Task.Run(() => _nesSystem?.Stop());
                 _logger.Information("Stopped");
-                contentPanel.Children.RemoveAt(0);
+                contentPanel.Children.Remove(_image);
                 contentPanel.Children.Add(this.fileListView);
                 SetButtonsFocusable(true);
                 this.fileListView.Focus();
@@ -258,12 +179,12 @@ namespace RobotNES
                 _nesSystem.FrameBufferReady += RenderFrame;
                 _nesSystem.Apu.SamplesReady += _audioPlayer.AddSamples;
 
-                var image = new NearestScalingImage(_bitmap)
+                _image = new NearestScalingImage(_bitmap)
                 {
                     Focusable = true
                 };
                 this.contentPanel.Children.Remove(this.fileListView);
-                this.contentPanel.Children.Add(image);
+                this.contentPanel.Children.Add(_image);
                 SetButtonsFocusable(false);
                 _stopwatch.Start();
                 await Task.Run(() => _nesSystem?.Run());
@@ -300,6 +221,18 @@ namespace RobotNES
             var fps = 1000 / _frameTimes.Average();
             Title = $"RobotNES | {fps} FPS";
             _stopwatch.Restart();
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            _gamepadListener.Stop();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            _gamepadListener.Start();
         }
     }
 }
