@@ -7,7 +7,7 @@
 /// Every tick it decrements its internal timer. It is returning the currently set duty value until the timer is >0 then increments the dutyStep
 /// The smaller the time, the faster we step to the next value => the higher the pitch
 /// </summary>
-public class PulseChannel
+public class PulseChannel(bool channelOne)
 {
     private static readonly byte[][] DutyTable =
     [
@@ -32,7 +32,14 @@ public class PulseChannel
     private bool _envelopeStart;
     private byte _envelopeCounter;
     private byte _envelopeDivider;
-    
+
+    private readonly bool _channelOne = channelOne;
+    private bool _sweepEnable;
+    private byte _sweepPeriod;
+    private bool _sweepNegate;
+    private byte _sweepShift; // the amount of right shift of the timerPeriod
+    private bool _sweepReload; // reloading the sweep is not instant 
+    private byte _sweepDivider;
     
     // "Once loaded with a value, it can optionally count down (when the length counter halt flag is clear). Once it reaches zero, the corresponding channel is silenced." https://www.nesdev.org/wiki/APU_Length_Counter
     public byte LengthCounter { get; private set; } // clocked by the frame counter
@@ -68,7 +75,12 @@ public class PulseChannel
                 _constantMode = (value & 0b00010000) > 0;
                 break;
             case 1:
-                // Sweep
+                // Sweep: EPPP NSSS
+                _sweepEnable = (value & 0b10000000) > 0; // E: Sweep enable flag
+                _sweepPeriod = (byte)((value >> 4) & 0b111); // P: Clock rate (3 bit)
+                _sweepNegate = (value & 0b0000_1000) > 0; // N: Negate flag
+                _sweepShift = (byte)(value & 0b111); // S: bit shift count (3 bit)
+                _sweepReload = true;
                 break;
             case 2:
                 // timer low: TTTT TTTT
@@ -145,9 +157,48 @@ public class PulseChannel
         }
     }
 
+    public void TickSweep()
+    {
+        var target = CalculateSweepTarget();
+
+        if (_sweepDivider == 0 && _sweepEnable && _sweepShift > 0 && !SweepMuting())
+        {
+            if (target >= 0)
+            {
+                _timerPeriod = (ushort)target;
+            }
+        }
+
+        if (_sweepDivider == 0 || _sweepReload)
+        {
+            _sweepDivider = _sweepPeriod;
+            _sweepReload = false;
+        }
+        else
+        {
+            _sweepDivider--;
+        }
+    }
+
+    private int CalculateSweepTarget()
+    {
+        var change = _timerPeriod >> _sweepShift;
+        if (_sweepNegate)
+        {
+            return _timerPeriod - change - (_channelOne ? 1 : 0);
+        }
+
+        return _timerPeriod + change;
+    }
+
+    private bool SweepMuting()
+    {
+        return _timerPeriod < 8 || CalculateSweepTarget() > 0x7FFF;
+    }
+
     public byte GetOutput()
     {
-        if (!Enabled || _timerPeriod < 8 || LengthCounter == 0)
+        if (!Enabled || SweepMuting() || LengthCounter == 0)
             return 0;
 
         if (DutyTable[_mode][_dutyStep] == 0)

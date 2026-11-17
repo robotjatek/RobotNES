@@ -30,8 +30,8 @@ namespace NESCore.APU
         private float _phase;
         public event IApu.SamplesReadyHandler? SamplesReady;
         
-        private readonly PulseChannel _pulseChannel1 = new();
-        private readonly PulseChannel _pulseChannel2 = new();
+        private readonly PulseChannel _pulseChannel1 = new(true);
+        private readonly PulseChannel _pulseChannel2 = new(false);
         
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
@@ -195,7 +195,9 @@ namespace NESCore.APU
         private void ClockHalfFrame()
         {
             _pulseChannel1.TickLenghtCounter();
+            _pulseChannel1.TickSweep();
             _pulseChannel2.TickLenghtCounter();
+            _pulseChannel2.TickSweep();
         }
         
         private void ClockQuarterFrame()
