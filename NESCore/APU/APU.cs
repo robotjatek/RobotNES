@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Runtime.Serialization;
+using Serilog;
 
 namespace NESCore.APU
 {
@@ -29,11 +30,20 @@ namespace NESCore.APU
         private float _phase;
         public event IApu.SamplesReadyHandler? SamplesReady;
         
+        private readonly PulseChannel _pulseChannel1 = new();
+        private readonly PulseChannel _pulseChannel2 = new();
+        
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
         public void Tick()
         {
             _latch = !_latch;
+
+            if (!_latch)
+            {
+                _pulseChannel1.Tick();
+                _pulseChannel2.Tick(); 
+            }
             
             if (_clearIrqBit && !_latch)
             {
@@ -73,15 +83,13 @@ namespace NESCore.APU
                 }
             }
             
-            // test audio sample
             _sampleTimer += 1.0;
             if (_sampleTimer >= CpuCyclesPerSample)
             {
                 _sampleTimer -= CpuCyclesPerSample;
-
-                _phase += 440.0f / 44100.0f;
-                if (_phase >= 1.0f) _phase -= 1.0f;
-                _sampleBuffer[_sampleIndex++] = _phase < 0.5f ? 0.05f : -0.05f;
+                var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
+                var sample = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
+                _sampleBuffer[_sampleIndex++] = sample * 0.3f;
 
                 if (_sampleIndex >= _sampleBuffer.Length)
                 {
@@ -96,6 +104,8 @@ namespace NESCore.APU
             if (address == 0x4015)
             {
                 var result = _status;
+                if (_pulseChannel1.Enabled) result |= 0x01; // TODO: _pulse.LenghtCounter
+                if (_pulseChannel2.Enabled) result |= 0x02; // TODO: _pulse.LenghtCounter
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
@@ -106,7 +116,23 @@ namespace NESCore.APU
 
         public void Write(ushort address, byte data)
         {
-            if (address == 0x4017)
+            if (address is >= 0x4000 and <= 0x4003)
+            {
+                _pulseChannel1.Write((ushort)(address - 0x4000), data);
+                return;
+            }
+            else if (address is >= 0x4004 and <= 0x4007)
+            {
+                _pulseChannel2.Write((ushort)(address - 0x4004), data);
+                return;
+            }
+            else if (address == 0x4015)
+            {
+                // ---D NT21
+                _pulseChannel1.Enabled = (data & 0b1) > 0;
+                _pulseChannel2.Enabled = (data & 0b10) > 0;
+            }
+            else if (address == 0x4017)
             {
                 // MI-- ----
                 // M: 0 = freerun 1 = external
