@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RobotNES"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="RobotNES" Height="900" Width="830">
+        Title="RobotNES" Height="800" Width="730">
     <Window.DataContext>
         <local:MainWindowViewModel />
     </Window.DataContext>
@@ -22,7 +22,8 @@
                 <MenuItem Header="File">
                     <MenuItem Header="Save state" InputGestureText="F1"></MenuItem>
                     <MenuItem Header="Load state" InputGestureText="F3"></MenuItem>
-                    <MenuItem Header="Controls" Click="OpenSettingsWindow"></MenuItem>
+                    <MenuItem Header="Settings" Click="OpenSettingsWindow"></MenuItem>
+                    <MenuItem Header="Reset"></MenuItem>
                 </MenuItem>
             </Menu>
             <ListView DockPanel.Dock="Top" Name="fileListView" ItemsSource="{Binding NesFiles}" Height="Auto" VerticalAlignment="Stretch">

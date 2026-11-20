@@ -1,0 +1,83 @@
+﻿<Window x:Class="RobotNES.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:RobotNES"
+        xmlns:settings="clr-namespace:RobotNES.Settings"
+        mc:Ignorable="d"
+        Title="Settings" Height="450" Width="800">
+    <Window.DataContext>
+        <settings:SettingsViewModel />
+    </Window.DataContext>
+    <Grid>
+        <GroupBox VerticalAlignment="Top" Header="Buttons">
+            <Grid VerticalAlignment="Top" Grid.IsSharedSizeScope="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                        
+                <Grid Grid.Column="0" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="BtnCol"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="D-PAD" FontWeight="Bold" Margin="0,0,0,10" Foreground="#555"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Up:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="1" Grid.Column="1" Tag="Up" Content="{Binding Up}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Down:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="2" Grid.Column="1" Tag="Down" Content="{Binding Down}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Left:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="3" Grid.Column="1" Tag="Left" Content="{Binding Left}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Right:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="4" Grid.Column="1" Tag="Right" Content="{Binding Right}" Padding="12,4" Margin="0,2" />
+                    
+                    <Label Grid.Row="5" Grid.Column="0" Content="{Binding PressedKey}"></Label>
+                </Grid>
+                
+                <Grid Grid.Column="2" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                        <ColumnDefinition Width="*" SharedSizeGroup="BtnCol"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Buttons" FontWeight="Bold" Margin="0,0,0,10" Foreground="#555"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="A:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="1" Grid.Column="1" Content="{Binding A}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="B:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="2" Grid.Column="1" Content="{Binding B}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Start:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="3" Grid.Column="1" Tag="Start" Content="{Binding Start}" Padding="12,4" Margin="0,2" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Select:" VerticalAlignment="Center" Margin="0,2,10,2"/>
+                    <Button Grid.Row="4" Grid.Column="1" Tag="Select" Content="{Binding Select}" Padding="12,4" Margin="0,2" />
+                </Grid>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>

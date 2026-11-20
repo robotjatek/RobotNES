@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Serilog;
+﻿using Serilog;
 
 namespace NESCore.APU
 {
@@ -143,6 +142,7 @@ namespace NESCore.APU
                 if (_pulseChannel2.LengthCounter > 0) result |= 0x02;
                 if (_triangleChannel.LenghtCounter > 0) result |= 0x04;
                 if (_noiseChannel.LengthCounter > 0) result |= 0x08;
+                // TODO: dmc samples remaining
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
@@ -170,6 +170,8 @@ namespace NESCore.APU
                 _pulseChannel2.Enabled = (data & 0b10) > 0;
                 _triangleChannel.Enabled = (data & 0b100) > 0;
                 _noiseChannel.Enabled = (data & 0b1000) > 0;
+                // TODO: If the DMC bit is clear, the bytes-remaining counter is set to 0 and the DMC will silence when it empties.
+                //  If the DMC bit is set, the DMC sample will be restarted only if its bytes-remaining counter is 0. If there are bits remaining in the shift register, these will finish playing before the next sample is fetched.
                 return;
             }
             else if (address is >= 0x4008 and <= 0x400B)

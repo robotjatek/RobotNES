@@ -133,8 +133,13 @@ namespace RobotNES
 
         private async Task Resume()
         {
-            if (_nesSystem?.Running == true)
+            if (_nesSystem == null)
                 return;
+            
+            if (_nesSystem.Running)
+                return;
+            
+            _gamepadListener.Start();
 
             await Task.Run(() => _nesSystem?.Run());
         }
@@ -244,13 +249,13 @@ namespace RobotNES
         protected override async void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            _gamepadListener.Start();
+            
             await Resume();
         }
 
         private void OpenSettingsWindow(object sender, RoutedEventArgs args)
         {
-            var settings = new Settings();
+            var settings = new SettingsWindow();
             settings.ShowDialog();
         }
     }
