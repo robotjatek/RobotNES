@@ -4,21 +4,21 @@ using System.Windows.Threading;
 
 namespace RobotNES;
 
-public class GamepadListener
+public class GamepadListener : IDisposable
 {
     public event Action<GamepadButtons>? ButtonDown;
     public event Action<GamepadButtons>? ButtonUp;
-    
+
     private readonly DispatcherTimer _timer = new()
     {
         Interval = TimeSpan.FromMilliseconds(16)
     };
-    
+
     private GamepadButtons _previousButtons;
 
     public GamepadListener()
     {
-        _timer.Tick += (_,_) => PollController();
+        _timer.Tick += (_, _) => PollController();
         _timer.Start();
     }
 
@@ -32,34 +32,41 @@ public class GamepadListener
     {
         _timer.Stop();
     }
-    
+
+    public void Dispose()
+    {
+        _timer.Stop();
+        ButtonDown = null;
+        ButtonUp = null;
+    }
+
     private void PollController()
     {
         for (uint i = 0; i < 4; i++)
         {
             if (XInput.XInputGetState(i, out var state) != 0)
                 continue;
-        
+
             var current = (GamepadButtons)state.Gamepad.wButtons;
             var pressed = current & ~_previousButtons;
             var released = _previousButtons & ~current;
-        
+
             foreach (var button in Enum.GetValues<GamepadButtons>())
             {
                 if (button == 0)
                     continue;
-        
+
                 if ((pressed & button) != 0)
                 {
                     ButtonDown?.Invoke(button);
                 }
-        
+
                 if ((released & button) != 0)
                 {
                     ButtonUp?.Invoke(button);
                 }
             }
-                
+
             _previousButtons = current;
         }
     }
@@ -88,7 +95,7 @@ public class GamepadListener
         [DllImport("xinput1_4.dll")]
         public static extern uint XInputGetState(uint dwUserIndex, out XINPUT_STATE pState);
     }
-    
+
     [Flags]
     public enum GamepadButtons : ushort
     {

@@ -6,7 +6,7 @@ using NESCore;
 
 namespace RobotNES.Settings;
 
-public class SettingsViewModel : INotifyPropertyChanged
+public class SettingsViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly GamepadListener _gamepadListener = new();
 
@@ -19,7 +19,7 @@ public class SettingsViewModel : INotifyPropertyChanged
     public ControllerMappings Mappings => ControllerMappings.Instance;
     
     public bool IsAwaitingRebind => _awaitingKey != null;
-    
+
     public string RebindHint => IsAwaitingRebind ? "Press a button on the controller (Esc to cancel)" : "";
 
     public SettingsViewModel()
@@ -28,6 +28,12 @@ public class SettingsViewModel : INotifyPropertyChanged
 
         _gamepadListener.Start();
         _gamepadListener.ButtonDown += OnButtonDown;
+    }
+
+    public void Dispose()
+    {
+        _gamepadListener.ButtonDown -= OnButtonDown;
+        _gamepadListener.Dispose();
     }
 
     private void StartRebind(string? nesButtonName)
@@ -41,7 +47,7 @@ public class SettingsViewModel : INotifyPropertyChanged
         _awaitingKey = nesKey;
         RaiseAwaitingChanged();
     }
-    
+
     public void CancelRebind()
     {
         if (_awaitingKey == null)

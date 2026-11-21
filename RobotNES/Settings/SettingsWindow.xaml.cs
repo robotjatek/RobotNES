@@ -8,6 +8,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        Closed += (_, _) => (DataContext as SettingsViewModel)?.Dispose();
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
