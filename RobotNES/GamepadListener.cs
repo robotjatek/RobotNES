@@ -24,6 +24,7 @@ public class GamepadListener
 
     public void Start()
     {
+        _previousButtons = default;
         _timer.Start();
     }
 
