@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using RobotNES.Settings;
 
 namespace RobotNES
 {
@@ -31,19 +32,21 @@ namespace RobotNES
 
         private NearestScalingImage? _image;
         private readonly GamepadListener _gamepadListener = new();
-        
+
         public MainWindow()
         {
             InitializeComponent();
             _logger = CreateLogger();
             _gamepadListener.ButtonDown += ButtonDown;
             _gamepadListener.ButtonUp += ButtonUp;
+            
+            _gamepadListener.Start();
         }
 
         
         private void ButtonDown(GamepadListener.GamepadButtons button)
         {
-            if (_controllerMap.TryGetValue(button, out var value))
+            if (ControllerMappings.Instance.ControllerMap.TryGetValue(button, out var value))
             {
                 _nesSystem?.PressControllerButton(value);
             }
@@ -51,23 +54,11 @@ namespace RobotNES
 
         private void ButtonUp(GamepadListener.GamepadButtons button)
         {
-            if (_controllerMap.TryGetValue(button, out var value))
+            if (ControllerMappings.Instance.ControllerMap.TryGetValue(button, out var value))
             {
                 _nesSystem?.ReleaseControllerButton(value);
             }
         }
-
-        private readonly Dictionary<GamepadListener.GamepadButtons, IController.Keys> _controllerMap = new()
-        {
-            { GamepadListener.GamepadButtons.A, IController.Keys.A },
-            { GamepadListener.GamepadButtons.X, IController.Keys.B },
-            { GamepadListener.GamepadButtons.Start, IController.Keys.START },
-            { GamepadListener.GamepadButtons.Back, IController.Keys.SELECT },
-            { GamepadListener.GamepadButtons.DPadDown,  IController.Keys.DOWN },
-            { GamepadListener.GamepadButtons.DPadLeft,  IController.Keys.LEFT },
-            { GamepadListener.GamepadButtons.DPadRight, IController.Keys.RIGHT },
-            { GamepadListener.GamepadButtons.DPadUp, IController.Keys.UP }
-        };
         
         private readonly Dictionary<Key, IController.Keys> _keyMap = new()
         {
@@ -115,35 +106,32 @@ namespace RobotNES
         {
             await Stop();
         }
-
+        
         private async Task Stop()
         {
-            if (_nesSystem?.Running == true)
-            {
-                await Task.Run(() => _nesSystem?.Stop());
-                _logger.Information("Stopped");
-                contentPanel.Children.Remove(_image);
-                contentPanel.Children.Add(this.fileListView);
-                SetButtonsFocusable(true);
-                this.fileListView.Focus();
-                _nesSystem.Apu.SamplesReady -= _audioPlayer.AddSamples;
-                _audioPlayer.Clear();
-            }
+            if (_nesSystem == null)
+                return;
+
+            await Task.Run(() => _nesSystem.Stop());
+            _nesSystem = null;
+            _logger.Information("Stopped");
+
+            contentPanel.Children.Remove(_image);
+            contentPanel.Children.Add(this.fileListView);
+            SetButtonsFocusable(true);
+            this.fileListView.Focus();
+            _audioPlayer.Clear();
         }
 
         private async Task Resume()
         {
-            if (_nesSystem == null)
+            if (_nesSystem is not { Running: false })
                 return;
-            
-            if (_nesSystem.Running)
-                return;
-            
-            _gamepadListener.Start();
 
+            _gamepadListener.Start();
             await Task.Run(() => _nesSystem?.Run());
         }
-        
+
         private const string ScreenshotsDirectory = "screenshots";
         private void Screenshot_OnClick(object sender, RoutedEventArgs e)
         {
@@ -241,9 +229,9 @@ namespace RobotNES
         {
             base.OnDeactivated(e);
             _gamepadListener.Stop();
-            
+
             if (_nesSystem?.Running == true)
-                _nesSystem!.Stop();
+                _nesSystem.Stop();
         }
 
         protected override async void OnActivated(EventArgs e)

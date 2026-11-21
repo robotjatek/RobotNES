@@ -8,8 +8,7 @@ public class SettingsViewModel : INotifyPropertyChanged
     private readonly GamepadListener _gamepadListener = new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    /// <summary>Raw last button pressed, for logic that needs the enum value.</summary>
+    
     public GamepadListener.GamepadButtons PressedKey
     {
         get;
@@ -23,6 +22,8 @@ public class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
+    public ControllerMappings Mappings => ControllerMappings.Instance;
+    
     public SettingsViewModel()
     {
         _gamepadListener.Start();
