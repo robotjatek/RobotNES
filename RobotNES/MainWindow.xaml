@@ -5,18 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RobotNES"
         mc:Ignorable="d"
-        Title="RobotNES" Height="450" Width="800">
+        WindowStartupLocation="CenterScreen"
+        Title="RobotNES" Height="800" Width="730">
     <Window.DataContext>
         <local:MainWindowViewModel />
     </Window.DataContext>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="8*"/>
+            <RowDefinition Height="9*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Name="contentPanel" Height="Auto" Focusable="True">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="File">
+                    <MenuItem Header="Save state" InputGestureText="F1"></MenuItem>
+                    <MenuItem Header="Load state" InputGestureText="F3"></MenuItem>
+                    <MenuItem Header="Settings" Click="OpenSettingsWindow"></MenuItem>
+                    <MenuItem Header="Reset"></MenuItem>
+                </MenuItem>
+            </Menu>
             <ListView DockPanel.Dock="Top" Name="fileListView" ItemsSource="{Binding NesFiles}" Height="Auto" VerticalAlignment="Stretch">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">

@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using RobotNES.Settings;
 
 namespace RobotNES
 {
@@ -29,12 +30,36 @@ namespace RobotNES
         private readonly Int32Rect _bitmapRect = new(0, 0, 256, 240);
         private readonly AudioPlayer _audioPlayer = new();
 
+        private NearestScalingImage? _image;
+        private readonly GamepadListener _gamepadListener = new();
+
         public MainWindow()
         {
             InitializeComponent();
             _logger = CreateLogger();
+            _gamepadListener.ButtonDown += ButtonDown;
+            _gamepadListener.ButtonUp += ButtonUp;
+            
+            _gamepadListener.Start();
         }
 
+        
+        private void ButtonDown(GamepadListener.GamepadButtons button)
+        {
+            if (ControllerMappings.Instance.ControllerMap.TryGetValue(button, out var value))
+            {
+                _nesSystem?.PressControllerButton(value);
+            }
+        }
+
+        private void ButtonUp(GamepadListener.GamepadButtons button)
+        {
+            if (ControllerMappings.Instance.ControllerMap.TryGetValue(button, out var value))
+            {
+                _nesSystem?.ReleaseControllerButton(value);
+            }
+        }
+        
         private readonly Dictionary<Key, IController.Keys> _keyMap = new()
         {
             {Key.A, IController.Keys.A},
@@ -81,21 +106,32 @@ namespace RobotNES
         {
             await Stop();
         }
-
+        
         private async Task Stop()
         {
-            if (_nesSystem?.Running == true)
-            {
-                await Task.Run(() => _nesSystem?.Stop());
-                _logger.Information("Stopped");
-                contentPanel.Children.RemoveAt(0);
-                contentPanel.Children.Add(this.fileListView);
-                SetButtonsFocusable(true);
-                this.fileListView.Focus();
-                _nesSystem.Apu.SamplesReady -= _audioPlayer.AddSamples;
-                _audioPlayer.Clear();
-            }
+            if (_nesSystem == null)
+                return;
+
+            await Task.Run(() => _nesSystem.Stop());
+            _nesSystem = null;
+            _logger.Information("Stopped");
+
+            contentPanel.Children.Remove(_image);
+            contentPanel.Children.Add(this.fileListView);
+            SetButtonsFocusable(true);
+            this.fileListView.Focus();
+            _audioPlayer.Clear();
         }
+
+        private async Task Resume()
+        {
+            if (_nesSystem is not { Running: false })
+                return;
+
+            _gamepadListener.Start();
+            await Task.Run(() => _nesSystem?.Run());
+        }
+
         private const string ScreenshotsDirectory = "screenshots";
         private void Screenshot_OnClick(object sender, RoutedEventArgs e)
         {
@@ -145,12 +181,12 @@ namespace RobotNES
                 _nesSystem.FrameBufferReady += RenderFrame;
                 _nesSystem.Apu.SamplesReady += _audioPlayer.AddSamples;
 
-                var image = new NearestScalingImage(_bitmap)
+                _image = new NearestScalingImage(_bitmap)
                 {
                     Focusable = true
                 };
                 this.contentPanel.Children.Remove(this.fileListView);
-                this.contentPanel.Children.Add(image);
+                this.contentPanel.Children.Add(_image);
                 SetButtonsFocusable(false);
                 _stopwatch.Start();
                 await Task.Run(() => _nesSystem?.Run());
@@ -187,6 +223,28 @@ namespace RobotNES
             var fps = 1000 / _frameTimes.Average();
             Title = $"RobotNES | {fps} FPS";
             _stopwatch.Restart();
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            _gamepadListener.Stop();
+
+            if (_nesSystem?.Running == true)
+                _nesSystem.Stop();
+        }
+
+        protected override async void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            
+            await Resume();
+        }
+
+        private void OpenSettingsWindow(object sender, RoutedEventArgs args)
+        {
+            var settings = new SettingsWindow();
+            settings.ShowDialog();
         }
     }
 }
