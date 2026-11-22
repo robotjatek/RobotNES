@@ -33,6 +33,7 @@ namespace NESCore.APU
         private readonly PulseChannel _pulseChannel2 = new(false);
         private readonly TriangleChannel _triangleChannel = new();
         private readonly NoiseChannel _noiseChannel = new();
+        private readonly DmcChannel _dmcChannel = new();
         
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
 
@@ -42,6 +43,8 @@ namespace NESCore.APU
 
             _triangleChannel.Tick();
             _noiseChannel.Tick();
+            _dmcChannel.Tick(); // TODO: is it every cycle?
+            
             if (!_latch)
             {
                 _pulseChannel1.Tick();
@@ -113,7 +116,8 @@ namespace NESCore.APU
                 var triangle = _triangleChannel.GetOutput();
                 var noise = _noiseChannel.GetOutput();
                 var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
-                var tndDenominator = (triangle / 8227.0f) + (noise / 12241.0f);
+                var dmc = _dmcChannel.GetOutput();
+                var tndDenominator = (triangle / 8227.0f) + (noise / 12241.0f) + (dmc / 22638.0f);
                 var tOut = tndDenominator == 0f ? 0f : 159.79f / ((1.0f / tndDenominator) + 100.0f);
                 var pulseOut = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
                 var sample = (pulseOut + tOut) * 1.5f;
@@ -163,6 +167,21 @@ namespace NESCore.APU
                 _pulseChannel2.Write((ushort)(address - 0x4004), data);
                 return;
             }
+            else if (address is >= 0x4008 and <= 0x400B)
+            {
+                _triangleChannel.Write((ushort)(address - 0x4008), data);
+                return;
+            }
+            else if (address is >= 0x400C and <= 0x400F)
+            {
+                _noiseChannel.Write((ushort)(address - 0x400C), data);
+                return;
+            }
+            else if (address is >= 0x4010 and <= 0x4013)
+            {
+                _dmcChannel.Write((ushort)(address - 0x4010), data);
+                return;
+            }
             else if (address == 0x4015)
             {
                 // ---D NT21
@@ -172,16 +191,6 @@ namespace NESCore.APU
                 _noiseChannel.Enabled = (data & 0b1000) > 0;
                 // TODO: If the DMC bit is clear, the bytes-remaining counter is set to 0 and the DMC will silence when it empties.
                 //  If the DMC bit is set, the DMC sample will be restarted only if its bytes-remaining counter is 0. If there are bits remaining in the shift register, these will finish playing before the next sample is fetched.
-                return;
-            }
-            else if (address is >= 0x4008 and <= 0x400B)
-            {
-                _triangleChannel.Write((ushort)(address - 0x4008), data);
-                return;
-            }
-            else if (address is >= 0x400C and <= 0x400F)
-            {
-                _noiseChannel.Write((ushort)(address - 0x400C), data);
                 return;
             }
             else if (address == 0x4017)
