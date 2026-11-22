@@ -49,7 +49,8 @@ public class DmcChannel
         }
     }
     
-    // TODO: load shift register
+    private bool _sampleBufferEmpty = true;
+    private byte _sampleBuffer;
     private byte _shiftRegister;
     private int _remainingBits;
     private bool _silence = true;
@@ -86,9 +87,18 @@ public class DmcChannel
 
             if (_remainingBits == 0)
             {
-                // TODO: reload shift register
                 _remainingBits = 8;
-                _silence = true;
+                if (_sampleBufferEmpty)
+                {
+                    _silence = true;
+                }
+                else
+                {
+                    _silence = false;
+                    _shiftRegister = _sampleBuffer;
+                    _sampleBufferEmpty = true;
+                    // TODO: fill samplebuffer
+                }
             }
         }
     }
