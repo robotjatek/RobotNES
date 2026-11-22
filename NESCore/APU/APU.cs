@@ -43,7 +43,7 @@ namespace NESCore.APU
 
             _triangleChannel.Tick();
             _noiseChannel.Tick();
-            _dmcChannel.Tick(); // TODO: is it every cycle?
+            _dmcChannel.Tick();
             
             if (!_latch)
             {
