@@ -2,6 +2,9 @@
 
 public class DmcChannel
 {
+    // The output can be directly set by 0x4011
+    private byte _output; // 0-127
+    
     public bool Enabled
     { 
         get;
@@ -20,7 +23,8 @@ public class DmcChannel
                 // $4010 	IL-- RRRR 	DMC sample-end IRQ enable (I), Loop (L), Sample rate (R)
                 break;
             case 1:
-                // $4011 	-DDD DDDD 	Load counter (D) 
+                // $4011 	-DDD DDDD 	Load counter (D)
+                _output = (byte)(value & 0x7F);
                 // Direct load register 
                 break;
             case 2:
@@ -44,6 +48,6 @@ public class DmcChannel
         // 0-127
         
                     
-        return 127;
+        return _output;
     }
 }
