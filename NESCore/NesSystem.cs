@@ -22,7 +22,7 @@ namespace NESCore
         private readonly IBUS _bus;
         private readonly ICpu _cpu;
         private readonly IPPU _ppu;
-        public IApu Apu { get; private set; }
+        public IApu Apu { get; }
         private readonly IController _controller1;
         private long _nextFrameTimestamp;
         private static readonly long FrameIntervalTicks = Stopwatch.Frequency / 60;
@@ -45,7 +45,6 @@ namespace NESCore
             var registers = new Registers();
             _cpu = new Cpu(_bus, registers, instructions, _logger);
             _bus.OamDmaEvent += _cpu.HandleDma;
-
             _ppu.NMIEvent += OnVBlank;
         }
 

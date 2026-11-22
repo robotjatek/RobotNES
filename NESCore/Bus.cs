@@ -42,15 +42,12 @@ namespace NESCore
             _controller1 = controller1;
             _controller2 = controller2;
             _apu = apu;
+            _apu.MemoryRead = ReadMemoryOnly; // TODO: need a read WITHOUT ticking the APU
         }
 
-        public byte Read(ushort address)
+        private byte ReadMemoryOnly(ushort address)
         {
-            Cycles++;
-            _ppu.Run(2);
-            _apu.Tick();
             byte data;
-            
             if (IsInInternalMemory(address))
             {
                 data = InternalMemoryRead(address);
@@ -88,7 +85,15 @@ namespace NESCore
                 data = _busData.Value;
             }
 
+            return data;
+        }
 
+        public byte Read(ushort address)
+        {
+            Cycles++;
+            _ppu.Run(2);
+            _apu.Tick();
+            var data = ReadMemoryOnly(address);
             _ppu.Run(1);
             return data;
         }
