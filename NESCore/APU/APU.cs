@@ -2,9 +2,6 @@
 
 namespace NESCore.APU
 {
-    /// <summary>
-    /// <remarks>For now only the frame counter IRQ is implemented. IRQ only happens in freerun mode. No auto-ACK from the interrupt handler. F bit stays on until it is cleared manually!</remarks>
-    /// </summary>
     public class Apu : IApu
     {
         private readonly ILogger _logger;
@@ -36,12 +33,13 @@ namespace NESCore.APU
         private readonly NoiseChannel _noiseChannel = new();
         
         public Func<ushort, byte>? MemoryRead { get; set; }
+        public Action<int>? StallCpu { get; set; }
         private readonly DmcChannel _dmcChannel;
 
         public Apu(ILogger logger)
         {
             _logger = logger;
-            _dmcChannel = new DmcChannel(address => MemoryRead?.Invoke(address) ?? 0);
+            _dmcChannel = new DmcChannel(address => MemoryRead?.Invoke(address) ?? 0, cycles => StallCpu?.Invoke(cycles));
         }
         
         public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0 || _dmcChannel.IrqFlag;
@@ -200,8 +198,6 @@ namespace NESCore.APU
                 _triangleChannel.Enabled = (data & 0b100) > 0;
                 _noiseChannel.Enabled = (data & 0b1000) > 0;
                 _dmcChannel.Enabled =  (data & 0b10000) > 0;
-                // TODO: If the DMC bit is clear, the bytes-remaining counter is set to 0 and the DMC will silence when it empties.
-                //  If the DMC bit is set, the DMC sample will be restarted only if its bytes-remaining counter is 0. If there are bits remaining in the shift register, these will finish playing before the next sample is fetched.
                 return;
             }
             else if (address == 0x4017)

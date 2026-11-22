@@ -11,7 +11,7 @@ Yet another Nintendo Entertainment System emulator written in C#.
 - Controller implementation (Controller 1: A, S, Up, Down, Left, Right, Space, Enter)
 - PPU implementation
 - PPU clocked by bus accesses
-- Pulse channel 1 & 2, triangle channel, noise, frame counter irq, and length counter is implemented in the APU
+- Pulse channel 1 & 2, triangle channel, noise, DMC, frame counter irq, and length counter is implemented in the APU
 - Tests from pages 1-9 in AccuracyCoin.nes fully pass 
 
 Works with NROM (mapper 0), UxROM (mapper 2) and CNROM (mapper 3) games

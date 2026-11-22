@@ -1,6 +1,6 @@
 ﻿namespace NESCore.APU;
 
-public class DmcChannel(Func<ushort, byte> busRead)
+public class DmcChannel(Func<ushort, byte> busRead, Action<int>? stallCpu)
 {
     // how many cpu cycles to wait before switching to the next bit in the sample
     private static readonly ushort[] RateTable = [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106,  84,  72,  54];
@@ -12,12 +12,25 @@ public class DmcChannel(Func<ushort, byte> busRead)
     private ushort _timerPeriod = RateTable[0];
     private bool _loop;
     private bool _irqEnabled;
+    private bool _isFetching;
     
+    private ushort _startAddress = 0xC000;
+    private ushort _currentAddress = 0xC000;
+    private ushort _sampleLength = 1;
+    public ushort BytesRemaining { get; private set; }
+    public bool IrqFlag { get; private set; }
+    
+    private bool _sampleBufferEmpty = true;
+    private byte _sampleBuffer;
+    private byte _shiftRegister;
+    private int _remainingBits = 8;
+    private bool _silence = true;
+
     public bool Enabled
-    { 
-        get;
+    {
         set
         {
+            IrqFlag = false;
             if (!value)
             {
                 BytesRemaining = 0;
@@ -27,7 +40,6 @@ public class DmcChannel(Func<ushort, byte> busRead)
                 RestartSample();
                 FillSampleBuffer();
             }
-            field = value;
         }
     }
 
@@ -39,25 +51,34 @@ public class DmcChannel(Func<ushort, byte> busRead)
 
     private void FillSampleBuffer()
     {
-        if (!_sampleBufferEmpty || BytesRemaining == 0)
+        if (_isFetching || !_sampleBufferEmpty || BytesRemaining == 0)
             return;
-
-        _sampleBuffer = busRead(_currentAddress);
-        _sampleBufferEmpty = false;
         
-        _currentAddress = _currentAddress == 0xFFFF ? (ushort)0x8000 : (ushort)(_currentAddress + 1);
-        BytesRemaining--;
-
-        if (BytesRemaining == 0)
+        _isFetching = true;
+        try
         {
-            if (_loop)
+            stallCpu?.Invoke(4); // TODO: cycle count?
+            _sampleBuffer = busRead(_currentAddress); // TODO: only on read cycles?
+            _sampleBufferEmpty = false;
+            
+            _currentAddress = _currentAddress == 0xFFFF ? (ushort)0x8000 : (ushort)(_currentAddress + 1);
+            BytesRemaining--;
+
+            if (BytesRemaining == 0)
             {
-                RestartSample();
+                if (_loop)
+                {
+                    RestartSample();
+                }
+                else if (_irqEnabled)
+                {
+                    IrqFlag = true;
+                }
             }
-            else if (_irqEnabled)
-            {
-                IrqFlag = true;
-            }
+        }
+        finally
+        {
+            _isFetching = false;
         }
     }
 
@@ -93,19 +114,6 @@ public class DmcChannel(Func<ushort, byte> busRead)
         }
     }
     
-    private ushort _startAddress = 0xC000;
-    private ushort _currentAddress = 0xC000;
-    private ushort _sampleLength = 1;
-    public ushort BytesRemaining { get; private set; }
-    public bool IrqFlag { get; private set; }
-    
-    private bool _sampleBufferEmpty = true;
-    private byte _sampleBuffer;
-    private byte _shiftRegister;
-    private int _remainingBits = 8;
-    private bool _silence = true;
-
-    // TODO: why hardcoded rates?
     public void Tick()
     {
         if (_timerValue > 0)
@@ -157,6 +165,6 @@ public class DmcChannel(Func<ushort, byte> busRead)
     public byte GetOutput()
     {
         // 0-127
-        return (byte)(_output);
+        return _output;
     }
 }

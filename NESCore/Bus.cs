@@ -42,7 +42,8 @@ namespace NESCore
             _controller1 = controller1;
             _controller2 = controller2;
             _apu = apu;
-            _apu.MemoryRead = ReadMemoryOnly; // TODO: need a read WITHOUT ticking the APU
+            _apu.MemoryRead = ReadMemoryOnly;
+            _apu.StallCpu = StallCpu;
         }
 
         private byte ReadMemoryOnly(ushort address)
@@ -158,6 +159,16 @@ namespace NESCore
             _ppu.OamDMAWrite(value);
             _ppu.Run(1);
             _apu.Tick();
+        }
+
+        public void StallCpu(int cycles)
+        {
+            for (var i = 0; i < cycles; i++)
+            {
+                Cycles++;
+                _ppu.Run(3);
+                _apu.Tick();
+            }
         }
 
         private static bool IsInInternalMemory(ushort address)
