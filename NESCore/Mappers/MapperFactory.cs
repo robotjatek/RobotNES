@@ -1,4 +1,5 @@
 ﻿using NESCore.Cartridge;
+using NESCore.Mappers.MMC1;
 using Serilog;
 
 namespace NESCore.Mappers
@@ -14,24 +15,32 @@ namespace NESCore.Mappers
         {
             logger.Information("Creating mapper {HeaderMapperId}", header.MapperID);
 
-            if (header.MapperID == 0)
+            switch (header.MapperID)
             {
-                var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                return new Mapper0(prgRoms, chr, logger);
-            } 
-            else if (header.MapperID == 2)
-            {
-                // I don't think unrom should support chr ram
-                var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                return new UnRom(prgRoms, chr, logger);
+                case 0:
+                {
+                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    return new Mapper0(prgRoms, chr, logger);
+                }
+                case 1:
+                {
+                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    return new Mmc1(prgRoms, chr, logger);
+                }
+                case 2:
+                {
+                    // I don't think unrom should support chr ram
+                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    return new UnRom(prgRoms, chr, logger);
+                }
+                case 3:
+                {
+                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    return new CnRom(prgRoms, chr, logger);
+                }
+                default:
+                    throw new UnknownMapperException(header.MapperID);
             }
-            else if (header.MapperID == 3)
-            {
-                var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                return new CnRom(prgRoms, chr, logger);
-            }
-
-            throw new UnknownMapperException(header.MapperID);
         }
     }
 }

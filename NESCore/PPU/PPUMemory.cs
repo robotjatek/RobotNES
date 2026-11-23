@@ -106,12 +106,14 @@ namespace NESCore.PPU
                 address &= 0x2FFF;
             }
 
+            // TODO: call the mapper for the mirroring
             if (cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
             {
                 logger.Error("4-screen mirroring is not supported");
                 throw new NotImplementedException();
             }
 
+            // TODO: support single screen mirroring
             if (cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
             {
                 return (ushort)(address & 0x7ff);
