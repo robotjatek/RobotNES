@@ -8,5 +8,7 @@
         void Tick();
         void Write(ushort address, byte data);
         byte Read(ushort address);
+        Func<ushort, byte>? MemoryRead { get; set; }
+        Action<int>? StallCpu { get; set; }
     }
 }

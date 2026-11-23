@@ -128,7 +128,6 @@ namespace RobotNES
             if (_nesSystem is not { Running: false })
                 return;
 
-            _gamepadListener.Start();
             await Task.Run(() => _nesSystem?.Run());
         }
 
@@ -238,6 +237,7 @@ namespace RobotNES
         {
             base.OnActivated(e);
             
+            _gamepadListener.Start();
             await Resume();
         }
 

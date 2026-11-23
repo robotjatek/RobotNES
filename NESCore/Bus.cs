@@ -42,15 +42,13 @@ namespace NESCore
             _controller1 = controller1;
             _controller2 = controller2;
             _apu = apu;
+            _apu.MemoryRead = ReadMemoryOnly;
+            _apu.StallCpu = StallCpu;
         }
 
-        public byte Read(ushort address)
+        private byte ReadMemoryOnly(ushort address)
         {
-            Cycles++;
-            _ppu.Run(2);
-            _apu.Tick();
             byte data;
-            
             if (IsInInternalMemory(address))
             {
                 data = InternalMemoryRead(address);
@@ -88,7 +86,15 @@ namespace NESCore
                 data = _busData.Value;
             }
 
+            return data;
+        }
 
+        public byte Read(ushort address)
+        {
+            Cycles++;
+            _ppu.Run(2);
+            _apu.Tick();
+            var data = ReadMemoryOnly(address);
             _ppu.Run(1);
             return data;
         }
@@ -153,6 +159,16 @@ namespace NESCore
             _ppu.OamDMAWrite(value);
             _ppu.Run(1);
             _apu.Tick();
+        }
+
+        public void StallCpu(int cycles)
+        {
+            for (var i = 0; i < cycles; i++)
+            {
+                Cycles++;
+                _ppu.Run(3);
+                _apu.Tick();
+            }
         }
 
         private static bool IsInInternalMemory(ushort address)

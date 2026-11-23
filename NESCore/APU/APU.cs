@@ -2,12 +2,10 @@
 
 namespace NESCore.APU
 {
-    /// <summary>
-    /// <remarks>For now only the frame counter IRQ is implemented. IRQ only happens in freerun mode. No auto-ACK from the interrupt handler. F bit stays on until it is cleared manually!</remarks>
-    /// </summary>
-    /// <param name="logger"></param>
-    public class Apu(ILogger logger) : IApu
+    public class Apu : IApu
     {
+        private readonly ILogger _logger;
+        
         /// <summary>
         /// F (frame counter IRQ) bit
         /// </summary>
@@ -34,7 +32,17 @@ namespace NESCore.APU
         private readonly TriangleChannel _triangleChannel = new();
         private readonly NoiseChannel _noiseChannel = new();
         
-        public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0;
+        public Func<ushort, byte>? MemoryRead { get; set; }
+        public Action<int>? StallCpu { get; set; }
+        private readonly DmcChannel _dmcChannel;
+
+        public Apu(ILogger logger)
+        {
+            _logger = logger;
+            _dmcChannel = new DmcChannel(address => MemoryRead?.Invoke(address) ?? 0, cycles => StallCpu?.Invoke(cycles));
+        }
+        
+        public bool IrqFlag => (_status & STATUS_FRAME_COUNTER_FLAG) != 0 || _dmcChannel.IrqFlag;
 
         public void Tick()
         {
@@ -42,6 +50,8 @@ namespace NESCore.APU
 
             _triangleChannel.Tick();
             _noiseChannel.Tick();
+            _dmcChannel.Tick();
+            
             if (!_latch)
             {
                 _pulseChannel1.Tick();
@@ -113,7 +123,8 @@ namespace NESCore.APU
                 var triangle = _triangleChannel.GetOutput();
                 var noise = _noiseChannel.GetOutput();
                 var pulseSum = _pulseChannel1.GetOutput() + _pulseChannel2.GetOutput();
-                var tndDenominator = (triangle / 8227.0f) + (noise / 12241.0f);
+                var dmc = _dmcChannel.GetOutput();
+                var tndDenominator = (triangle / 8227.0f) + (noise / 12241.0f) + (dmc / 22638.0f);
                 var tOut = tndDenominator == 0f ? 0f : 159.79f / ((1.0f / tndDenominator) + 100.0f);
                 var pulseOut = pulseSum == 0 ? 0f : 95.88f / ((8128.0f / pulseSum) + 100.0f); // https://www.nesdev.org/wiki/APU_Mixer
                 var sample = (pulseOut + tOut) * 1.5f;
@@ -142,12 +153,13 @@ namespace NESCore.APU
                 if (_pulseChannel2.LengthCounter > 0) result |= 0x02;
                 if (_triangleChannel.LenghtCounter > 0) result |= 0x04;
                 if (_noiseChannel.LengthCounter > 0) result |= 0x08;
-                // TODO: dmc samples remaining
+                if (_dmcChannel.BytesRemaining > 0) result |= 0x10;
+                if (_dmcChannel.IrqFlag) result |= 0x80;
                 _clearIrqBit = true; // clear the frame counter bit on the next odd cycle
                 return result;
             }
             
-            logger.Debug("Read from APU address 0x{Address:X4} is ignored", address);
+            _logger.Debug("Read from APU address 0x{Address:X4} is ignored", address);
             return 0;
         }
 
@@ -163,17 +175,6 @@ namespace NESCore.APU
                 _pulseChannel2.Write((ushort)(address - 0x4004), data);
                 return;
             }
-            else if (address == 0x4015)
-            {
-                // ---D NT21
-                _pulseChannel1.Enabled = (data & 0b1) > 0;
-                _pulseChannel2.Enabled = (data & 0b10) > 0;
-                _triangleChannel.Enabled = (data & 0b100) > 0;
-                _noiseChannel.Enabled = (data & 0b1000) > 0;
-                // TODO: If the DMC bit is clear, the bytes-remaining counter is set to 0 and the DMC will silence when it empties.
-                //  If the DMC bit is set, the DMC sample will be restarted only if its bytes-remaining counter is 0. If there are bits remaining in the shift register, these will finish playing before the next sample is fetched.
-                return;
-            }
             else if (address is >= 0x4008 and <= 0x400B)
             {
                 _triangleChannel.Write((ushort)(address - 0x4008), data);
@@ -182,6 +183,21 @@ namespace NESCore.APU
             else if (address is >= 0x400C and <= 0x400F)
             {
                 _noiseChannel.Write((ushort)(address - 0x400C), data);
+                return;
+            }
+            else if (address is >= 0x4010 and <= 0x4013)
+            {
+                _dmcChannel.Write((ushort)(address - 0x4010), data);
+                return;
+            }
+            else if (address == 0x4015)
+            {
+                // ---D NT21
+                _pulseChannel1.Enabled = (data & 0b1) > 0;
+                _pulseChannel2.Enabled = (data & 0b10) > 0;
+                _triangleChannel.Enabled = (data & 0b100) > 0;
+                _noiseChannel.Enabled = (data & 0b1000) > 0;
+                _dmcChannel.Enabled =  (data & 0b10000) > 0;
                 return;
             }
             else if (address == 0x4017)
@@ -221,7 +237,7 @@ namespace NESCore.APU
                 
                 return;
             }
-            logger.Debug("Write to APU address 0x{Address:X4} is ignored. Value: 0x{Data:X2}", address, data);
+            _logger.Debug("Write to APU address 0x{Address:X4} is ignored. Value: 0x{Data:X2}", address, data);
         }
 
         private void ClockHalfFrame()
