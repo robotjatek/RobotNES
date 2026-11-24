@@ -16,7 +16,7 @@ namespace NESCore
         public event FrameBufferReadyEvent? FrameBufferReady;
         public bool Running => _running;
 
-        private volatile bool _running ;
+        private volatile bool _running;
 
         private readonly ILogger _logger;
         private readonly IBUS _bus;
@@ -30,7 +30,7 @@ namespace NESCore
         public NesSystem(string cartridgePath, ILogger logger)
         {
             _logger = logger;
-            var cartridge = LoadCartridge(cartridgePath); //TODO: move cartridge load out of this class
+            var cartridge = LoadCartridge(cartridgePath, () => _bus!); //TODO: move cartridge load out of this class
 
             _controller1 = new Controller(_logger);
             IController controller2 = new Controller(_logger);
@@ -45,7 +45,10 @@ namespace NESCore
             var registers = new Registers();
             _cpu = new Cpu(_bus, registers, instructions, _logger);
             _bus.OamDmaEvent += _cpu.HandleDma;
-            _ppu.NMIEvent += OnVBlank;
+            // Frame delivery and CPU interruption are separate: VBlank fires every frame,
+            // NMIEvent only when the ROM has enabled NMI in PPU control.
+            _ppu.VBlank += OnVBlank;
+            _ppu.NMIEvent += OnNmi;
         }
 
         public void Run()
@@ -81,15 +84,19 @@ namespace NESCore
 
         private void OnVBlank(byte[] framebuffer)
         {
-            _cpu.HandleNmi();
             FrameBufferReady?.Invoke(framebuffer);
             LimitFrameRate();
         }
 
-        private ICartridge LoadCartridge(string path)
+        private void OnNmi(byte[] framebuffer)
+        {
+            _cpu.HandleNmi();
+        }
+
+        private ICartridge LoadCartridge(string path, Func<IBUS> getBus)
         {
             var parser = new CartridgeParser(new MapperFactory(_logger));
-            return parser.LoadCartridge(path);
+            return parser.LoadCartridge(path, getBus);
         }
 
         private void LimitFrameRate()

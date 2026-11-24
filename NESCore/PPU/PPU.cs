@@ -42,10 +42,12 @@ namespace NESCore.PPU
             new(0xE4, 0xF4, 0xB0), new(0xB4, 0xFA, 0xB4), new(0xB4, 0xF4, 0xD8), new(0x00, 0xFA, 0xFA),
             new(0xCC, 0xCC, 0xCC), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00)
         ];
-        
+
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
 
         public event NMIEventHandler? NMIEvent;
+
+        public event VBlankEventHandler? VBlank;
 
         public Ppu(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
         {
@@ -189,7 +191,7 @@ namespace NESCore.PPU
                 Cycle();
             }
         }
-        
+
         private void Cycle()
         {
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
@@ -215,7 +217,7 @@ namespace NESCore.PPU
                         var showSpr = _registers.ShowSprites() &&
                                       (_scanlineCycles >= 8 || _registers.ShowSpritesInLeftColumn());
                         var bgPx = _backgroundEvaluator.NextPixel(_scanlineCycles);
-                        
+
                         var sprData = _spriteEvaluator.SpriteScanlineBuffer[_scanlineCycles];
                         var sprOpaque = showSpr && sprData.PixelColor is not null;
 
@@ -228,16 +230,16 @@ namespace NESCore.PPU
                         {
                             pixel = bgPx.pixel;
                         }
-                        
+
                         // Sprite 0 Hit: both pixels must be opaque
-                        if (showBg && showSpr && 
+                        if (showBg && showSpr &&
                             sprData is { PixelColor: not null, Zero: true } &&
                             bgPx.opaque &&
                             _scanlineCycles < 255)
                         {
                             _registers.SetSpriteZeroHitFlag(true);
                         }
-                        
+
                         _frameBuffer[pxOffset + 2] = pixel.R;
                         _frameBuffer[pxOffset + 1] = pixel.G;
                         _frameBuffer[pxOffset + 0] = pixel.B;
@@ -258,7 +260,7 @@ namespace NESCore.PPU
                     {
                         _registers.OAMAddress = 0;
                     }
-                    
+
                     if (_scanlineCycles == 1)
                     {
                         _registers.SetVBlankFlag(false);
@@ -282,6 +284,12 @@ namespace NESCore.PPU
                 if (_scanlines == 241 && _scanlineCycles == 0)
                 {
                     _registers.SetVBlankFlag(true);
+
+                    // The rendered frame is handed over on every VBlank. The NMI enable bit in PPU
+                    // control only decides whether the CPU gets interrupted, so ROMs that never set
+                    // it (e.g. the sprite hit / frame basics test ROMs) still get displayed.
+                    VBlank?.Invoke(_frameBuffer);
+
                     if (_registers.GetEnableNMI())
                     {
                         NMIEvent?.Invoke(_frameBuffer);

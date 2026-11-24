@@ -68,8 +68,7 @@ public class SpriteEvaluator(IPPURegisters registers, IPPUMemory ppuMemory)
                 }
 
                 var paletteIndex = (attribute << 2) | pixelColor;
-                var paletteColor =
-                    ppuMemory.Read((ushort)(0x3F10 + paletteIndex)); // Sprite palette is fixed to 0x3F10
+                var paletteColor = ppuMemory.Read((ushort)(0x3F10 + paletteIndex)) & 0x3F; // Sprite palette is fixed to 0x3F10
                 var spriteData = new SpritePixelData(Ppu.Palette[paletteColor], sprite.BehindBackground,
                     sprite.IsSpriteZero);
 
