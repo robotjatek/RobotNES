@@ -24,29 +24,23 @@ public class Mmc1 : IMapper
     // PPU $0000-$0FFF: 4 KiB switchable CHR bank
     //PPU $1000-$1FFF: 4 KiB switchable CHR bank
     // 4k/8k mode
-    public RomBase Chr { get; private set; } // TODO: sliced switching
+    public RomBase Chr { get; }
     
     public RomBase PrgRam { get; }
 
     private readonly ShiftRegister _shiftRegister;
     
     private byte _controlRegister = 0x0C; // $8000-$9FFF
-    private byte _chrBank0; // $A000-$BFFF
-    private byte _chrBank1; // $C000-$DFFF
     private byte _prgBank; // $E000-$FFFF
     private bool _prgRamDisabled;
     private readonly PagedChr _pagedChr;
-    
-    
     private readonly List<Rom> _prgRoms;
-    private readonly List<ChrBase> _chrRoms;
     private Rom _lowerBank; // CPU $8000-$BFFF: 16 KiB PRG-ROM bank, either switchable or fixed to the first bank
     private Rom _upperBank; // CPU $C000-$FFFF: 16 KiB PRG-ROM bank, either fixed to the last bank or switchable
 
     public Mmc1(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
     {
         _logger = logger;
-        _chrRoms = chr;
         _prgRoms = prgRoms;
         PrgRomNumber = (byte)prgRoms.Count;
         PrgRomSize = prgRoms.Count * 1024 * 16;
@@ -61,6 +55,7 @@ public class Mmc1 : IMapper
         
         _shiftRegister = new ShiftRegister((address, value) =>
         {
+            // action after the shift register is filled is determined by the last address it was written from
             switch (address)
             {
                 case >= 0x8000 and <= 0x9FFF:
@@ -68,12 +63,12 @@ public class Mmc1 : IMapper
                     SwitchPrg(_prgBank);
                     break;
                 case >= 0xA000 and <= 0xBFFF:
-                    _chrBank0 = (byte)(value & 0x1f);
-                    SwitchChr0(value); // Select 4 KiB or 8 KiB CHR bank at PPU $0000 (low bit ignored in 8 KiB mode)
+                    var chrBank0 = (byte)(value & 0x1f);
+                    SwitchChr0(chrBank0); // Select 4 KiB or 8 KiB CHR bank at PPU $0000 (low bit ignored in 8 KiB mode)
                     break;
                 case >= 0xC000 and <= 0xDFFF:
-                    _chrBank1 = (byte)(value & 0x1f); // Select 4 KiB CHR bank at PPU $1000 (ignored in 8 KiB mode)
-                    SwitchChr1(value);
+                    var chrBank1 = (byte)(value & 0x1f); // Select 4 KiB CHR bank at PPU $1000 (ignored in 8 KiB mode)
+                    SwitchChr1(chrBank1);
                     break;
                 case >= 0xE000:
                     _prgBank = (byte)(value & 0xf);
@@ -115,10 +110,6 @@ public class Mmc1 : IMapper
     {
         switch (address)
         {
-            case >= 0x8000:
-                // 5-bit serial shift register: on the 5th write it fires an action that depends on the last address it was written from
-                _shiftRegister.Write(value, address);
-                break;
             case >= 0x6000 and <= 0x7FFF:
             {
                 if (_prgRamDisabled)
@@ -128,6 +119,10 @@ public class Mmc1 : IMapper
                 PrgRam.Write((ushort)(address - 0x6000), value);
                 break;
             }
+            case >= 0x8000:
+                // 5-bit serial shift register: on the 5th write it fires an action that depends on the last address it was written from
+                _shiftRegister.Write(value, address);
+                break;
             default:
                 _logger.Warning("Unsupported write to cart: {Address:X}:{Value:X}", address, value);
                 break;
@@ -141,8 +136,8 @@ public class Mmc1 : IMapper
         {
             0 => IMapper.MirroringMode.OneScreenLower, // (CIRAM A10)	Physical VRAM Page Mapped to All 4 Nametables: Lower 1 KB bank (normally $2000)
             1 => IMapper.MirroringMode.OneScreenUpper, // and One-Screen B corresponds to the upper CIRAM bank (CIRAM A10 = 1, PPU $2400)
-            2 => IMapper.MirroringMode.Horizontal,
-            3 => IMapper.MirroringMode.Vertical,
+            2 => IMapper.MirroringMode.Vertical,
+            3 => IMapper.MirroringMode.Horizontal,
             _ => throw new ArgumentOutOfRangeException(nameof(mirrorBits))
         };
     }

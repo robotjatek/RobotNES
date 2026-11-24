@@ -56,7 +56,7 @@
 
         public FLAGS(byte flags6, byte flags7)
         {
-            Mirroring = (MIRRORING)DecodeField(flags6, (byte)FLAG6FIELDS.MIRRORING); // TODO: The mirroring should be returned based on the mapper
+            Mirroring = (MIRRORING)DecodeField(flags6, (byte)FLAG6FIELDS.MIRRORING);
             BatteryRAM = (BATTERY_RAM)DecodeField(flags6, (byte)FLAG6FIELDS.BATTERY_RAM);
 
             Trainer = (TRAINER)DecodeField(flags6, (byte)FLAG6FIELDS.TRAINER);

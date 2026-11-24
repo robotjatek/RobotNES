@@ -22,6 +22,7 @@ public class ShiftRegister(Action<ushort, byte> action, Action resetAction)
         {
             resetAction();
             _remainingShift = 5;
+            _register = 0;
             return;
         }
         
@@ -32,6 +33,7 @@ public class ShiftRegister(Action<ushort, byte> action, Action resetAction)
         if (_remainingShift == 0)
         {
             action(destination, (byte)(_register & 0x1f));
+            _register = 0;
             _remainingShift = 5;
         }
     }

@@ -16,7 +16,6 @@ namespace NESCore.PPU
 
             if (IsInPatternTableZero(address))
             {
-                //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
                 return cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInPatternTableOne(address))
@@ -107,31 +106,22 @@ namespace NESCore.PPU
                 address &= 0x2FFF;
             }
             
-            var mirroring = cartridge.Mapper.GetMirroring();
-            if (mirroring is IMapper.MirroringMode.FourScreen)
+            switch (cartridge.Mapper.GetMirroring())
             {
-                logger.Error("This mirroring mode is not supported: {Mirroring}", mirroring);
-                throw new NotImplementedException();
+                case IMapper.MirroringMode.FourScreen:
+                    logger.Error("This mirroring mode is not supported: {Mirroring}", IMapper.MirroringMode.FourScreen);
+                    throw new NotImplementedException();
+                case IMapper.MirroringMode.Vertical:
+                    return (ushort)(address & 0x7ff);
+                case IMapper.MirroringMode.Horizontal:
+                    return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
+                case IMapper.MirroringMode.OneScreenLower:
+                    return (ushort)(address & 0x3FF);
+                case IMapper.MirroringMode.OneScreenUpper:
+                    return (ushort)((address & 0x3FF) | 0x400);
+                default:
+                    throw new NotImplementedException("Unsupported address");
             }
-            
-            if (mirroring == IMapper.MirroringMode.Vertical)
-            {
-                return (ushort)(address & 0x7ff);
-            }
-            else if (mirroring == IMapper.MirroringMode.Horizontal)
-            {
-                return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
-            }
-            else if (mirroring == IMapper.MirroringMode.OneScreenLower)
-            {
-                return (ushort)(address & 0x3FF);
-            }
-            else if (mirroring == IMapper.MirroringMode.OneScreenUpper)
-            {
-                return (ushort)((address & 0x3FF) | 0x400);
-            }
-
-            throw new NotImplementedException("Unsupported address");
         }
 
         private static bool IsInPatternTableZero(ushort address)

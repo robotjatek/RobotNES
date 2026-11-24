@@ -63,6 +63,7 @@
         }
     }
 
+    // TODO: create a generic paged Rom for both chr and prg to enable smaller slices like 1kb chr for MMC3
     public class PagedChr : RomBase
     {
         private readonly List<ChrBase> _banks;
