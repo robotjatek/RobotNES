@@ -25,7 +25,7 @@ public class BackgroundEvaluator(LoopyRegisters loopyRegisters, IPPUMemory ppuMe
         
         var bgPx = showBg
             ? Ppu.Palette[paletteId]
-            : Ppu.Palette[ppuMemory.Read(0x3F00)]; // Render the default background color
+            : Ppu.Palette[ppuMemory.Read(0x3F00) & 0x3F]; // Render the default background color
                     
         return (showBg && GetBgColorPaletteId() != 0, bgPx);
     }

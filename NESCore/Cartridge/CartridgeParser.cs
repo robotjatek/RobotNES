@@ -13,7 +13,7 @@ namespace NESCore.Cartridge
             _mapperFactory = mapperFactory;
         }
 
-        public ICartridge LoadCartridge(string filepath)
+        public ICartridge LoadCartridge(string filepath, Func<IBUS> getBus)
         {
             var rawBytes = File.ReadAllBytes(filepath);
             var header = new CartridgeHeader(rawBytes.AsSpan()[0..16]);
@@ -25,7 +25,7 @@ namespace NESCore.Cartridge
 
             var prgRoms = CreateROMs(rawBytes.AsSpan(romsStart, romsSize));
             var chrRoms = CreateVROMs(rawBytes.AsSpan(vromsStart, vromsSize));
-            var mapper = _mapperFactory.CreateMapper(header, prgRoms, chrRoms);
+            var mapper = _mapperFactory.CreateMapper(header, prgRoms, chrRoms, getBus);
 
             return new Cartridge(header, mapper);
         }

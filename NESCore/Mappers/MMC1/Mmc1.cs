@@ -20,6 +20,7 @@ public class Mmc1 : IMapper
     public int ChrRomSize { get; }
 
     private readonly ILogger _logger;
+    private readonly Func<IBUS> _getBus;
     
     // PPU $0000-$0FFF: 4 KiB switchable CHR bank
     //PPU $1000-$1FFF: 4 KiB switchable CHR bank
@@ -38,9 +39,10 @@ public class Mmc1 : IMapper
     private Rom _lowerBank; // CPU $8000-$BFFF: 16 KiB PRG-ROM bank, either switchable or fixed to the first bank
     private Rom _upperBank; // CPU $C000-$FFFF: 16 KiB PRG-ROM bank, either fixed to the last bank or switchable
 
-    public Mmc1(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+    public Mmc1(List<Rom> prgRoms, List<ChrBase> chr, Func<IBUS> getBus, ILogger logger)
     {
         _logger = logger;
+        _getBus = getBus;
         _prgRoms = prgRoms;
         PrgRomNumber = (byte)prgRoms.Count;
         PrgRomSize = prgRoms.Count * 1024 * 16;
@@ -121,7 +123,7 @@ public class Mmc1 : IMapper
             }
             case >= 0x8000:
                 // 5-bit serial shift register: on the 5th write it fires an action that depends on the last address it was written from
-                _shiftRegister.Write(value, address);
+                _shiftRegister.Write(value, address, _getBus().Cycles);
                 break;
             default:
                 _logger.Warning("Unsupported write to cart: {Address:X}:{Value:X}", address, value);
