@@ -91,7 +91,7 @@ public class UnRom : IMapper
     
     public IMapper.MirroringMode GetMirroring()
     {
-        if (_cartridgeHeader.FLAGS.FourScreenMirroring > 0)
+        if (_cartridgeHeader.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
         {
             return IMapper.MirroringMode.FourScreen;
         }
