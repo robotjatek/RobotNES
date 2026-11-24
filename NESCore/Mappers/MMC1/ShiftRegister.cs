@@ -5,7 +5,7 @@
 /// 5-bit shift register for MMC1. On the 5th write it fires its action
 /// </summary>
 /// <param name="action"></param>
-public class ShiftRegister(Action<ushort, byte> action)
+public class ShiftRegister(Action<ushort, byte> action, Action resetAction)
 {
     private int _remainingShift = 5;
     private byte _register; // 5 bit -- note: the real hardware initializes D5 to 1 to be able to detect when the 5th write happens. I have an independent counter so this is not needed here
@@ -20,7 +20,7 @@ public class ShiftRegister(Action<ushort, byte> action)
         // if bit 7 is set => reset
         if ((value & 0x80) > 0)
         {
-            // TODO: reset some bits in the control register too
+            resetAction();
             _remainingShift = 5;
             return;
         }

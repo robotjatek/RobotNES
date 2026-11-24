@@ -6,17 +6,8 @@ using NESCore.PPU;
 
 namespace NESCoreTests.Unit.PPUTest
 {
-    public class PPUMemoryTests : TestBase
+    public class PpuMemoryTests : TestBase
     {
-        private ICartridge CreateCartridge(IMapper.MirroringMode mirroring)
-        {
-            var mapper = new Mock<IMapper>();
-            mapper.Setup(m => m.GetMirroring()).Returns(mirroring);
-            var cartridge = new Mock<ICartridge>();
-            cartridge.Setup(c => c.Mapper).Returns(mapper.Object);
-            return cartridge.Object;
-        }
-
         [Fact]
         public void ReadsPatternTables()
         {
@@ -251,6 +242,15 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 memory.OamRead(i).Should().Be(0xaa);
             }
+        }
+        
+        private static ICartridge CreateCartridge(IMapper.MirroringMode mirroring)
+        {
+            var mapper = new Mock<IMapper>();
+            mapper.Setup(m => m.GetMirroring()).Returns(mirroring);
+            var cartridge = new Mock<ICartridge>();
+            cartridge.Setup(c => c.Mapper).Returns(mapper.Object);
+            return cartridge.Object;
         }
     }
 }

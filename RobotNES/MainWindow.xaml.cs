@@ -235,10 +235,17 @@ namespace RobotNES
 
         protected override async void OnActivated(EventArgs e)
         {
-            base.OnActivated(e);
+            try
+            {
+                base.OnActivated(e);
             
-            _gamepadListener.Start();
-            await Resume();
+                _gamepadListener.Start();
+                await Resume();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
         }
 
         private void OpenSettingsWindow(object sender, RoutedEventArgs args)

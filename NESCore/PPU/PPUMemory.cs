@@ -108,10 +108,7 @@ namespace NESCore.PPU
             }
             
             var mirroring = cartridge.Mapper.GetMirroring();
-            // TODO: support single screen mirroring
-            if (mirroring is IMapper.MirroringMode.FourScreen or 
-                IMapper.MirroringMode.OneScreenLower or
-                IMapper.MirroringMode.OneScreenUpper)
+            if (mirroring is IMapper.MirroringMode.FourScreen)
             {
                 logger.Error("This mirroring mode is not supported: {Mirroring}", mirroring);
                 throw new NotImplementedException();
@@ -124,6 +121,14 @@ namespace NESCore.PPU
             else if (mirroring == IMapper.MirroringMode.Horizontal)
             {
                 return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
+            }
+            else if (mirroring == IMapper.MirroringMode.OneScreenLower)
+            {
+                return (ushort)(address & 0x3FF);
+            }
+            else if (mirroring == IMapper.MirroringMode.OneScreenUpper)
+            {
+                return (ushort)((address & 0x3FF) | 0x400);
             }
 
             throw new NotImplementedException("Unsupported address");
