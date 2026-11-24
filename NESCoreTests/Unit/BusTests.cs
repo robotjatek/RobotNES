@@ -328,7 +328,7 @@ namespace NESCoreTests.Unit
         private static Bus CreateBusWithMapper0Cartridge(IMemory memory)
         {
             var prgBank = new Rom(RandomBytePattern(16));
-            var mapper = new Mapper0([prgBank], [new ChrRom(RandomBytePattern(8))], Mock.Of<ILogger>());
+            var mapper = new Mapper0([prgBank], [new ChrRom(RandomBytePattern(8))], Mock.Of<ILogger>(), Mock.Of<ICartridgeHeader>());
             var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapper);
             return new Bus(cartridge, memory, Mock.Of<IPPU>(), Mock.Of<IController>(), Mock.Of<IController>(),
                 Mock.Of<IApu>(), Mock.Of<ILogger>());

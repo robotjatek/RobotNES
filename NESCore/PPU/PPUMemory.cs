@@ -1,4 +1,5 @@
 ﻿using NESCore.Cartridge;
+using NESCore.Mappers;
 using Serilog;
 
 namespace NESCore.PPU
@@ -105,20 +106,22 @@ namespace NESCore.PPU
             {
                 address &= 0x2FFF;
             }
-
-            // TODO: call the mapper for the mirroring
-            if (cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+            
+            var mirroring = cartridge.Mapper.GetMirroring();
+            // TODO: support single screen mirroring
+            if (mirroring is IMapper.MirroringMode.FourScreen or 
+                IMapper.MirroringMode.OneScreenLower or
+                IMapper.MirroringMode.OneScreenUpper)
             {
-                logger.Error("4-screen mirroring is not supported");
+                logger.Error("This mirroring mode is not supported: {Mirroring}", mirroring);
                 throw new NotImplementedException();
             }
-
-            // TODO: support single screen mirroring
-            if (cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
+            
+            if (mirroring == IMapper.MirroringMode.Vertical)
             {
                 return (ushort)(address & 0x7ff);
             }
-            else if (cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
+            else if (mirroring == IMapper.MirroringMode.Horizontal)
             {
                 return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
             }

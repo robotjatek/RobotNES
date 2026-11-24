@@ -36,6 +36,11 @@ namespace NESCoreTests.Unit
             {
                 throw new NotImplementedException();
             }
+
+            public IMapper.MirroringMode GetMirroring()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [Fact]

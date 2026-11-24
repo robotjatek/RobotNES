@@ -118,4 +118,10 @@ public class Mmc1 : IMapper
             _logger.Warning("Unsupported write to cart: {Address:X}:{Value:X}", address, value);
         }
     }
+
+    public IMapper.MirroringMode GetMirroring()
+    {
+        // TODO: read from the control register
+        return 0;
+    }
 }

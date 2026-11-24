@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using NESCore.Cartridge;
+using Serilog;
 
 namespace NESCore.Mappers
 {
@@ -23,15 +24,18 @@ namespace NESCore.Mappers
         public byte ChrRomNumber { get; private set; }
 
         public int ChrRomSize { get; private set; }
+        
+        private readonly ICartridgeHeader _cartridgeHeader;
 
-        public Mapper0(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+        public Mapper0(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger, ICartridgeHeader cartridgeHeader)
         {
+            _cartridgeHeader = cartridgeHeader;
             PrgRomNumber = (byte)prgRoms.Count;
             PrgRomSize = PrgRomNumber * 1024 * 16;
             ChrRomNumber = (byte)chr.Count;
             ChrRomSize = ChrRomNumber * 1024 * 8;
 
-            if (PrgRomNumber > 2 || PrgRomNumber == 0)
+            if (PrgRomNumber is > 2 or 0)
             {
                 throw new ArgumentException("Invalid number of ROMs");
             }
@@ -40,14 +44,7 @@ namespace NESCore.Mappers
             PrgRam = new Ram(8);
             _lowerBank = prgRoms[0];
 
-            if (PrgRomNumber > 1)
-            {
-                _upperBank = prgRoms[1];
-            }
-            else
-            {
-                _upperBank = prgRoms[0];
-            }
+            _upperBank = PrgRomNumber > 1 ? prgRoms[1] : prgRoms[0];
 
             _logger = logger;
         }
@@ -84,6 +81,21 @@ namespace NESCore.Mappers
             {
                 _logger.Warning("Unsupported write to ROM area. ");
             }
+        }
+
+        public IMapper.MirroringMode GetMirroring()
+        {
+            if (_cartridgeHeader.FLAGS.FourScreenMirroring > 0)
+            {
+                return IMapper.MirroringMode.FourScreen;
+            }
+
+            return _cartridgeHeader.FLAGS.Mirroring switch
+            {
+                MIRRORING.HORIZONTAL => IMapper.MirroringMode.Horizontal,
+                MIRRORING.VERTICAL => IMapper.MirroringMode.Vertical,
+                _ => throw new Exception("Unsupported mirroring mode.")
+            };
         }
     }
 }

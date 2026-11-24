@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using NESCore.Cartridge;
+using Serilog;
 
 namespace NESCore.Mappers;
 
@@ -15,9 +16,11 @@ public class CnRom : IMapper
     private readonly List<ChrBase> _chrRoms;
     private readonly Rom _lowerBank;
     private readonly Rom _upperBank;
+    private readonly ICartridgeHeader _cartridgeHeader;
     
-    public CnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+    public CnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger, ICartridgeHeader cartridgeHeader)
     {
+        _cartridgeHeader = cartridgeHeader;
         _logger = logger;
         _chrRoms = chr;
         PrgRomNumber = (byte)prgRoms.Count;
@@ -70,5 +73,20 @@ public class CnRom : IMapper
         {
             _logger.Warning("Unsupported write to CART: {Address:X}:{Value:X}", address, value);
         }
+    }
+    
+    public IMapper.MirroringMode GetMirroring()
+    {
+        if (_cartridgeHeader.FLAGS.FourScreenMirroring > 0)
+        {
+            return IMapper.MirroringMode.FourScreen;
+        }
+
+        return _cartridgeHeader.FLAGS.Mirroring switch
+        {
+            MIRRORING.HORIZONTAL => IMapper.MirroringMode.Horizontal,
+            MIRRORING.VERTICAL => IMapper.MirroringMode.Vertical,
+            _ => throw new Exception("Unsupported mirroring mode.")
+        };
     }
 }
