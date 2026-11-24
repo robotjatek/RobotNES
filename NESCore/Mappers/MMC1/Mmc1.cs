@@ -38,6 +38,8 @@ public class Mmc1 : IMapper
     private readonly List<Rom> _prgRoms;
     private Rom _lowerBank; // CPU $8000-$BFFF: 16 KiB PRG-ROM bank, either switchable or fixed to the first bank
     private Rom _upperBank; // CPU $C000-$FFFF: 16 KiB PRG-ROM bank, either fixed to the last bank or switchable
+    private byte _chrBank0;
+    private byte _chrBank1;
 
     public Mmc1(List<Rom> prgRoms, List<ChrBase> chr, Func<IBUS> getBus, ILogger logger)
     {
@@ -63,14 +65,16 @@ public class Mmc1 : IMapper
                 case >= 0x8000 and <= 0x9FFF:
                     _controlRegister = (byte)(value & 0x1f);
                     SwitchPrg(_prgBank);
+                    SwitchChr0(_chrBank0);
+                    SwitchChr1(_chrBank1);
                     break;
                 case >= 0xA000 and <= 0xBFFF:
-                    var chrBank0 = (byte)(value & 0x1f);
-                    SwitchChr0(chrBank0); // Select 4 KiB or 8 KiB CHR bank at PPU $0000 (low bit ignored in 8 KiB mode)
+                    _chrBank0 = (byte)(value & 0x1f);
+                    SwitchChr0(_chrBank0); // Select 4 KiB or 8 KiB CHR bank at PPU $0000 (low bit ignored in 8 KiB mode)
                     break;
                 case >= 0xC000 and <= 0xDFFF:
-                    var chrBank1 = (byte)(value & 0x1f); // Select 4 KiB CHR bank at PPU $1000 (ignored in 8 KiB mode)
-                    SwitchChr1(chrBank1);
+                    _chrBank1 = (byte)(value & 0x1f); // Select 4 KiB CHR bank at PPU $1000 (ignored in 8 KiB mode)
+                    SwitchChr1(_chrBank1);
                     break;
                 case >= 0xE000:
                     _prgBank = (byte)(value & 0xf);
@@ -123,6 +127,7 @@ public class Mmc1 : IMapper
             }
             case >= 0x8000:
                 // 5-bit serial shift register: on the 5th write it fires an action that depends on the last address it was written from
+                // Pass the bus cycle counter so the shift register can drop the second write of a read-modify-write (nesdev: "Consecutive-cycle writes").
                 _shiftRegister.Write(value, address, _getBus().Cycles);
                 break;
             default:
@@ -174,10 +179,10 @@ public class Mmc1 : IMapper
         value &= 0x1f;
         _pagedChr.SetUpper4KBank(value);
     }
-
+    
     private void SwitchPrg(byte value)
     {
-        var bank = (value & 0b01111) % _prgRoms.Count; // Select 16 KiB PRG-ROM bank (low bit ignored in 32 KiB mode)
+        var rawBank = value & 0b01111;
         var mode = (_controlRegister & 0b01100) >> 2;
 
         switch (mode)
@@ -185,18 +190,30 @@ public class Mmc1 : IMapper
             case 0:
             case 1:
                 // switch 32 KiB at $8000, ignoring low bit of bank number
-                bank &= 0b11110;
-                _lowerBank = _prgRoms[bank];
-                _upperBank = _prgRoms[bank + 1];
+                if (_prgRoms.Count == 1)
+                {
+                    // safeguard for cartridges with one bank only. unlikely but not impossible
+                    _lowerBank = _prgRoms[0];
+                    _upperBank = _prgRoms[0];
+                }
+                else
+                {
+                    var bank = (rawBank & 0b11110) % _prgRoms.Count; // Select 16 KiB PRG-ROM bank (low bit ignored in 32 KiB mode)
+                    bank &= 0b11110;
+                    _lowerBank = _prgRoms[bank];
+                    _upperBank = _prgRoms[bank + 1];
+                }
                 break;
             case 2:
                 // fix first bank at $8000 and switch 16 KiB bank at $C000
+                var upperBank = rawBank % _prgRoms.Count;
                 _lowerBank = _prgRoms[0];
-                _upperBank = _prgRoms[bank];
+                _upperBank = _prgRoms[upperBank];
                 break;
             case 3:
                 //  fix last bank at $C000 and switch 16 KiB bank at $8000
-                _lowerBank = _prgRoms[bank];
+                var lowerBank = rawBank % _prgRoms.Count;
+                _lowerBank = _prgRoms[lowerBank];
                 _upperBank = _prgRoms[^1];
                 break;
         }

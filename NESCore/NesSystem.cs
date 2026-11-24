@@ -30,7 +30,7 @@ namespace NESCore
         public NesSystem(string cartridgePath, ILogger logger)
         {
             _logger = logger;
-            var cartridge = LoadCartridge(cartridgePath, () => _bus); //TODO: move cartridge load out of this class
+            var cartridge = LoadCartridge(cartridgePath, () => _bus!); //TODO: move cartridge load out of this class
 
             _controller1 = new Controller(_logger);
             IController controller2 = new Controller(_logger);
