@@ -35,6 +35,7 @@ public class Mmc1 : IMapper
     private byte _chrBank1; // $C000-$DFFF
     private byte _prgBank; // $E000-$FFFF
     private bool _prgRamDisabled;
+    private readonly PagedChr _pagedChr;
     
     
     private readonly List<Rom> _prgRoms;
@@ -52,7 +53,8 @@ public class Mmc1 : IMapper
         ChrRomNumber = (byte)chr.Count;
         ChrRomSize = chr.Count * 1024 * 8;
         
-        Chr = chr[0]; // TODO: sliced switching 4kb slices
+        _pagedChr = new PagedChr(chr);
+        Chr = _pagedChr;
         PrgRam = new Ram(8); // CPU $6000-$7FFF: 8 KiB PRG-RAM bank, (optional)
         _lowerBank = prgRoms[0];
         _upperBank = prgRoms[^1];
@@ -156,12 +158,11 @@ public class Mmc1 : IMapper
         if (mode == ChrSwitchMode._8Kib)
         {
             value &= 0b11110; // low bit ignored in 8 KiB mode
-            // TODO: indices are caluclated in 4kb
-            Chr = _chrRoms[value >> 1 % _chrRoms.Count];
+            _pagedChr.Set8KBank(value);
         } 
         else if (mode == ChrSwitchMode._4Kib)
         {
-            // TODO: swap the lower part of the chr
+            _pagedChr.SetLower4KBank(value);
         }
     }
 
@@ -173,7 +174,8 @@ public class Mmc1 : IMapper
     {
         if (GetChrMode() == ChrSwitchMode._8Kib) return;
         
-        // TODO: select the upper part of the chr
+        value &= 0x1f;
+        _pagedChr.SetUpper4KBank(value);
     }
 
     private void SwitchPrg(byte value)
