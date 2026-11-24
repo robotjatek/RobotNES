@@ -1,4 +1,5 @@
 ﻿using NESCore.Cartridge;
+using NESCore.Mappers;
 using Serilog;
 
 namespace NESCore.PPU
@@ -15,7 +16,6 @@ namespace NESCore.PPU
 
             if (IsInPatternTableZero(address))
             {
-                //TODO: maybe i need to split 8k CHRroms to two independent 4k ROMS
                 return cartridge.Mapper.Chr.Read(address);
             }
             else if (IsInPatternTableOne(address))
@@ -105,23 +105,23 @@ namespace NESCore.PPU
             {
                 address &= 0x2FFF;
             }
-
-            if (cartridge.Header.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+            
+            switch (cartridge.Mapper.GetMirroring())
             {
-                logger.Error("4-screen mirroring is not supported");
-                throw new NotImplementedException();
+                case IMapper.MirroringMode.FourScreen:
+                    logger.Error("This mirroring mode is not supported: {Mirroring}", IMapper.MirroringMode.FourScreen);
+                    throw new NotImplementedException();
+                case IMapper.MirroringMode.Vertical:
+                    return (ushort)(address & 0x7ff);
+                case IMapper.MirroringMode.Horizontal:
+                    return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
+                case IMapper.MirroringMode.OneScreenLower:
+                    return (ushort)(address & 0x3FF);
+                case IMapper.MirroringMode.OneScreenUpper:
+                    return (ushort)((address & 0x3FF) | 0x400);
+                default:
+                    throw new NotImplementedException("Unsupported address");
             }
-
-            if (cartridge.Header.FLAGS.Mirroring == MIRRORING.VERTICAL)
-            {
-                return (ushort)(address & 0x7ff);
-            }
-            else if (cartridge.Header.FLAGS.Mirroring == MIRRORING.HORIZONTAL)
-            {
-                return (ushort)(((address & 0x800) >> 1) | (address & 0x3ff));
-            }
-
-            throw new NotImplementedException("Unsupported address");
         }
 
         private static bool IsInPatternTableZero(ushort address)

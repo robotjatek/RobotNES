@@ -21,7 +21,7 @@
             _data = rawBytes;
         }
 
-        public byte Read(ushort address)
+        public virtual byte Read(ushort address)
         {
             return _data[address];
         }
@@ -60,6 +60,53 @@
         public override void Write(ushort address, byte value)
         {
             _data[address] = value;
+        }
+    }
+
+    // TODO: create a generic paged Rom for both chr and prg to enable smaller slices like 1kb chr for MMC3
+    public class PagedChr : RomBase
+    {
+        private readonly List<ChrBase> _banks;
+        private int _lowerBankIndex;
+        private int _upperBankIndex;
+        
+        public PagedChr(List<ChrBase> banks) : base(8, new byte[8*1024])
+        {
+            _banks = banks.Count == 0 ? [new ChrRam()] : banks;
+            Set8KBank(0);
+        }
+
+        public void SetLower4KBank(int bank)
+        {
+            var totalBanks = _banks.Count * 2;
+            _lowerBankIndex = bank % (totalBanks);
+        }
+
+        public void SetUpper4KBank(int bank)
+        {
+            var totalBanks = _banks.Count * 2;
+            _upperBankIndex = bank % (totalBanks);
+        }
+
+        public void Set8KBank(int bank)
+        {
+            var baseBank = bank & 0b11110;
+            SetLower4KBank(baseBank);
+            SetUpper4KBank(baseBank + 1);
+        }
+
+        public override void Write(ushort address, byte value)
+        {
+            var bank4K = address < 0x1000 ? _lowerBankIndex : _upperBankIndex;
+            var offset = (ushort)((address & 0x0FFF) + bank4K % 2 * 0x1000);
+            _banks[bank4K / 2].Write(offset, value);
+        }
+
+        public override byte Read(ushort address)
+        {
+            var bank4K = address < 0x1000 ? _lowerBankIndex :  _upperBankIndex;
+            var offset = (ushort)((address & 0x0FFF) + ((bank4K % 2) * 0x1000));
+            return _banks[bank4K / 2].Read(offset);
         }
     }
 }

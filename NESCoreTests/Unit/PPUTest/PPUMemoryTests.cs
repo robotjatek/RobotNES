@@ -6,7 +6,7 @@ using NESCore.PPU;
 
 namespace NESCoreTests.Unit.PPUTest
 {
-    public class PPUMemoryTests : TestBase
+    public class PpuMemoryTests : TestBase
     {
         [Fact]
         public void ReadsPatternTables()
@@ -43,13 +43,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametablesCanBeReadBack1()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x3000; i++)
@@ -62,13 +56,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable0CanBeReadBackFromNameTable1HorizontalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x2400; i++)
@@ -81,13 +69,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable1CanBeReadBackFromNameTable0HorizontalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
@@ -101,11 +83,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void
             WritesToNameTable2DoesNotOverwriteNameTable3() // Fix for collapsed NT2 & NT3 in horizontal mirror mode
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-            var cartridge = new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); // Horizontal mirror mode
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
             {
@@ -117,13 +95,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable2CanBeReadBackFromNameTable3HorizontalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2800; i < 0x2C00; i++)
@@ -136,13 +108,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable3CanBeReadBackFromNameTable2HorizontalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(NESTEST_ROM_PATH); //Cart with horizontal mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Horizontal); //Cart with horizontal mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2C00; i < 0x2FFF; i++)
@@ -155,13 +121,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametablesCanBeReadBack2()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Vertical); //Cart with vertical mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x3000; i++)
@@ -174,13 +134,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable0CanBeReadBackFromNameTable2VerticalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Vertical); //Cart with vertical mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2000; i < 0x2400; i++)
@@ -193,13 +147,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametabl1CanBeReadBackFromNameTable3VerticalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Vertical); //Cart with vertical mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2400; i < 0x2800; i++)
@@ -212,13 +160,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable2CanBeReadBackFromNameTable0VerticalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Vertical); //Cart with vertical mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2800; i < 0x2C00; i++)
@@ -231,13 +173,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToNametable3CanBeReadBackFromNameTable1HorizontalMirroring()
         {
-            var mf = new Mock<IMapperFactory>();
-            var header = Mock.Of<ICartridgeHeader>();
-            var mapper = Mock.Of<IMapper>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>())).Returns(mapper);
-
-            var cartridge =
-                new CartridgeParser(mf.Object).LoadCartridge(SUPER_MARIO_ROM_PATH); //Cart with vertical mirroring
+            var cartridge = CreateCartridge(IMapper.MirroringMode.Vertical); //Cart with vertical mirroring
 
             var memory = new PpuMemory(cartridge, _logger);
             for (UInt16 i = 0x2C00; i < 0x2FFF; i++)
@@ -306,6 +242,15 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 memory.OamRead(i).Should().Be(0xaa);
             }
+        }
+        
+        private static ICartridge CreateCartridge(IMapper.MirroringMode mirroring)
+        {
+            var mapper = new Mock<IMapper>();
+            mapper.Setup(m => m.GetMirroring()).Returns(mirroring);
+            var cartridge = new Mock<ICartridge>();
+            cartridge.Setup(c => c.Mapper).Returns(mapper.Object);
+            return cartridge.Object;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using NESCore.Cartridge;
+using Serilog;
 
 namespace NESCore.Mappers;
 
@@ -15,9 +16,11 @@ public class CnRom : IMapper
     private readonly List<ChrBase> _chrRoms;
     private readonly Rom _lowerBank;
     private readonly Rom _upperBank;
+    private readonly ICartridgeHeader _cartridgeHeader;
     
-    public CnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+    public CnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger, ICartridgeHeader cartridgeHeader)
     {
+        _cartridgeHeader = cartridgeHeader;
         _logger = logger;
         _chrRoms = chr;
         PrgRomNumber = (byte)prgRoms.Count;
@@ -33,25 +36,24 @@ public class CnRom : IMapper
     
     public bool TryRead(ushort address, out byte value)
     {
-        if (address is >= 0x8000 and <= 0xBFFF)
+        switch (address)
         {
-            value = _lowerBank.Read((ushort)(address - 0x8000));
-            return true;
+            case >= 0x8000 and <= 0xBFFF:
+                value = _lowerBank.Read((ushort)(address - 0x8000));
+                return true;
+            case >= 0xC000:
+                value = _upperBank.Read((ushort)(address - 0xC000));
+                return true;
+            case >= 0x6000:
+            {
+                var mirroredAddress = (ushort)((address - 0x6000) & 0x07ff);
+                value = PrgRam.Read(mirroredAddress);
+                return true;
+            }
+            default:
+                value = 0;
+                return false;
         }
-        else if (address is >= 0xC000)
-        {
-            value = _upperBank.Read((ushort)(address - 0xC000));
-            return true;
-        }
-        else if (address is >= 0x6000 and <= 0x7FFF)
-        {
-            var mirroredAddress = (ushort)((address - 0x6000) & 0x07ff);
-            value = PrgRam.Read(mirroredAddress);
-            return true;
-        }
-
-        value = 0;
-        return false;
     }
 
     public void Write(ushort address, byte value)
@@ -71,5 +73,20 @@ public class CnRom : IMapper
         {
             _logger.Warning("Unsupported write to CART: {Address:X}:{Value:X}", address, value);
         }
+    }
+    
+    public IMapper.MirroringMode GetMirroring()
+    {
+        if (_cartridgeHeader.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+        {
+            return IMapper.MirroringMode.FourScreen;
+        }
+
+        return _cartridgeHeader.FLAGS.Mirroring switch
+        {
+            MIRRORING.HORIZONTAL => IMapper.MirroringMode.Horizontal,
+            MIRRORING.VERTICAL => IMapper.MirroringMode.Vertical,
+            _ => throw new Exception("Unsupported mirroring mode.")
+        };
     }
 }

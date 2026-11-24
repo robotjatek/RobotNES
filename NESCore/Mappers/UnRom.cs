@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using NESCore.Cartridge;
+using Serilog;
 
 namespace NESCore.Mappers;
 /// <summary>
@@ -22,13 +23,15 @@ public class UnRom : IMapper
     public RomBase Chr { get; }
     public RomBase PrgRam { get; }
     private readonly ILogger _logger;
+    private readonly ICartridgeHeader _cartridgeHeader;
 
     private readonly List<Rom> _prgRoms;
     private Rom _lowerBank; // switchable 0x8000-0xBFFF
     private readonly Rom _upperBank; // fixed 0xC000-0xFFFF, Should be initialized to the LAST ROM
 
-    public UnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+    public UnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger,  ICartridgeHeader cartridgeHeader)
     {
+        _cartridgeHeader = cartridgeHeader;
         _logger = logger;
         _prgRoms = prgRoms;
         PrgRomNumber =  (byte)prgRoms.Count; // window 16k + 16k fixed
@@ -84,5 +87,20 @@ public class UnRom : IMapper
         {
             _logger.Warning("Unsupported write to UNROM ROM area 0x{Address:X4} 0x{Value:X}", address, value);
         }
+    }
+    
+    public IMapper.MirroringMode GetMirroring()
+    {
+        if (_cartridgeHeader.FLAGS.FourScreenMirroring == FOUR_SCREEN_MIRRORING.ENABLED)
+        {
+            return IMapper.MirroringMode.FourScreen;
+        }
+
+        return _cartridgeHeader.FLAGS.Mirroring switch
+        {
+            MIRRORING.HORIZONTAL => IMapper.MirroringMode.Horizontal,
+            MIRRORING.VERTICAL => IMapper.MirroringMode.Vertical,
+            _ => throw new Exception("Unsupported mirroring mode.")
+        };
     }
 }
