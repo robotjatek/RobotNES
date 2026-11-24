@@ -16,7 +16,7 @@ namespace NESCore
         public event FrameBufferReadyEvent? FrameBufferReady;
         public bool Running => _running;
 
-        private volatile bool _running ;
+        private volatile bool _running;
 
         private readonly ILogger _logger;
         private readonly IBUS _bus;
@@ -45,7 +45,10 @@ namespace NESCore
             var registers = new Registers();
             _cpu = new Cpu(_bus, registers, instructions, _logger);
             _bus.OamDmaEvent += _cpu.HandleDma;
-            _ppu.NMIEvent += OnVBlank;
+            // Frame delivery and CPU interruption are separate: VBlank fires every frame,
+            // NMIEvent only when the ROM has enabled NMI in PPU control.
+            _ppu.VBlank += OnVBlank;
+            _ppu.NMIEvent += OnNmi;
         }
 
         public void Run()
@@ -81,9 +84,13 @@ namespace NESCore
 
         private void OnVBlank(byte[] framebuffer)
         {
-            _cpu.HandleNmi();
             FrameBufferReady?.Invoke(framebuffer);
             LimitFrameRate();
+        }
+
+        private void OnNmi(byte[] framebuffer)
+        {
+            _cpu.HandleNmi();
         }
 
         private ICartridge LoadCartridge(string path, Func<IBUS> getBus)
