@@ -12,7 +12,7 @@
         }
         
         int Id { get; }
-        byte PrgRomNumber { get; }
+        byte PrgRomNumber { get; } // TODO: do i need these?
         int PrgRomSize { get; }
         byte ChrRomNumber { get; }
         int ChrRomSize { get; }

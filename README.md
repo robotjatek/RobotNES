@@ -29,5 +29,8 @@ Tested with: Donkey Kong, Donkey Kong Jr., Donkey Kong3, Excitebike, Galaga, Gal
 ![SM](./img/sm1.png)
 ![SM](./img/sm2.png)
 ![AccuracyCoin Tests](./img/ac.png)
+![Metroid](./img/metroid.png)
+![Contra](./img/contra.png)
+![Dr. Mario](./img/drmario.png)
 
 Files in `NesCoreTests/TestROMs/` are dumps of real games, but all of their data content are randomized to avoid any copyright issues, only the header data kept intact. (Except nestest.nes which is a freely available test ROM)
