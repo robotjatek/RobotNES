@@ -8,8 +8,6 @@ namespace NESCore.PPU
         private const int PreRenderScanline = 261;
         private const int VBlankSetDot = 1;
         private const int VBlankClearDot = 2;
-        private const int CpuReadSampleOffsetDots = 2;
-        private const int VBlankEventDot = 1;
         
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
@@ -53,8 +51,6 @@ namespace NESCore.PPU
         ];
 
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
-
-        public event NMIEventHandler? NMIEvent;
 
         public event VBlankEventHandler? VBlank;
 

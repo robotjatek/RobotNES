@@ -15,7 +15,7 @@ Yet another Nintendo Entertainment System emulator written in C#.
 - Tests from pages 1-9 in AccuracyCoin.nes fully pass 
 - Basic Xbox controller support
 
-Works with NROM (mapper 0), MMC1 (mapper 1), UxROM (mapper 2) and CNROM (mapper 3) games
+Works with NROM (mapper 0), MMC1 (mapper 1), UxROM (mapper 2) and CNROM (mapper 3) , AOROM (mapper 7) games
 
 Tested with: Donkey Kong, Donkey Kong Jr., Donkey Kong3, Excitebike, Galaga, Galaxian, Bomberman, Magic Jewelry, Mario Bros., Super Mario Bros. 1, F1 Race, Pinball, 1942, Baseball, Battle City, Kungfu, Karateka, Macross, Ice Climber, Road Fighter, Soccer, Megaman, Contra, Ducktales, Arkanoid, Track & Field, Gradius, Double Dragon, Robocop 3, Metroid, Chip 'n Dale Rescue Rangers 2
 
