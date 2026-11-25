@@ -20,5 +20,9 @@
         event NMIEventHandler NMIEvent;
 
         event VBlankEventHandler? VBlank;
+        
+        public bool NmiOutput { get; }
+       
+        void BeginStatusRead();
     }
 }

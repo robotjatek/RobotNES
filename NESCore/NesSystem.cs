@@ -48,7 +48,6 @@ namespace NESCore
             // Frame delivery and CPU interruption are separate: VBlank fires every frame,
             // NMIEvent only when the ROM has enabled NMI in PPU control.
             _ppu.VBlank += OnVBlank;
-            _ppu.NMIEvent += OnNmi;
         }
 
         public void Run()
@@ -86,11 +85,6 @@ namespace NESCore
         {
             FrameBufferReady?.Invoke(framebuffer);
             LimitFrameRate();
-        }
-
-        private void OnNmi(byte[] framebuffer)
-        {
-            _cpu.HandleNmi();
         }
 
         private ICartridge LoadCartridge(string path, Func<IBUS> getBus)

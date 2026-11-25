@@ -13,5 +13,10 @@
         void PpuOamDma(byte value);
         uint Cycles { get; }
         bool Irq { get; }
+        
+        // A NMI that is still waiting for the cpu to handle
+        bool NmiLatched { get; }
+        bool NmiReadyForCpu { get; }
+        public void AcknowledgeNmi();
     }
 }

@@ -53,6 +53,7 @@ namespace NESCoreTests.Unit.CPUTest
             //setup PC on startup: 0xdead
             bus.Setup(b => b.Read(0xfffd)).Returns(0xde);
             bus.Setup(b => b.Read(0xfffc)).Returns(0xad);
+            bus.Setup(b => b.NmiReadyForCpu).Returns(true);
 
             var registers = new Registers
             {
@@ -60,8 +61,6 @@ namespace NESCoreTests.Unit.CPUTest
             };
 
             var cpu = new Cpu(bus.Object, registers, _instructions, _logger);
-            
-            cpu.HandleNmi();
             cpu.RunInstruction();
 
             writeArgs.Should().ContainInConsecutiveOrder(0xde, 0xad, 0xee);

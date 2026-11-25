@@ -4,6 +4,13 @@ namespace NESCore.PPU
 {
     public class Ppu : IPPU
     {
+        private const int VBlankScanline = 241;
+        private const int PreRenderScanline = 261;
+        private const int VBlankSetDot = 1;
+        private const int VBlankClearDot = 2;
+        private const int CpuReadSampleOffsetDots = 2;
+        private const int VBlankEventDot = 1;
+        
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
         private readonly IPPUMemory _ppuMemory;
@@ -20,6 +27,8 @@ namespace NESCore.PPU
 
         private byte _ppuDataBus;
         private byte _dataBuffer;
+        private bool _oddFrame;
+        private bool _suppressVBlankThisFrame;
 
         public readonly record struct Color(byte R, byte G, byte B);
 
@@ -57,6 +66,16 @@ namespace NESCore.PPU
             _backgroundEvaluator = new BackgroundEvaluator(_loopyRegisters, _ppuMemory, _registers);
             _spriteEvaluator = new SpriteEvaluator(registers, ppuMemory);
             Array.Fill(_frameBuffer, (byte)0);
+        }
+        
+        public void BeginStatusRead()
+        {
+            // Hardware quirk (2C02): reading $2002 on the exact dot before VBlank starts (241:0)
+            // clears the VBlank latch simultaneously with its set signal, suppressing VBlank for this frame.
+            if (_scanlines == 241 && _scanlineCycles == 0)
+            {
+                _suppressVBlankThisFrame = true;
+            }
         }
 
         public byte Read(ushort address)
@@ -141,11 +160,6 @@ namespace NESCore.PPU
                 var prevNmi = _registers.GetEnableNMI();
                 _registers.Control = value;
                 _loopyRegisters.WriteControl(value);
-
-                if (!prevNmi && _registers.GetEnableNMI() && _registers.GetVBlankFlag())
-                {
-                    NMIEvent?.Invoke(_frameBuffer);
-                }
             }
             else if (address == 0x2001)
             {
@@ -196,7 +210,7 @@ namespace NESCore.PPU
         {
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
             var isRenderScanline = _scanlines is >= 0 and < 240;
-            var isPreRenderScanline = _scanlines == 261;
+            var isPreRenderScanline = _scanlines == PreRenderScanline;
 
             if (isRenderScanline || isPreRenderScanline)
             {
@@ -261,7 +275,7 @@ namespace NESCore.PPU
                         _registers.OAMAddress = 0;
                     }
 
-                    if (_scanlineCycles == 1)
+                    if (_scanlineCycles == VBlankClearDot)
                     {
                         _registers.SetVBlankFlag(false);
                         _registers.SetOverflowFlag(false);
@@ -278,36 +292,42 @@ namespace NESCore.PPU
             {
                 // Post-render scanline: idle
             }
-            else if (_scanlines >= 241 && _scanlines <= 260)
+            else if (_scanlines >= VBlankScanline && _scanlines <= 260)
             {
                 // VBlank scanlines
-                if (_scanlines == 241 && _scanlineCycles == 0)
+                if (_scanlines == VBlankScanline && _scanlineCycles == VBlankSetDot)
                 {
-                    _registers.SetVBlankFlag(true);
+                    if (!_suppressVBlankThisFrame)
+                    {
+                        _registers.SetVBlankFlag(true);
+                    }
+                    _suppressVBlankThisFrame = false;
 
                     // The rendered frame is handed over on every VBlank. The NMI enable bit in PPU
                     // control only decides whether the CPU gets interrupted, so ROMs that never set
                     // it (e.g. the sprite hit / frame basics test ROMs) still get displayed.
                     VBlank?.Invoke(_frameBuffer);
-
-                    if (_registers.GetEnableNMI())
-                    {
-                        NMIEvent?.Invoke(_frameBuffer);
-                    }
                 }
             }
 
             _cycles++;
             _scanlineCycles++;
+            if (_scanlines == PreRenderScanline && _scanlineCycles == 340 && _oddFrame && renderingEnabled)
+            {
+                _scanlineCycles = 341;
+            }
             if (_scanlineCycles == 341)
             {
                 _scanlines++;
                 _scanlineCycles = 0;
-                if (_scanlines > 261)
+                if (_scanlines > PreRenderScanline)
                 {
                     _scanlines = 0;
+                    _oddFrame = !_oddFrame;
                 }
             }
         }
+        
+        public bool NmiOutput => _registers.GetVBlankFlag() && _registers.GetEnableNMI();
     }
 }
