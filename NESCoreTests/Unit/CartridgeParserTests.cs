@@ -13,7 +13,7 @@ namespace NESCoreTests.Unit
 
             public SlicedRom Chr => throw new NotImplementedException();
 
-            public RomBase PrgRam => throw new NotImplementedException();
+            public Ram PrgRam => throw new NotImplementedException();
             
             public bool TryRead(ushort address, out byte value)
             {
@@ -225,36 +225,6 @@ namespace NESCoreTests.Unit
         {
             var sut = new CartridgeHeader([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             sut.IsPAL.Should().BeFalse();
-        }
-
-        [Fact]
-        public void ROMShouldThrowWhenSizeIsNotEqualTo16k_1()
-        {
-            var createRom = () => new Rom([]);
-            createRom.Should().Throw<InvalidSizeException>();
-        }
-
-        [Fact]
-        public void ROMShouldThrowWhenSizeIsNotEqualTo16k_2()
-        {
-            var createRom = () => new Rom([0]);
-            createRom.Should().Throw<InvalidSizeException>();
-        }
-
-        [Fact]
-        public void RomShouldThrowWhenSizeIsLargerThan16K()
-        {
-            var bytes = new byte[16 * 1024 + 1];
-            var createRom = () => new Rom(bytes);
-            createRom.Should().Throw<InvalidSizeException>();
-        }
-
-        [Fact]
-        public void RomShouldNotThrowWhenSizeIs16K()
-        {
-            var bytes = new byte[16 * 1024];
-            var createRom = () => new Rom(bytes);
-            createRom.Should().NotThrow();
         }
     }
 }

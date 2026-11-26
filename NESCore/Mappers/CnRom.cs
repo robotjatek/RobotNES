@@ -8,7 +8,7 @@ public class CnRom : IMapper
     public int Id => 3;
     
     public SlicedRom Chr { get; } // 8kb Switchable, up to 32kb
-    public RomBase PrgRam { get; }
+    public Ram PrgRam { get; }
     private readonly ILogger _logger;
     private readonly ICartridgeHeader _cartridgeHeader;
     private readonly SlicedRom _prg;

@@ -15,7 +15,7 @@
 
         SlicedRom Chr { get; }
         
-        RomBase PrgRam { get; } // TODO: use sliced?
+        Ram PrgRam { get; }
 
         bool TryRead(ushort address, out byte value);
 

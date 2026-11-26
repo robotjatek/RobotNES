@@ -13,7 +13,7 @@ namespace NESCore.Mappers
 
         public SlicedRom Chr { get; }
 
-        public RomBase PrgRam { get; }
+        public Ram PrgRam { get; }
         
         private readonly ICartridgeHeader _cartridgeHeader;
 

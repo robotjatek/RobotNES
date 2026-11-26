@@ -327,8 +327,8 @@ namespace NESCoreTests.Unit
         // there reach the real open bus path without any mocking.
         private static Bus CreateBusWithMapper0Cartridge(IMemory memory)
         {
-            var prg = new SlicedRom(16, RandomBytePattern(16), true);
-            var mapper = new Mapper0(prg, new SlicedRom(8, RandomBytePattern(8), true), Mock.Of<ILogger>(), Mock.Of<ICartridgeHeader>());
+            var prg = new SlicedRom(16, RandomBytePattern(16));
+            var mapper = new Mapper0(prg, new SlicedRom(8, RandomBytePattern(8)), Mock.Of<ILogger>(), Mock.Of<ICartridgeHeader>());
             var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapper);
             return new Bus(cartridge, memory, Mock.Of<IPPU>(), Mock.Of<IController>(), Mock.Of<IController>(),
                 Mock.Of<IApu>(), Mock.Of<ILogger>());

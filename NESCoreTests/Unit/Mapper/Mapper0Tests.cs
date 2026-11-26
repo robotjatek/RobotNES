@@ -2,6 +2,7 @@
 using NESCore;
 using NESCore.Mappers;
 using Serilog;
+
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace NESCoreTests.Unit.Mapper
@@ -11,8 +12,8 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void ReadFromLowerBank()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var loggerMock = new Mock<ILogger>();
 
             var sut = new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
@@ -26,8 +27,8 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void ReadFromUpperBank()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var loggerMock = new Mock<ILogger>();
 
             var sut = new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
@@ -41,8 +42,8 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void WritesAreIgnoredToRomArea()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var loggerMock = new Mock<ILogger>();
             
             var sut = new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
@@ -58,7 +59,7 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void PrgRamCanBeWrittenAndRead()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
             var chr = new SlicedRom(8, RandomBytePattern(8), false);
             var sut = new Mapper0(prg, chr, new Mock<ILogger>().Object, _mockHeader.Object);
 
@@ -74,8 +75,8 @@ namespace NESCoreTests.Unit.Mapper
         public void MapperCreationIsSuccessfulWithOnlyOneROMBank()
         {
             var loggerMock = new Mock<ILogger>();
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(16));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var sut = () => new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
             sut.Should().NotThrow();
         }
@@ -84,8 +85,8 @@ namespace NESCoreTests.Unit.Mapper
         public void MapperCreationIsSuccessfulWithTwoRomBanks()
         {
             var loggerMock = new Mock<ILogger>();
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var sut = () => new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
             
             sut.Should().NotThrow();
@@ -95,8 +96,8 @@ namespace NESCoreTests.Unit.Mapper
         public void Mapper0ShouldThrowWhenThereAreMoreRoMsThanTwo()
         {
             var loggerMock = new Mock<ILogger>();
-            var prg = new SlicedRom(16, RandomBytePattern(48), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(48));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
 
             var sut = () => new Mapper0(prg, chr, loggerMock.Object, _mockHeader.Object);
             
@@ -106,8 +107,8 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void ShouldThrowWhenThereAreNoRoms()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(0), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(0));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var sut = () => new Mapper0(prg, chr, new Mock<ILogger>().Object, _mockHeader.Object);
             sut.Should().Throw<ArgumentException>();
         }
@@ -115,8 +116,8 @@ namespace NESCoreTests.Unit.Mapper
         [Fact]
         public void MapperIdShouldBe0()
         {
-            var prg = new SlicedRom(16, RandomBytePattern(32), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(32));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var sut = new Mapper0(prg, chr, new Mock<ILogger>().Object, _mockHeader.Object);
             sut.Id.Should().Be(0);
         }
@@ -126,8 +127,8 @@ namespace NESCoreTests.Unit.Mapper
         [InlineData(0x5fff)]
         public void ReadOutsideTheMappedAreasIsReportedAsUndecoded(int address)
         {
-            var prg = new SlicedRom(16, RandomBytePattern(16), true);
-            var chr = new SlicedRom(8, RandomBytePattern(8), true);
+            var prg = new SlicedRom(16, RandomBytePattern(16));
+            var chr = new SlicedRom(8, RandomBytePattern(8));
             var sut = new Mapper0(prg, chr, new Mock<ILogger>().Object, _mockHeader.Object);
 
             sut.TryRead((ushort)address, out var data).Should().BeFalse();

@@ -25,7 +25,7 @@ public class Mmc1 : IMapper
     // 4kb slices
     public SlicedRom Chr { get; }
     
-    public RomBase PrgRam { get; }
+    public Ram PrgRam { get; }
 
     private readonly ShiftRegister _shiftRegister;
     

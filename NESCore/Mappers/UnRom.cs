@@ -17,7 +17,7 @@ public class UnRom : IMapper
 {
     public int Id => 2;
     public SlicedRom Chr { get; }
-    public RomBase PrgRam { get; }
+    public Ram PrgRam { get; }
     private readonly ILogger _logger;
     private readonly ICartridgeHeader _cartridgeHeader;
 

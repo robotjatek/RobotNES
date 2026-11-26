@@ -21,7 +21,7 @@ public class AoRom : IMapper
 {
     public int Id => 7;
     public SlicedRom Chr { get; }
-    public RomBase PrgRam { get; } = new Ram(8);
+    public Ram PrgRam { get; } = new(8);
     private readonly SlicedRom _prg;
 
     private bool _mirrorMode;
