@@ -16,7 +16,7 @@
                 //Sets up the instructionset to throw on an unknown instruction
                 var opcode = (byte)i;
                 //instructions[i] = (_, registers) => throw new NotImplementedException($"Unknown instruction 0x{opcode:X2}@0x{registers.PC - 1:X4}");
-                instructions[i] = NOP_IMM;
+                instructions[i] = NOP;
             }
 
             instructions[Opcodes.BRK] = BRK;
