@@ -4,7 +4,7 @@ using Serilog;
 
 namespace NESCore.PPU
 {
-    public class PpuMemory(ICartridge cartridge, ILogger logger) : IPPUMemory
+    public class PpuMemory(ICartridge cartridge, IPPURegisters registers, ILogger logger) : IPPUMemory
     {
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
@@ -28,7 +28,8 @@ namespace NESCore.PPU
             }
             else if (IsInPaletteMemory(address))
             {
-                return _paletteMemory[GetPaletteIndex(address)];
+                var grayscaleMask = registers.IsGrayScale() ? 0x30 : 0xFF;
+                return (byte)(_paletteMemory[GetPaletteIndex(address)] & grayscaleMask);
             }
 
             throw new NotImplementedException();
