@@ -6,12 +6,12 @@ namespace NESCore.Mappers
 {
     public interface IMapperFactory
     {
-        IMapper CreateMapper(ICartridgeHeader header, byte[] prgRoms, List<ChrBase> chrRoms, Func<IBUS> getBus);
+        IMapper CreateMapper(ICartridgeHeader header, byte[] prgRoms, byte[] chrRoms, Func<IBUS> getBus);
     }
 
     public class MapperFactory(ILogger logger) : IMapperFactory
     {
-        public IMapper CreateMapper(ICartridgeHeader header, byte[] prgRoms, List<ChrBase> chrRoms, Func<IBUS> getBus)
+        public IMapper CreateMapper(ICartridgeHeader header, byte[] prgRoms, byte[] chrRoms, Func<IBUS> getBus)
         {
             logger.Information("Creating mapper {HeaderMapperId}", header.MapperID);
 
@@ -19,7 +19,7 @@ namespace NESCore.Mappers
             {
                 case 0:
                 {
-                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    var chr = chrRoms.Length == 0 ? new SlicedRom(8, new byte[8*1024], false) : new SlicedRom(8, chrRoms, true);
                     var prg = new SlicedRom(16, prgRoms, true);
                     return new Mapper0(prg, chr, logger, header);
                 }

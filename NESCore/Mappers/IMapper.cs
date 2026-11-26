@@ -13,7 +13,7 @@
         
         int Id { get; }
 
-        RomBase Chr { get; }
+        SlicedRom Chr { get; }
         
         RomBase PrgRam { get; }
 

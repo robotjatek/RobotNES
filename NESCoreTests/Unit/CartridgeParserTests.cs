@@ -11,7 +11,7 @@ namespace NESCoreTests.Unit
         {
             public int Id => throw new NotImplementedException();
 
-            public RomBase Chr => throw new NotImplementedException();
+            public SlicedRom Chr => throw new NotImplementedException();
 
             public RomBase PrgRam => throw new NotImplementedException();
             
@@ -93,7 +93,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), RandomBytePattern(8), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(DRAGON_WARRIOR_ROM_PATH, _getBus).Header.FLAGS.BatteryRAM.Should().Be(BATTERY_RAM.PRESENT);
@@ -118,7 +118,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), RandomBytePattern(8), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(MARIO_BROS_ROM_PATH, _getBus).Header.FLAGS.FourScreenMirroring.Should()
@@ -130,7 +130,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), RandomBytePattern(8), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(RAD_RACER_II_ROM_PATH, _getBus).Header.FLAGS.FourScreenMirroring.Should()
@@ -166,7 +166,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), RandomBytePattern(8), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(DEATHBOTS_ROM_PATH, _getBus).Header.MapperID.Should().Be(79);
@@ -195,7 +195,7 @@ namespace NESCoreTests.Unit
                 [],
                 _getBus);
 
-            mapper.Chr.Should().BeOfType<ChrRam>();
+            mapper.Chr.IsReadonly.Should().BeFalse();
         }
 
         [Fact]

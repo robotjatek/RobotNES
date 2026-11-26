@@ -11,21 +11,15 @@ namespace NESCore.Mappers
 
         private readonly ILogger _logger;
 
-        public RomBase Chr { get; }
+        public SlicedRom Chr { get; }
 
         public RomBase PrgRam { get; }
-
-        public byte ChrRomNumber { get; }
-
-        public int ChrRomSize { get; }
         
         private readonly ICartridgeHeader _cartridgeHeader;
 
-        public Mapper0(SlicedRom prgRoms, List<ChrBase> chr, ILogger logger, ICartridgeHeader cartridgeHeader)
+        public Mapper0(SlicedRom prgRoms, SlicedRom chr, ILogger logger, ICartridgeHeader cartridgeHeader)
         {
             _cartridgeHeader = cartridgeHeader;
-            ChrRomNumber = (byte)chr.Count;
-            ChrRomSize = ChrRomNumber * 1024 * 8;
             _prgRom = prgRoms;
 
             if (_prgRom.NumberOfBanks is > 2 or 0)
@@ -33,11 +27,10 @@ namespace NESCore.Mappers
                 throw new ArgumentException("Invalid number of ROMs");
             }
 
-            Chr = chr[0];
+            Chr = chr;
             PrgRam = new Ram(8);
             
             prgRoms.Map(0, 0);
-
             if (prgRoms.NumberOfBanks == 1)
             {
                 prgRoms.Map(1, 0);

@@ -65,6 +65,7 @@
         private readonly int _sliceSize;
         private readonly bool _isReadonly;
         public int NumberOfBanks => _roms.Count;
+        public bool IsReadonly => _isReadonly;
 
         public SlicedRom(int sliceSizeKb, byte[] rawBytes, bool isReadonly)
         {

@@ -11,7 +11,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void ReadsPatternTables()
         {
-            var chr = new ChrRom(RandomBytePattern(8));
+            var chr = new SlicedRom(8, RandomBytePattern(8), false);
             var mapper = new Mock<IMapper>();
             mapper.Setup(m => m.Chr).Returns(chr);
 
@@ -28,7 +28,7 @@ namespace NESCoreTests.Unit.PPUTest
         [Fact]
         public void WritesToChrRamCanBeReadBack()
         {
-            var chrRam = new ChrRam();
+            var chrRam = new SlicedRom(8, new byte[8*1024], false);
             var mapper = new Mock<IMapper>();
             mapper.Setup(m => m.Chr).Returns(chrRam);
             var cartridge = new Mock<ICartridge>();
