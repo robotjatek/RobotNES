@@ -129,7 +129,8 @@ namespace NESCore.PPU
                 else // palette read
                 {
                     // palette is just 6 bits, the top two bits are openbus
-                    var result = (byte)((_ppuMemory.Read(_loopyRegisters.V) & 0x3f) | _ppuDataBus & 0xC0);
+                    var grayscaleMask = _registers.IsGrayScale() ? 0x30 : 0xFF;
+                    var result = (byte)(((_ppuMemory.Read(_loopyRegisters.V) & 0x3f) | _ppuDataBus & 0xC0) & grayscaleMask);
                     _dataBuffer = _ppuMemory.Read(_loopyRegisters.GetPaletteMirrorAddress());
                     _loopyRegisters.IncrementAddress(_registers);
                     _ppuDataBus = result;
