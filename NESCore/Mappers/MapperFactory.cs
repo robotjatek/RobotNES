@@ -35,11 +35,12 @@ namespace NESCore.Mappers
                     var prg = new SlicedRom(16, prgRoms, true);
                     return new UnRom(prg, chr, logger, header);
                 }
-                // case 3:
-                // {
-                //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                //     return new CnRom(prgRoms, chr, logger, header);
-                // }
+                case 3:
+                {
+                    var chr = CreateChr(chrRoms);
+                    var prg = new SlicedRom(16, prgRoms, true);
+                    return new CnRom(prg, chr, logger, header);
+                }
                 // case 7:
                 // {
                 //     // BattleToads: NES2.0 8k CHR-RAM size: 8192
