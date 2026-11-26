@@ -12,14 +12,10 @@
         }
         
         int Id { get; }
-        byte PrgRomNumber { get; } // TODO: do i need these?
-        int PrgRomSize { get; }
-        byte ChrRomNumber { get; }
-        int ChrRomSize { get; }
 
-        RomBase Chr { get; }
+        SlicedRom Chr { get; }
         
-        RomBase PrgRam { get; }
+        Ram PrgRam { get; }
 
         bool TryRead(ushort address, out byte value);
 

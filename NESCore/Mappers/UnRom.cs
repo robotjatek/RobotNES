@@ -16,56 +16,41 @@ namespace NESCore.Mappers;
 public class UnRom : IMapper
 {
     public int Id => 2;
-    public byte PrgRomNumber { get; }
-    public int PrgRomSize { get; }
-    public byte ChrRomNumber { get; }
-    public int ChrRomSize { get; }
-    public RomBase Chr { get; }
-    public RomBase PrgRam { get; }
+    public SlicedRom Chr { get; }
+    public Ram PrgRam { get; }
     private readonly ILogger _logger;
     private readonly ICartridgeHeader _cartridgeHeader;
 
-    private readonly List<Rom> _prgRoms;
-    private Rom _lowerBank; // switchable 0x8000-0xBFFF
-    private readonly Rom _upperBank; // fixed 0xC000-0xFFFF, Should be initialized to the LAST ROM
+    private readonly SlicedRom _prgRoms;
 
-    public UnRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger,  ICartridgeHeader cartridgeHeader)
+    public UnRom(SlicedRom prgRoms, SlicedRom chr, ILogger logger,  ICartridgeHeader cartridgeHeader)
     {
         _cartridgeHeader = cartridgeHeader;
         _logger = logger;
         _prgRoms = prgRoms;
-        PrgRomNumber =  (byte)prgRoms.Count; // window 16k + 16k fixed
-        PrgRomSize = PrgRomNumber * 1024 * 16;
-        ChrRomNumber = (byte)chr.Count;
-        ChrRomSize = ChrRomNumber * 1024 * 8; // 8k fix
         
-        Chr = chr[0];
+        Chr = chr;
         PrgRam = new Ram(8); // According to wiki this should be 0, but keep it safe
-        _lowerBank = prgRoms[0];
-        _upperBank = prgRoms[^1];
+
+        prgRoms.Map(0, 0);
+        prgRoms.Map(1, prgRoms.LastBankId); // "Upper" bank is initialized to the last bank
     }
     
     
     public bool TryRead(ushort address, out byte value)
     {
-        if (address is >= 0x8000 and <= 0xBFFF)
+        switch (address)
         {
-            value = _lowerBank.Read((ushort)(address - 0x8000));
-            return true;
+            case >= 0x8000:
+                value = _prgRoms.Read((ushort)(address - 0x8000));
+                return true;
+            case >= 0x6000:
+                value = PrgRam.Read((ushort)(address - 0x6000));
+                return true;
+            default:
+                value = 0;
+                return false;
         }
-        else if  (address >= 0xC000)
-        {
-            value = _upperBank.Read((ushort)(address -  0xC000));
-            return true;
-        }
-        else if (address is >= 0x6000 and < 0x8000)
-        {
-            value = PrgRam.Read((ushort)(address - 0x6000));
-            return true;
-        }
-
-        value = 0;
-        return false;
     }
 
     public void Write(ushort address, byte value)
@@ -80,8 +65,8 @@ public class UnRom : IMapper
             // bank switch
             // NesDev wiki: Emulator implementations of iNES mapper 2 treat this as a full 8-bit bank select register,
             // without bus conflicts. This allows the mapper to be used for similar boards that are compatible.
-            var selectedBank = value % _prgRoms.Count;
-            _lowerBank = _prgRoms[selectedBank];
+            var selectedBank = (byte)(value % _prgRoms.NumberOfBanks);
+            _prgRoms.Map(0, selectedBank);
         }
         else
         {

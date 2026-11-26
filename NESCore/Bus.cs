@@ -92,7 +92,6 @@ namespace NESCore
         public byte Read(ushort address)
         {
             BeginCpuCycle();
-            Cycles++;
             
             // PPU $2002 suppression depends on the dot when the read begins, not when the byte is latched.
             if (IsInPpuArea(address) && (address & 0x0007) == 0x0002)
@@ -119,7 +118,6 @@ namespace NESCore
         public void Write(ushort address, byte data)
         {
             BeginCpuCycle();
-            Cycles++;
             _busData.Drive(data);
             _ppu.Run(3);
             _apu.Tick();
@@ -165,7 +163,6 @@ namespace NESCore
         public void PpuOamDma(byte value)
         {
             BeginCpuCycle();
-            Cycles++;
             _busData.Drive(value);
             _ppu.Run(3);
             _ppu.OamDMAWrite(value);
@@ -178,7 +175,6 @@ namespace NESCore
             for (var i = 0; i < cycles; i++)
             {
                 BeginCpuCycle();
-                Cycles++;
                 _ppu.Run(3);
                 _apu.Tick();
                 EndCpuCycle();

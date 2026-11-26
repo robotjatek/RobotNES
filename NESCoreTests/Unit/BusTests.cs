@@ -302,7 +302,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void WriteToOAMDmaRegisterRaisesEvent()
+        public void WriteToOamDmaRegisterRaisesEvent()
         {
             var memory = new Mock<IMemory>();
             var bus = new Bus(_mockCartridge.Object, memory.Object, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
@@ -313,7 +313,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void WriteToOAMDmaRegisterRaisesEvent2()
+        public void WriteToOamDmaRegisterRaisesEvent2()
         {
             var memory = new Mock<IMemory>();
             var bus = new Bus(_mockCartridge.Object, memory.Object, _mockPPU, _controller1.Object, _controller2.Object, _apu.Object, _logger);
@@ -327,8 +327,8 @@ namespace NESCoreTests.Unit
         // there reach the real open bus path without any mocking.
         private static Bus CreateBusWithMapper0Cartridge(IMemory memory)
         {
-            var prgBank = new Rom(RandomBytePattern(16));
-            var mapper = new Mapper0([prgBank], [new ChrRom(RandomBytePattern(8))], Mock.Of<ILogger>(), Mock.Of<ICartridgeHeader>());
+            var prg = new SlicedRom(16, RandomBytePattern(16));
+            var mapper = new Mapper0(prg, new SlicedRom(8, RandomBytePattern(8)), Mock.Of<ILogger>(), Mock.Of<ICartridgeHeader>());
             var cartridge = new Cartridge(Mock.Of<ICartridgeHeader>(), mapper);
             return new Bus(cartridge, memory, Mock.Of<IPPU>(), Mock.Of<IController>(), Mock.Of<IController>(),
                 Mock.Of<IApu>(), Mock.Of<ILogger>());

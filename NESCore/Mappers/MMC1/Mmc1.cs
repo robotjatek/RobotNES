@@ -2,6 +2,7 @@
 
 namespace NESCore.Mappers.MMC1;
 
+// TODO: support save ram
 // Metroid
 // Dr. Mario
 // Final Fantasy
@@ -14,10 +15,6 @@ namespace NESCore.Mappers.MMC1;
 public class Mmc1 : IMapper
 {
     public int Id => 1;
-    public byte PrgRomNumber { get; }
-    public int PrgRomSize { get; }
-    public byte ChrRomNumber { get; }
-    public int ChrRomSize { get; }
 
     private readonly ILogger _logger;
     private readonly Func<IBUS> _getBus;
@@ -25,37 +22,35 @@ public class Mmc1 : IMapper
     // PPU $0000-$0FFF: 4 KiB switchable CHR bank
     //PPU $1000-$1FFF: 4 KiB switchable CHR bank
     // 4k/8k mode
-    public RomBase Chr { get; }
+    // 4kb slices
+    public SlicedRom Chr { get; }
     
-    public RomBase PrgRam { get; }
+    public Ram PrgRam { get; }
 
     private readonly ShiftRegister _shiftRegister;
     
     private byte _controlRegister = 0x0C; // $8000-$9FFF
     private byte _prgBank; // $E000-$FFFF
     private bool _prgRamDisabled;
-    private readonly PagedChr _pagedChr;
-    private readonly List<Rom> _prgRoms;
-    private Rom _lowerBank; // CPU $8000-$BFFF: 16 KiB PRG-ROM bank, either switchable or fixed to the first bank
-    private Rom _upperBank; // CPU $C000-$FFFF: 16 KiB PRG-ROM bank, either fixed to the last bank or switchable
+    
+    // CPU $8000-$BFFF: 16 KiB PRG-ROM bank, either switchable or fixed to the first bank
+    // CPU $C000-$FFFF: 16 KiB PRG-ROM bank, either fixed to the last bank or switchable
+    private readonly SlicedRom _prgRoms;
+    
     private byte _chrBank0;
     private byte _chrBank1;
 
-    public Mmc1(List<Rom> prgRoms, List<ChrBase> chr, Func<IBUS> getBus, ILogger logger)
+    public Mmc1(SlicedRom prgRoms, SlicedRom chr, Func<IBUS> getBus, ILogger logger)
     {
         _logger = logger;
         _getBus = getBus;
         _prgRoms = prgRoms;
-        PrgRomNumber = (byte)prgRoms.Count;
-        PrgRomSize = prgRoms.Count * 1024 * 16;
-        ChrRomNumber = (byte)chr.Count;
-        ChrRomSize = chr.Count * 1024 * 8;
         
-        _pagedChr = new PagedChr(chr);
-        Chr = _pagedChr;
+        //_pagedChr = new PagedChr(chr);
+        Chr = chr;
         PrgRam = new Ram(8); // CPU $6000-$7FFF: 8 KiB PRG-RAM bank, (optional)
-        _lowerBank = prgRoms[0];
-        _upperBank = prgRoms[^1];
+        _prgRoms.Map(0, 0);
+        _prgRoms.Map(1, _prgRoms.LastBankId);
         
         _shiftRegister = new ShiftRegister((address, value) =>
         {
@@ -97,11 +92,8 @@ public class Mmc1 : IMapper
     {
         switch (address)
         {
-            case >= 0x8000 and <= 0xBFFF:
-                value = _lowerBank.Read((ushort)(address - 0x8000));
-                return true;
-            case >= 0xC000:
-                value = _upperBank.Read((ushort)(address -  0xC000));
+            case >= 0x8000:
+                value = _prgRoms.Read((ushort)(address - 0x8000));
                 return true;
             case >= 0x6000:
                 value = PrgRam.Read((ushort)(address - 0x6000));
@@ -157,14 +149,18 @@ public class Mmc1 : IMapper
     {
         value &= 0x1f;
         var mode = GetChrMode();
-        if (mode == ChrSwitchMode._8Kib)
+        switch (mode)
         {
-            value &= 0b11110; // low bit ignored in 8 KiB mode
-            _pagedChr.Set8KBank(value);
-        } 
-        else if (mode == ChrSwitchMode._4Kib)
-        {
-            _pagedChr.SetLower4KBank(value);
+            case ChrSwitchMode._8Kib:
+                value &= 0b11110; // low bit ignored in 8 KiB mode
+                Chr.Map(0, value);
+                Chr.Map(1, (byte)(value + 1));
+                break;
+            case ChrSwitchMode._4Kib:
+                Chr.Map(0, value);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
@@ -177,7 +173,7 @@ public class Mmc1 : IMapper
         if (GetChrMode() == ChrSwitchMode._8Kib) return;
         
         value &= 0x1f;
-        _pagedChr.SetUpper4KBank(value);
+        Chr.Map(1, value);
     }
     
     private void SwitchPrg(byte value)
@@ -190,31 +186,31 @@ public class Mmc1 : IMapper
             case 0:
             case 1:
                 // switch 32 KiB at $8000, ignoring low bit of bank number
-                if (_prgRoms.Count == 1)
+                if (_prgRoms.NumberOfBanks == 1)
                 {
                     // safeguard for cartridges with one bank only. unlikely but not impossible
-                    _lowerBank = _prgRoms[0];
-                    _upperBank = _prgRoms[0];
+                    _prgRoms.Map(0, 0);
+                    _prgRoms.Map(1, 0);
                 }
                 else
                 {
-                    var bank = (rawBank & 0b11110) % _prgRoms.Count; // Select 16 KiB PRG-ROM bank (low bit ignored in 32 KiB mode)
+                    var bank = (rawBank & 0b11110) % _prgRoms.NumberOfBanks; // Select 16 KiB PRG-ROM bank (low bit ignored in 32 KiB mode)
                     bank &= 0b11110;
-                    _lowerBank = _prgRoms[bank];
-                    _upperBank = _prgRoms[bank + 1];
+                    _prgRoms.Map(0, (byte)bank);
+                    _prgRoms.Map(1, (byte)(bank + 1));
                 }
                 break;
             case 2:
                 // fix first bank at $8000 and switch 16 KiB bank at $C000
-                var upperBank = rawBank % _prgRoms.Count;
-                _lowerBank = _prgRoms[0];
-                _upperBank = _prgRoms[upperBank];
+                var upperBank = rawBank % _prgRoms.NumberOfBanks;
+                _prgRoms.Map(0, 0);
+                _prgRoms.Map(1, (byte)upperBank);
                 break;
             case 3:
                 //  fix last bank at $C000 and switch 16 KiB bank at $8000
-                var lowerBank = rawBank % _prgRoms.Count;
-                _lowerBank = _prgRoms[lowerBank];
-                _upperBank = _prgRoms[^1];
+                var lowerBank = rawBank % _prgRoms.NumberOfBanks;
+                _prgRoms.Map(0, (byte)lowerBank);
+                _prgRoms.Map(1, _prgRoms.LastBankId);
                 break;
         }
     }

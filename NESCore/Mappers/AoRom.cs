@@ -20,34 +20,20 @@ namespace NESCore.Mappers;
 public class AoRom : IMapper
 {
     public int Id => 7;
-    public byte PrgRomNumber { get; }
-    public int PrgRomSize { get; }
-    public byte ChrRomNumber { get; }
-    public int ChrRomSize { get; }
-    public RomBase Chr { get; }
-    public RomBase PrgRam { get; } = new Ram(8);
+    public SlicedRom Chr { get; }
+    public Ram PrgRam { get; } = new(8);
+    private readonly SlicedRom _prg;
 
-    // TODO: merge into one "SlicedRom"
-    private Rom _lowerBank;
-    private Rom _upperBank;
-
-    private bool _mode;
-    private readonly List<Rom> _prgRoms;
-    
+    private bool _mirrorMode;
     private readonly ILogger _logger;
 
-    public AoRom(List<Rom> prgRoms, List<ChrBase> chr, ILogger logger)
+    public AoRom(SlicedRom prgRoms, SlicedRom chr, ILogger logger)
     {
         _logger = logger;
-        _prgRoms = prgRoms;
-        PrgRomNumber = (byte)prgRoms.Count;
-        PrgRomSize = PrgRomNumber * 1024 * 16;
-        ChrRomNumber = (byte)chr.Count;
-        ChrRomSize = ChrRomNumber * 1024 * 8;
+        _prg = prgRoms;
 
-        Chr = chr[0];
-        _lowerBank = prgRoms[^2];
-        _upperBank = prgRoms[^1];
+        Chr = chr;
+        SwitchBanks(_prg.LastBankId - 1);
     }
     
     public bool TryRead(ushort address, out byte value)
@@ -58,11 +44,8 @@ public class AoRom : IMapper
                 _logger.Warning("PRG Ram read");
                 value = PrgRam.Read((ushort)(address - 0x6000));
                 return true;
-            case >= 0x8000 and <= 0xBFFF:
-                value = _lowerBank.Read((ushort)(address - 0x8000));
-                return true;
-            case >= 0xC000:
-                value = _upperBank.Read((ushort)(address -  0xC000));
+            case >= 0x8000:
+                value = _prg.Read((ushort)(address - 0x8000));
                 return true;
             default:
                 value = 0;
@@ -80,10 +63,10 @@ public class AoRom : IMapper
         else if (address >= 0x8000)
         {
             // bank select register
-            _mode = (value & 0b10000) > 0;
+            _mirrorMode = (value & 0b10000) > 0;
             
             // switching in pairs (32k chunks)
-            var unitCount = _prgRoms.Count / 2;
+            var unitCount = _prg.NumberOfBanks / 2;
             var bankId = ((value & 0b111) % unitCount) * 2;
             SwitchBanks(bankId);
         }
@@ -91,12 +74,12 @@ public class AoRom : IMapper
 
     public IMapper.MirroringMode GetMirroring()
     {
-        return _mode ? IMapper.MirroringMode.OneScreenUpper : IMapper.MirroringMode.OneScreenLower;
+        return _mirrorMode ? IMapper.MirroringMode.OneScreenUpper : IMapper.MirroringMode.OneScreenLower;
     }
 
     private void SwitchBanks(int bankId)
     {
-        _lowerBank = _prgRoms[bankId];
-        _upperBank = _prgRoms[bankId + 1];
+        _prg.Map(0, (byte) bankId);
+        _prg.Map(1, (byte)(bankId + 1));
     }
 }
