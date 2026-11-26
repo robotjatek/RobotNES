@@ -19,7 +19,7 @@ namespace NESCore.Mappers
             {
                 case 0:
                 {
-                    var chr = chrRoms.Length == 0 ? new SlicedRom(8, new byte[8*1024], false) : new SlicedRom(8, chrRoms, true);
+                    var chr = CreateChr(chrRoms);
                     var prg = new SlicedRom(16, prgRoms, true);
                     return new Mapper0(prg, chr, logger, header);
                 }
@@ -28,12 +28,13 @@ namespace NESCore.Mappers
                 //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
                 //     return new Mmc1(prgRoms, chr, getBus, logger);
                 // }
-                // case 2:
-                // {
-                //     // I don't think unrom should support chr ram
-                //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                //     return new UnRom(prgRoms, chr, logger, header);
-                // }
+                case 2:
+                {
+                    // I don't think unrom should support chr ram
+                    var chr = CreateChr(chrRoms);
+                    var prg = new SlicedRom(16, prgRoms, true);
+                    return new UnRom(prg, chr, logger, header);
+                }
                 // case 3:
                 // {
                 //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
@@ -48,6 +49,11 @@ namespace NESCore.Mappers
                 default:
                     throw new UnknownMapperException(header.MapperID);
             }
+        }
+
+        private SlicedRom CreateChr(byte[] rawBytes)
+        {
+            return rawBytes.Length == 0 ? new SlicedRom(8, new byte[8*1024], false) : new SlicedRom(8, rawBytes, true);
         }
     }
 }
