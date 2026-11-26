@@ -165,6 +165,7 @@ namespace NESCore
         public void PpuOamDma(byte value)
         {
             BeginCpuCycle();
+            Cycles++;
             _busData.Drive(value);
             _ppu.Run(3);
             _ppu.OamDMAWrite(value);
