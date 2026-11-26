@@ -11,22 +11,10 @@ namespace NESCoreTests.Unit
         {
             public int Id => throw new NotImplementedException();
 
-            public byte PrgRomNumber => throw new NotImplementedException();
-
-            public int PrgRomSize => throw new NotImplementedException();
-
-            public Rom LowerBank => throw new NotImplementedException();
-
-            public Rom UpperBank => throw new NotImplementedException();
-
             public RomBase Chr => throw new NotImplementedException();
 
             public RomBase PrgRam => throw new NotImplementedException();
-
-            public byte ChrRomNumber => throw new NotImplementedException();
-
-            public int ChrRomSize => throw new NotImplementedException();
-
+            
             public bool TryRead(ushort address, out byte value)
             {
                 throw new NotImplementedException();
@@ -53,7 +41,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void HeaderEncodesTheNumberOf16kROMBanks()
+        public void HeaderEncodesTheNumberOf16KRomBanks()
         {
             var mf = new MapperFactory(_logger);
             var sut = new CartridgeParser(mf);
@@ -61,7 +49,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void HeaderEncodesSuperMario16kROMBanksCorrectly()
+        public void HeaderEncodesSuperMario16KRomBanksCorrectly()
         {
             var mf = new MapperFactory(_logger);
             var sut = new CartridgeParser(mf);
@@ -69,7 +57,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void HeaderEncodesTheNumberOf8kVROMBanksCorrectly()
+        public void HeaderEncodesTheNumberOf8KVromBanksCorrectly()
         {
             var mf = new MapperFactory(_logger);
             var sut = new CartridgeParser(mf);
@@ -105,7 +93,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(DRAGON_WARRIOR_ROM_PATH, _getBus).Header.FLAGS.BatteryRAM.Should().Be(BATTERY_RAM.PRESENT);
@@ -114,14 +102,14 @@ namespace NESCoreTests.Unit
         [Fact]
         public void TrainerFieldIsZero()
         {
-            var sut = new CartridgeHeader(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            var sut = new CartridgeHeader([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             sut.FLAGS.Trainer.Should().Be(TRAINER.NO);
         }
 
         [Fact]
         public void ThrowsExceptionWhenTrainerIsPresent()
         {
-            var act = () => new CartridgeHeader(new byte[] { 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            var act = () => new CartridgeHeader([0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             act.Should().Throw<TrainersNotSupportedException>();
         }
 
@@ -130,7 +118,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(MARIO_BROS_ROM_PATH, _getBus).Header.FLAGS.FourScreenMirroring.Should()
@@ -142,7 +130,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(RAD_RACER_II_ROM_PATH, _getBus).Header.FLAGS.FourScreenMirroring.Should()
@@ -178,7 +166,7 @@ namespace NESCoreTests.Unit
         {
             var mf = new Mock<IMapperFactory>();
             var header = Mock.Of<ICartridgeHeader>();
-            mf.Setup(f => f.CreateMapper(header, new List<Rom>(), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
+            mf.Setup(f => f.CreateMapper(header, RandomBytePattern(32), new List<ChrBase>(), _getBus)).Returns(new StubMapper());
 
             var sut = new CartridgeParser(mf.Object);
             sut.LoadCartridge(DEATHBOTS_ROM_PATH, _getBus).Header.MapperID.Should().Be(79);
@@ -203,7 +191,7 @@ namespace NESCoreTests.Unit
 
             var mapper = new MapperFactory(_logger).CreateMapper(
                 header.Object,
-                [new Rom(RandomBytePattern(16))],
+                RandomBytePattern(16),
                 [],
                 _getBus);
 
@@ -219,7 +207,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void Parses8kPRGRam()
+        public void Parses8KPrgRam()
         {
             var sut = new CartridgeHeader([0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0]);
             sut.NumberOf8kRAMBanks.Should().Be(50);
@@ -233,75 +221,28 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void HeaderFlags9ByteBit0EncodesNTSCSystem()
+        public void HeaderFlags9ByteBit0EncodesNtscSystem()
         {
             var sut = new CartridgeHeader([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             sut.IsPAL.Should().BeFalse();
         }
 
         [Fact]
-        public void CreatesMapperWithTheCorrectNumberOfPrgROMBanksWithARealCartridge1()
-        {
-            var sut = new CartridgeParser(new MapperFactory(_logger));
-            var cartridge = sut.LoadCartridge(MARIO_BROS_ROM_PATH, _getBus);
-            cartridge.Mapper.PrgRomNumber.Should().Be(1);
-            cartridge.Mapper.PrgRomSize.Should().Be(1 * 16 * 1024); // 16k
-        }
-
-        [Fact]
-        public void CreatesMapperWithTheCorrectNumberOfPrgROMBanksWithARealCartridge2()
-        {
-            var sut = new CartridgeParser(new MapperFactory(_logger));
-            var cartridge = sut.LoadCartridge(SUPER_MARIO_ROM_PATH, _getBus);
-            cartridge.Mapper.PrgRomNumber.Should().Be(2);
-            cartridge.Mapper.PrgRomSize.Should().Be(2 * 16 * 1024); // 32k
-        }
-
-        [Fact]
-        public void CreatesMapperWithTheCorrectNumberofCHRRomBanksWithARealCartridge()
-        {
-            var sut = new CartridgeParser(new MapperFactory(_logger));
-            var cartridge = sut.LoadCartridge(DONKEY_KONG_ROM_PATH, _getBus);
-            cartridge.Mapper.ChrRomNumber.Should().Be(1);
-            cartridge.Mapper.ChrRomSize.Should().Be(1 * 8 * 1024);
-        }
-
-        [Fact]
-        public void CreatesMapperWithTheCorrectNumberofCHRRomBanksWithARealCartridge2()
-        {
-            var mf = new Mock<IMapperFactory>();
-            var sut = new CartridgeParser(mf.Object);
-            sut.LoadCartridge(DRAGON_WARRIOR_ROM_PATH, _getBus);
-            mf.Verify(f => f.CreateMapper(It.IsAny<ICartridgeHeader>(), It.Is<List<Rom>>(a => a.Count == 4),
-                It.Is<List<ChrBase>>(a => a.Count == 2), It.IsAny<Func<IBUS>>()));
-        }
-
-        [Fact]
-        public void CreatesMapperWithTheCorrectNumberofCHRRomBanksWithARealCartridge3()
-        {
-            var mf = new Mock<IMapperFactory>();
-            var sut = new CartridgeParser(mf.Object);
-            sut.LoadCartridge(DUCKTALESROM_PATH, _getBus);
-            mf.Verify(f => f.CreateMapper(It.IsAny<ICartridgeHeader>(), It.Is<List<Rom>>(a => a.Count == 8),
-                It.Is<List<ChrBase>>(a => a.Count == 0), It.IsAny<Func<IBUS>>()));
-        }
-
-        [Fact]
         public void ROMShouldThrowWhenSizeIsNotEqualTo16k_1()
         {
-            var createRom = () => new Rom(Array.Empty<byte>());
+            var createRom = () => new Rom([]);
             createRom.Should().Throw<InvalidSizeException>();
         }
 
         [Fact]
         public void ROMShouldThrowWhenSizeIsNotEqualTo16k_2()
         {
-            var createRom = () => new Rom(new byte[] { 0 });
+            var createRom = () => new Rom([0]);
             createRom.Should().Throw<InvalidSizeException>();
         }
 
         [Fact]
-        public void ROMShouldThrowWhenSizeIsLargerThan16k()
+        public void RomShouldThrowWhenSizeIsLargerThan16K()
         {
             var bytes = new byte[16 * 1024 + 1];
             var createRom = () => new Rom(bytes);
@@ -309,7 +250,7 @@ namespace NESCoreTests.Unit
         }
 
         [Fact]
-        public void ROMShouldNotThrowWhenSizeIs16k()
+        public void RomShouldNotThrowWhenSizeIs16K()
         {
             var bytes = new byte[16 * 1024];
             var createRom = () => new Rom(bytes);

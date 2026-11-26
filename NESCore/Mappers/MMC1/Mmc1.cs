@@ -2,6 +2,7 @@
 
 namespace NESCore.Mappers.MMC1;
 
+// TODO: support save ram
 // Metroid
 // Dr. Mario
 // Final Fantasy
