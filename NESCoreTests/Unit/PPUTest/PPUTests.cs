@@ -55,11 +55,11 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(2); // set the vblank flag on the first cycle of the vblank lines
 
             registers.GetVBlankFlag().Should().BeTrue();
-            eventMonitor.Should().Raise(nameof(ppu.NMIEvent));
+            eventMonitor.Should().Raise(nameof(ppu.VBlank));
         }
 
         [Fact]
-        public void SetsVBlankFlagButDoesNotSendNmi()
+        public void SetsVBlankFlagWithoutNmiWhenNmiDisabled()
         {
             var registers = new PPURegisters();
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
@@ -74,7 +74,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppu.Run(2); // set the vblank flag on the first cycle of the vblank lines
 
             registers.GetVBlankFlag().Should().BeTrue();
-            eventMonitor.Should().NotRaise(nameof(ppu.NMIEvent));
+            ppu.NmiOutput.Should().BeFalse();
         }
 
         [Fact]
@@ -100,7 +100,6 @@ namespace NESCoreTests.Unit.PPUTest
 
             registers.GetVBlankFlag().Should().BeTrue();
             eventMonitor.Should().Raise(nameof(ppu.VBlank));
-            eventMonitor.Should().NotRaise(nameof(ppu.NMIEvent));
         }
 
         [Fact]
@@ -120,8 +119,7 @@ namespace NESCoreTests.Unit.PPUTest
 
                 registers.GetVBlankFlag().Should().BeTrue();
             }
-
-            eventMonitor.OccurredEvents.Where(e => e.EventName == nameof(ppu.NMIEvent)).Should().HaveCount(3);
+            
             eventMonitor.OccurredEvents.Where(e => e.EventName == nameof(ppu.VBlank)).Should().HaveCount(3);
         }
 
@@ -130,11 +128,8 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
-            uint beforePrerender =
-                341 * 240
-                + 341
-                + 2;
-            ppu.Run(beforePrerender);
+            uint toVBlank = 341 * 241 + 3;
+            ppu.Run(toVBlank);
             registers.GetVBlankFlag().Should().BeTrue(); // Double check if vblank is set
 
             ppu.Run(20 * 341);
@@ -151,11 +146,8 @@ namespace NESCoreTests.Unit.PPUTest
             };
 
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
-            uint beforePrerender =
-                341 * 240
-                + 341
-                + 2;
-            ppu.Run(beforePrerender);
+            uint toVBlank = 341 * 241 + 3;
+            ppu.Run(toVBlank);
             ppu.Run(20 * 341);
 
             registers.GetOverflowFlag().Should().BeFalse();
@@ -170,11 +162,8 @@ namespace NESCoreTests.Unit.PPUTest
             };
 
             var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
-            uint beforePrerender =
-                341 * 240
-                + 341
-                + 2;
-            ppu.Run(beforePrerender);
+            uint toVBlank = 341 * 241 + 3;
+            ppu.Run(toVBlank);
             ppu.Run(20 * 341);
 
             registers.GetSpriteZeroHitFlag().Should().BeFalse();
@@ -557,14 +546,14 @@ namespace NESCoreTests.Unit.PPUTest
             var ppu = new Ppu(registers, memory.Object, _logger);
             using var monitor = ppu.Monitor();
 
-            uint cyclesBeforeVBlank = 240 * 341 + 341;
+            uint cyclesBeforeVBlank = 241 * 341 + 1;
             ppu.Run(cyclesBeforeVBlank);
             registers.GetVBlankFlag().Should().BeFalse();
 
             ppu.Run(1);
 
             registers.GetVBlankFlag().Should().BeTrue();
-            monitor.Should().Raise(nameof(ppu.NMIEvent));
+            monitor.Should().Raise(nameof(ppu.VBlank));
         }
 
 

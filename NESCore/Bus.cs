@@ -91,11 +91,20 @@ namespace NESCore
 
         public byte Read(ushort address)
         {
+            BeginCpuCycle();
             Cycles++;
+            
+            // PPU $2002 suppression depends on the dot when the read begins, not when the byte is latched.
+            if (IsInPpuArea(address) && (address & 0x0007) == 0x0002)
+            {
+                _ppu.BeginStatusRead();
+            }
+            
             _ppu.Run(2);
             _apu.Tick();
             var data = ReadMemoryOnly(address);
             _ppu.Run(1);
+            EndCpuCycle();
             return data;
         }
 
@@ -109,9 +118,10 @@ namespace NESCore
 
         public void Write(ushort address, byte data)
         {
+            BeginCpuCycle();
             Cycles++;
             _busData.Drive(data);
-            _ppu.Run(2);
+            _ppu.Run(3);
             _apu.Tick();
             
             if (IsInInternalMemory(address))
@@ -149,25 +159,29 @@ namespace NESCore
                 _logger.Warning("Unsupported write to 0x{Address:X4}", address);
                 throw new NotImplementedException();
             }
-            _ppu.Run(1);
+            EndCpuCycle();
         }
         
         public void PpuOamDma(byte value)
         {
+            BeginCpuCycle();
+            Cycles++;
             _busData.Drive(value);
-            _ppu.Run(2);
+            _ppu.Run(3);
             _ppu.OamDMAWrite(value);
-            _ppu.Run(1);
             _apu.Tick();
+            EndCpuCycle();
         }
 
         public void StallCpu(int cycles)
         {
             for (var i = 0; i < cycles; i++)
             {
+                BeginCpuCycle();
                 Cycles++;
                 _ppu.Run(3);
                 _apu.Tick();
+                EndCpuCycle();
             }
         }
 
@@ -230,6 +244,32 @@ namespace NESCore
                 _logger.Warning("Mirrored ppu address accessed: {Address} => {MirroredAddress}", address, mirroredAddress);
             }
             _ppu.Write(mirroredAddress, data);
+        }
+        
+        private bool _lastNmiLine;
+        public bool NmiLatched { get; private set; }
+        public bool NmiReadyForCpu { get; private set; }
+        
+        public void AcknowledgeNmi()
+        {
+            NmiLatched = false;
+            NmiReadyForCpu = false;
+        }
+
+        private void BeginCpuCycle()
+        {
+            NmiReadyForCpu = NmiLatched;
+            Cycles++;
+        }
+
+        private void EndCpuCycle()
+        {
+            var currentNmiLine = _ppu.NmiOutput;
+            if (!_lastNmiLine && currentNmiLine)
+            {
+                NmiLatched = true;
+            }
+            _lastNmiLine = currentNmiLine;
         }
     }
 }

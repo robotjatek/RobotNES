@@ -225,9 +225,8 @@ namespace NESCore.APU
                 
                 // "When the mode is disabled, the frame counter counts its own ≈60Hz cycle that is not synchronized with the Vsync signal from PPU."
                 // "When it's enabled, it expects the CPU to manually synchronize the internal counter with the external timing source that the CPU uses."
-
-                // 3 cycles delay to reset when write occurs on odd cycles, 4 on even cycles
-                _counterResetDelay = _latch ? 3 : 4;
+                
+                _counterResetDelay = 3;
 
                 if (!_4StepMode)
                 {

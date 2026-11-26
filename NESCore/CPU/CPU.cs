@@ -9,7 +9,6 @@ namespace NESCore.CPU
         private readonly IRegisters _registers;
         private readonly IReadOnlyList<Action<IBUS, IRegisters>> _instructions;
         private readonly ILogger _logger;
-        private bool _nmi;
 
         private bool _dma;
         private byte _dmaCpuPage;
@@ -24,11 +23,6 @@ namespace NESCore.CPU
             _registers.PC = (ushort)(_bus.Read(0xfffd) << 8 | _bus.Read(0xfffc));
         }
 
-        public void HandleNmi()
-        {
-            _nmi = true;
-        }
-
         public void HandleDma(byte cpuPage)
         {
             _dma = true;
@@ -37,7 +31,7 @@ namespace NESCore.CPU
 
         public void RunInstruction()
         {
-            if (_nmi)
+            if (_bus.NmiReadyForCpu)
             {
                 DoNmi();
                 return;
@@ -87,6 +81,7 @@ namespace NESCore.CPU
 
         private void DoNmi()
         {
+            _bus.AcknowledgeNmi();
             _bus.Read(_registers.PC);
             _bus.Read(_registers.PC);
             
@@ -97,7 +92,6 @@ namespace NESCore.CPU
             var addressLow = (ushort)_bus.Read(0xfffa);
             var addressHigh = (ushort)(_bus.Read(0xfffb) << 8);
             _registers.PC = (ushort)(addressHigh | addressLow);
-            _nmi = false;
         }
 
         private void DoIrq()

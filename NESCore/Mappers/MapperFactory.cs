@@ -38,6 +38,12 @@ namespace NESCore.Mappers
                     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
                     return new CnRom(prgRoms, chr, logger, header);
                 }
+                case 7:
+                {
+                    // BattleToads: NES2.0 8k CHR-RAM size: 8192
+                    var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
+                    return new AoRom(prgRoms, chr, logger);
+                }
                 default:
                     throw new UnknownMapperException(header.MapperID);
             }
