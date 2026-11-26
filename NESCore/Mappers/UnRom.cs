@@ -33,7 +33,7 @@ public class UnRom : IMapper
         PrgRam = new Ram(8); // According to wiki this should be 0, but keep it safe
 
         prgRoms.Map(0, 0);
-        prgRoms.Map(1, prgRoms.LastBankId()); // "Upper" bank is initialized to the last bank
+        prgRoms.Map(1, prgRoms.LastBankId); // "Upper" bank is initialized to the last bank
     }
     
     

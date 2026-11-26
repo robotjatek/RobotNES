@@ -22,7 +22,7 @@ public class CnRom : IMapper
         PrgRam = new Ram(2); // CPU $6000-$7FFF: 2 KiB of PRG-RAM, mirrored three times (Hayauchi Super Igo only)
         _prg = prgRoms;
         prgRoms.Map(0, 0);
-        prgRoms.Map(1, prgRoms.LastBankId());
+        prgRoms.Map(1, prgRoms.LastBankId);
     }
     
     public bool TryRead(ushort address, out byte value)

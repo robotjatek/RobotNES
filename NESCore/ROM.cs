@@ -109,10 +109,7 @@
             _mappings[sliceId] = romId;
         }
 
-        public byte LastBankId()
-        {
-            return (byte)(_roms.Count - 1);
-        }
+        public byte LastBankId => (byte)(_roms.Count - 1);
     }
 
     public abstract class ChrBase(int sizeKb, byte[] rawBytes) : RomBase(sizeKb, rawBytes);

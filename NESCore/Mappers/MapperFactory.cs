@@ -41,12 +41,13 @@ namespace NESCore.Mappers
                     var prg = new SlicedRom(16, prgRoms, true);
                     return new CnRom(prg, chr, logger, header);
                 }
-                // case 7:
-                // {
-                //     // BattleToads: NES2.0 8k CHR-RAM size: 8192
-                //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                //     return new AoRom(prgRoms, chr, logger);
-                // }
+                case 7:
+                {
+                    // BattleToads: NES2.0 8k CHR-RAM size: 8192
+                    var chr = CreateChr(chrRoms);
+                    var prg = new SlicedRom(16, prgRoms, true);
+                    return new AoRom(prg, chr, logger);
+                }
                 default:
                     throw new UnknownMapperException(header.MapperID);
             }
