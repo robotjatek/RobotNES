@@ -126,9 +126,10 @@ namespace NESCore.PPU
                     _ppuDataBus = result;
                     return result;
                 }
-                else
+                else // palette read
                 {
-                    var result = _ppuMemory.Read(_loopyRegisters.V);
+                    // palette is just 6 bits, the top two bits are openbus
+                    var result = (byte)((_ppuMemory.Read(_loopyRegisters.V) & 0x3f) | _ppuDataBus & 0xC0);
                     _dataBuffer = _ppuMemory.Read(_loopyRegisters.GetPaletteMirrorAddress());
                     _loopyRegisters.IncrementAddress(_registers);
                     _ppuDataBus = result;
@@ -153,7 +154,6 @@ namespace NESCore.PPU
 
             if (address == 0x2000) // Control register
             {
-                var prevNmi = _registers.GetEnableNMI();
                 _registers.Control = value;
                 _loopyRegisters.WriteControl(value);
             }

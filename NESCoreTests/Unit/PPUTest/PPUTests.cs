@@ -324,7 +324,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var result = ppu.Read(0x2007); // Palette access is not buffered
 
-            result.Should().Be(0xaa);
+            result.Should().Be(0x2a); // palette data is just 6 bits, the top 2 is floating "openbus" -- here the top 2 should be 0 
             ppuMemory.Verify(m => m.Read(0x3f00), Times.Once());
         }
 
