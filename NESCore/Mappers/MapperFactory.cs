@@ -23,11 +23,13 @@ namespace NESCore.Mappers
                     var prg = new SlicedRom(16, prgRoms, true);
                     return new Mapper0(prg, chr, logger, header);
                 }
-                // case 1:
-                // {
-                //     var chr = chrRoms.Count == 0 ? [new ChrRam()] : chrRoms;
-                //     return new Mmc1(prgRoms, chr, getBus, logger);
-                // }
+                case 1:
+                {
+                    var chr = chrRoms.Length == 0 ? new SlicedRom(4, new byte[8*1024], false)
+                        : new SlicedRom(4, chrRoms, true);
+                    var prg = new SlicedRom(16, prgRoms, true);
+                    return new Mmc1(prg, chr, getBus, logger);
+                }
                 case 2:
                 {
                     // I don't think unrom should support chr ram
