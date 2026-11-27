@@ -55,20 +55,23 @@ public class AoRom : IMapper
 
     public void Write(ushort address, byte value)
     {
-        if (address is >= 6000 and < 0x8000)
+        switch (address)
         {
-            _logger.Warning("PRG Ram write");
-            PrgRam.Write((ushort)(address - 0x6000), value);
-        }
-        else if (address >= 0x8000)
-        {
-            // bank select register
-            _mirrorMode = (value & 0b10000) > 0;
+            case >= 6000 and < 0x8000:
+                _logger.Warning("PRG Ram write");
+                PrgRam.Write((ushort)(address - 0x6000), value);
+                break;
+            case >= 0x8000:
+            {
+                // bank select register
+                _mirrorMode = (value & 0b10000) > 0;
             
-            // switching in pairs (32k chunks)
-            var unitCount = _prg.NumberOfBanks / 2;
-            var bankId = ((value & 0b111) % unitCount) * 2;
-            SwitchBanks(bankId);
+                // switching in pairs (32k chunks)
+                var unitCount = _prg.NumberOfBanks / 2;
+                var bankId = ((value & 0b111) % unitCount) * 2;
+                SwitchBanks(bankId);
+                break;
+            }
         }
     }
 

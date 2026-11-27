@@ -48,7 +48,7 @@
             }
         }
 
-        public byte Read(int address)
+        public byte Read(ushort address)
         {
             var mappingId = address / _sliceSize;
             var offset = (ushort)(address % _sliceSize);
@@ -66,7 +66,7 @@
             _roms[romId].Write(offset, value);
         }
 
-        public void Map(byte sliceId, byte romId)
+        public virtual void Map(byte sliceId, int romId)
         {
             _mappings[sliceId] = romId;
         }
@@ -74,5 +74,11 @@
         public byte LastBankId => (byte)(_roms.Count - 1);
     }
 
-    public class Ram(int sizeKb) : SlicedRom(sizeKb, new byte[sizeKb * 1024], false);
+    public class Ram(int sizeKb) : SlicedRom(sizeKb, new byte[sizeKb * 1024], false)
+    {
+        public override void Map(byte sliceId, int romId)
+        {
+            // Ram cannot be remapped
+        }
+    }
 }
