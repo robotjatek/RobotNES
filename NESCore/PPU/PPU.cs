@@ -21,7 +21,7 @@ namespace NESCore.PPU
 
         // Test-only hook for render tests comparing the framebuffer output (see InternalsVisibleTo).
         internal byte[] FrameBuffer => _frameBuffer;
-        private int _cycles;
+        private uint _cycles;
         private int _scanlines;
         private int _scanlineCycles;
 
@@ -184,6 +184,7 @@ namespace NESCore.PPU
             else if (address == 0x2006)
             {
                 _loopyRegisters.WriteAddress(value);
+                _cartridge.Mapper.NotifyPpuAddress((ushort)(_loopyRegisters.V & 0x3FFF), _cycles);
             }
             else if (address == 0x2007)
             {
@@ -207,6 +208,8 @@ namespace NESCore.PPU
 
         private void Cycle()
         {
+            _ppuMemory.CurrentCycle = _cycles;
+            
             var renderingEnabled = _registers.ShowBackground() || _registers.ShowSprites();
             var isRenderScanline = _scanlines is >= 0 and < 240;
             var isPreRenderScanline = _scanlines == PreRenderScanline;
@@ -264,11 +267,6 @@ namespace NESCore.PPU
                 {
                     // Reset horizontal scroll (coarse X and NT horizontal bit)
                     _loopyRegisters.ResetHorizontalScroll();
-                }
-                else if (renderingEnabled && _scanlineCycles == 260)
-                {
-                    // TODO: this is a temporary hack. To be removed
-                    _cartridge.Mapper.OnScanline();
                 }
 
                 // Pre-render line specific actions

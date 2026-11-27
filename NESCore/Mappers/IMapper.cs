@@ -25,8 +25,6 @@
 
         bool IrqPending => false;
 
-        void OnScanline()
-        {
-        }
+        void NotifyPpuAddress(ushort address, ulong ppuCycles) { }
     }
 }

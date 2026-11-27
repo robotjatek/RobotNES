@@ -8,5 +8,6 @@
         byte OamRead(byte address);
         OamEntry GetOamEntry(int index);
         OamEntry GetOamEntryAtAddress(ushort address, int index);
+        ulong CurrentCycle { get; set; }
     }
 }

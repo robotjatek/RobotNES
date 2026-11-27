@@ -9,10 +9,12 @@ namespace NESCore.PPU
         private readonly byte[] _memory = new byte[0x800];
         private readonly byte[] _paletteMemory = new byte[32];
         private readonly byte[] _oam = new byte[256];
+        public ulong CurrentCycle { get; set; }
 
         public byte Read(ushort address)
         {
             address &= 0x3fff;
+            cartridge.Mapper.NotifyPpuAddress(address, CurrentCycle);
 
             if (IsInPatternTableZero(address))
             {
@@ -38,6 +40,7 @@ namespace NESCore.PPU
         public void Write(ushort address, byte data)
         {
             address &= 0x3fff;
+            cartridge.Mapper.NotifyPpuAddress(address, CurrentCycle);
 
             if (IsInPatternTableZero(address))
             {

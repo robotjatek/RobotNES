@@ -101,7 +101,30 @@ public class Mmc3 : IMapper
         }
     }
 
-    public void OnScanline()
+    private bool _lastA12;
+    private ulong _lastA12FallCycle;
+    
+    public void NotifyPpuAddress(ushort address, ulong ppuCycles)
+    {
+        var a12 = (address & 0x1000) > 0;
+        if (!a12)
+        {
+            if (_lastA12)
+            {
+                _lastA12FallCycle = ppuCycles;
+            }
+        }
+        else
+        {
+            if (!_lastA12 && (ppuCycles - _lastA12FallCycle) >= 10)
+            {
+                ClockIrqCounter();
+            }
+        }
+        _lastA12 = a12;
+    }
+
+    private void ClockIrqCounter()
     {
         if (_irqCounter == 0 || _irqReload)
         {
