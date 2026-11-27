@@ -42,6 +42,34 @@ public class Mmc3 : IMapper
     private readonly SlicedRom _prg; // 8K + 8K + 16K fixed
     private readonly ILogger _logger;
     private readonly ICartridgeHeader _cartridgeHeader;
+    
+    private readonly byte[] _bankRegisters = new byte[8];
+    private byte _registerId;
+    
+    /// <summary>
+    /// 0: $8000-$9FFF swappable, $C000-$DFFF fixed to second-last bank;
+    /// 1: $C000-$DFFF swappable,$8000-$9FFF fixed to second-last bank
+    /// </summary>
+    private bool _prgBankMode;
+    /// <summary>
+    /// 0: two 2 KiB banks at $0000-$0FFF, four 1 KiB banks at $1000-$1FFF;
+    /// 1: two 2 KiB banks at $1000-$1FFF, four 1 KiB banks at $0000-$0FFF
+    /// </summary>
+    private bool _chrInversion;
+    private IMapper.MirroringMode _mirroringMode;
+    private bool _prgRamWriteProtect; // 0: allow writes, 1: deny writes
+    private bool _prgRamEnable = true; // 0: disable, 1: enable
+    
+    
+    // Irq is just a basic counter: it counts down every end of a scanline
+    // (on the real hardware the ppu address bus is snooped to determine the exact end of a scanline)
+    // When the counter reaches zero an NMI is fired
+    // The value of the counter can be set via the IRQ latch register, the counter immediately reloads from the latch
+    public bool IrqPending { get; private set; }
+    private byte _irqLatch; // When the IRQ counter is zero (or a reload is requested through $C001), this value will be copied to the IRQ counter at the NEXT rising edge of the PPU address, presumably at PPU cycle 260 of the current scanline.
+    private bool _irqEnabled;
+    private byte _irqCounter;
+    private bool _irqReload;
 
     public Mmc3(SlicedRom prg, SlicedRom chr, ILogger logger, ICartridgeHeader cartridgeHeader)
     {
@@ -73,37 +101,39 @@ public class Mmc3 : IMapper
         }
     }
 
-    private readonly byte[] _bankRegisters = new byte[8];
-    private byte _registerId;
-    
-    /// <summary>
-    /// 0: $8000-$9FFF swappable, $C000-$DFFF fixed to second-last bank;
-    /// 1: $C000-$DFFF swappable,$8000-$9FFF fixed to second-last bank
-    /// </summary>
-    private bool _prgBankMode;
+    public void OnScanline()
+    {
+        if (_irqCounter == 0 || _irqReload)
+        {
+            _irqCounter = _irqLatch;
+            _irqReload = false;
+        }
+        else
+        {
+            _irqCounter--;
+        }
 
-    /// <summary>
-    /// 0: two 2 KiB banks at $0000-$0FFF, four 1 KiB banks at $1000-$1FFF;
-    /// 1: two 2 KiB banks at $1000-$1FFF, four 1 KiB banks at $0000-$0FFF
-    /// </summary>
-    private bool _chrInversion;
-    
-    private IMapper.MirroringMode _mirroringMode;
-
-    private bool _prgRamWriteProtect; // 0: allow writes, 1: deny writes
-    private bool _prgRamEnable = true; // 0: disable, 1: enable
+        if (_irqCounter == 0 && _irqEnabled)
+        {
+            IrqPending = true;
+        }
+    }
 
     public void Write(ushort address, byte value)
     {
         switch (address)
         {
             case >= 0x6000 and <= 0x7FFF:
+            {
                 if (_prgRamEnable && !_prgRamWriteProtect)
                 {
                     PrgRam.Write((ushort)(address - 0x6000), value);
                 }
+
                 break;
+            }
             case >= 0x8000 and <= 0x9fff:
+            {
                 // bank select and bank data
                 if (address % 2 == 0)
                 {
@@ -112,27 +142,65 @@ public class Mmc3 : IMapper
                     _registerId = (byte)(value & 0b111);
                     _prgBankMode = (value & 0b0100_0000) > 0;
                     _chrInversion = (value & 0x80) > 0;
-                     UpdateBanks();
                 }
                 else
                 {
                     // Bank Data
                     // $8000–$9FFF	Odd ($8001)	Writes the bank number into the register selected by $8000
                     _bankRegisters[_registerId] = value;
-                    UpdateBanks();
                 }
+                UpdateBanks();
                 break;
+            }
             case >= 0xa000 and <= 0xbfff:
+            {
                 if (address % 2 == 0) // Mirroring mode
                 {
                     SetMirrorMode(value);
                 }
                 else
                 {
+                    // prg ram protect
                     _prgRamWriteProtect = (value & 0b0100_0000) > 0;
                     _prgRamEnable = (value & 0x80) > 0;
                 }
+
                 break;
+            }
+            case >= 0xc000 and <= 0xDFFF:
+            {
+                if (address % 2 == 0)
+                {
+                    _irqLatch = value;
+                }
+                else
+                {
+                    // irq reload
+                    // Writing any value to this register clears the MMC3 IRQ counter immediately,
+                    // and then reloads it at the NEXT rising edge of the PPU address, presumably at PPU cycle 260 of the current scanline.
+                    _irqCounter = 0;
+                    _irqReload = true;
+                }
+                break;
+            }
+            case >= 0xe000:
+            {
+                if (address % 2 == 0)
+                {
+                    // irq disable
+                    // Writing any value to this register will disable MMC3 interrupts AND acknowledge any pending interrupts.
+                    _irqEnabled = false;
+                    IrqPending = false;
+                }
+                else
+                {
+                    // irq enable
+                    // Writing any value to this register will enable MMC3 interrupts. 
+                    _irqEnabled = true;
+                    
+                }
+                break;
+            }
             default:
                 _logger.Warning("Unsupported write to cart: {Address:X}:{Value:X}", address, value);
                 break;
@@ -147,7 +215,7 @@ public class Mmc3 : IMapper
             return;
         }
 
-        _mirroringMode = (value & 0b1) > 0 ? IMapper.MirroringMode.Vertical : IMapper.MirroringMode.Horizontal;
+        _mirroringMode = (value & 0b1) > 0 ? IMapper.MirroringMode.Horizontal : IMapper.MirroringMode.Vertical;
     }
 
     private void UpdateBanks()
@@ -156,6 +224,7 @@ public class Mmc3 : IMapper
         UpdateChr();
     }
 
+    // https://www.nesdev.org/wiki/MMC3#PRG_Banks
     private void UpdatePrg()
     {
         if (_prgBankMode)
@@ -174,6 +243,7 @@ public class Mmc3 : IMapper
         }
     }
 
+    // https://www.nesdev.org/wiki/MMC3#CHR_Banks
     private void UpdateChr()
     {
         // 2 KiB banks can only select even numbered CHR banks. (The lowest bit is ignored.) 

@@ -34,6 +34,7 @@ namespace NESCoreTests
         protected Mock<IController> _controller2 = new();
         protected Mock<IApu> _apu = new();
         protected Func<IBUS> _getBus = Mock.Of<IBUS>;
+        protected Mock<ICartridge> _cartridge = new();
 
         protected static byte[] RandomBytePattern(int sizeInKilobytes)
         {

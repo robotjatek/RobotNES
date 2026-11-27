@@ -17,7 +17,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = testData
             };
 
-            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _cartridge.Object, _logger);
             var data = ppu.Read(0x2002);
             data.Should().Be(0b11100000);
         }
@@ -30,7 +30,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Status = testData
             };
-            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(ppuRegisters, _ppuMemory.Object, _cartridge.Object, _logger);
             var status = ppu.Read(0x2002);
             status.Should().Be(0b11100000);
             ppuRegisters.Status.Should().Be(0b01100000);
@@ -43,7 +43,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Control = 0x80 //Enable nmi
             };
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             const uint beforeVBlank =
@@ -62,7 +62,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void SetsVBlankFlagWithoutNmiWhenNmiDisabled()
         {
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             const uint beforeVBlank =
@@ -88,7 +88,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Control = 0x00, // NMI disabled
                 Mask = PPUMaskFlagPositions.SHOW_BACKGROUND
             };
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             const uint beforeVBlank =
@@ -109,7 +109,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Control = 0x80 //Enable nmi
             };
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             using var eventMonitor = ppu.Monitor();
 
             for (var i = 0; i < 3; i++) // Three times a charm!
@@ -127,7 +127,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ClearsVBlankFlag()
         {
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             uint toVBlank = 341 * 241 + 3;
             ppu.Run(toVBlank);
             registers.GetVBlankFlag().Should().BeTrue(); // Double check if vblank is set
@@ -145,7 +145,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = 0xff
             };
 
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             uint toVBlank = 341 * 241 + 3;
             ppu.Run(toVBlank);
             ppu.Run(20 * 341);
@@ -161,7 +161,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Status = 0xff
             };
 
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             uint toVBlank = 341 * 241 + 3;
             ppu.Run(toVBlank);
             ppu.Run(20 * 341);
@@ -177,7 +177,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Control = 0
             };
 
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2000, 0xff);
 
             registers.Control.Should().Be(0xff);
@@ -188,7 +188,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var logger = new Mock<ILogger>();
-            var ppu = new Ppu(registers, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object,  logger.Object);
             ppu.Read(0x2000);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -201,7 +201,7 @@ namespace NESCoreTests.Unit.PPUTest
             {
                 Mask = 0
             };
-            var ppu = new Ppu(registers, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2001, 0xff);
 
             registers.Mask.Should().Be(0xff);
@@ -212,7 +212,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters();
             var logger = new Mock<ILogger>();
-            var ppu = new Ppu(registers, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers, _ppuMemory.Object, _cartridge.Object, logger.Object);
             ppu.Read(0x2001);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -222,7 +222,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ReadFromScrollLogs()
         {
             var logger = new Mock<ILogger>();
-            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, _cartridge.Object, logger.Object);
             ppu.Read(0x2005);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -232,7 +232,7 @@ namespace NESCoreTests.Unit.PPUTest
         public void ReadFromAddressLogs()
         {
             var logger = new Mock<ILogger>();
-            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(_ppuRegisters.Object, _ppuMemory.Object, _cartridge.Object, logger.Object);
             ppu.Read(0x2006);
 
             logger.Verify(l => l.Warning(It.IsAny<string>()));
@@ -244,7 +244,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuMemory = new Mock<IPPUMemory>();
 
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
             ppu.Write(0x2007, 0xaa); // Data byte
@@ -258,7 +258,7 @@ namespace NESCoreTests.Unit.PPUTest
             var ppuMemory = new Mock<IPPUMemory>();
 
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -280,7 +280,7 @@ namespace NESCoreTests.Unit.PPUTest
             registers.SetupAllProperties();
             registers.Setup(r => r.VRAMIncrement()).Returns(32);
 
-            var ppu = new Ppu(registers.Object, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -300,7 +300,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3c0f)).Returns(0xaa);
 
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -318,7 +318,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3f00)).Returns(0xaa);
 
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3f); // Upper byte first
             ppu.Write(0x2006, 0x00); // Lower byte second
 
@@ -338,7 +338,7 @@ namespace NESCoreTests.Unit.PPUTest
             ppuMemory.Setup(m => m.Read(0x3c11)).Returns(0xac);
 
             var registers = new PPURegisters();
-            var ppu = new Ppu(registers, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -371,7 +371,7 @@ namespace NESCoreTests.Unit.PPUTest
             registers.SetupAllProperties();
             registers.Setup(r => r.VRAMIncrement()).Returns(32);
 
-            var ppu = new Ppu(registers.Object, ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x3c); // Upper byte first
             ppu.Write(0x2006, 0x0f); // Lower byte second
 
@@ -399,7 +399,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var logger = new Mock<ILogger>();
 
-            var ppu = new Ppu(registers.Object, _ppuMemory.Object, logger.Object);
+            var ppu = new Ppu(registers.Object, _ppuMemory.Object, _cartridge.Object, logger.Object);
             ppu.Read(0x2003);
             logger.Verify(l => l.Warning(It.IsAny<string>()));
         }
@@ -410,7 +410,7 @@ namespace NESCoreTests.Unit.PPUTest
             var registers = new Mock<IPPURegisters>();
             registers.SetupAllProperties();
 
-            var ppu = new Ppu(registers.Object, _ppuMemory.Object, _logger);
+            var ppu = new Ppu(registers.Object, _ppuMemory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2003, 0xaa);
             registers.Object.OAMAddress.Should().Be(0xaa);
         }
@@ -424,7 +424,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var memory = new Mock<IPPUMemory>();
 
-            var ppu = new Ppu(registers.Object, memory.Object, _logger);
+            var ppu = new Ppu(registers.Object, memory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2004, 0xde);
 
             memory.Verify(m => m.OamWrite(0x0, 0xde));
@@ -441,7 +441,7 @@ namespace NESCoreTests.Unit.PPUTest
             var memory = new Mock<IPPUMemory>();
             memory.Setup(m => m.OamRead(0)).Returns(0xde);
 
-            var ppu = new Ppu(registers.Object, memory.Object, _logger);
+            var ppu = new Ppu(registers.Object, memory.Object, _cartridge.Object, _logger);
             var value = ppu.Read(0x2004);
             value.Should().Be(0xde);
 
@@ -454,7 +454,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             // V = 2042
             ppu.Write(0x2006, 0x20);
@@ -475,7 +475,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x00);
             ppu.Write(0x2006, 0x8C);
             // NT read
@@ -500,7 +500,7 @@ namespace NESCoreTests.Unit.PPUTest
                 Mask = 0x8
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
             ppu.Write(0x2006, 0x00);
             ppu.Write(0x2006, 0x8C);
             // NT read
@@ -526,7 +526,7 @@ namespace NESCoreTests.Unit.PPUTest
 
             var registers = new PPURegisters { Control = 0x10, Mask = 0x8 };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             ppu.Write(0x2006, 0x20);
             ppu.Write(0x2006, 0x0);
@@ -543,7 +543,7 @@ namespace NESCoreTests.Unit.PPUTest
         {
             var registers = new PPURegisters { Control = 0x80 }; // nmi enabled: bit 7 = 1
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
             using var monitor = ppu.Monitor();
 
             uint cyclesBeforeVBlank = 241 * 341 + 1;
@@ -569,7 +569,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             // Sprite 0 covering scanline 8 (OamEntry.ScreenY = Y + 1, so Y=7 draws rows 8..15),
             // X = 0-7, Palette 3, BEHIND the background.
@@ -642,7 +642,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             // Sprite 0 covering scanline 8 (OamEntry.ScreenY = Y + 1, so Y=7 draws rows 8..15),
             // X = 0-7, Palette 3, IN FRONT of the background.
@@ -711,7 +711,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_BACKGROUND_IN_LEFT_COLUMN // No sprite rendering
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             // Sprite setup:
             // There is a sprite at X = 0-7, Palette 3 covering scanline 8 (Y=7 => screen row 8),
@@ -784,7 +784,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             // Sprite setup:
             // Sprite 0 covering scanline 8 (OamEntry.ScreenY = Y + 1, so Y=7 draws on rows 8..15),
@@ -853,7 +853,7 @@ namespace NESCoreTests.Unit.PPUTest
                        PPUMaskFlagPositions.SHOW_SPRITES_IN_LEFT_COLUMN
             };
             var memory = new Mock<IPPUMemory>();
-            var ppu = new Ppu(registers, memory.Object, _logger);
+            var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
             memory.Setup(m => m.GetOamEntry(It.IsAny<int>()))
                 .Returns((int i) => i switch

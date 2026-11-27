@@ -22,5 +22,11 @@
         void Write(ushort address, byte value);
         
         MirroringMode GetMirroring();
+
+        bool IrqPending => false;
+
+        void OnScanline()
+        {
+        }
     }
 }

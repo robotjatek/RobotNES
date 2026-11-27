@@ -17,7 +17,7 @@ public class LoopyRegisterTests : TestBase
         var memory = new Mock<IPPUMemory>();
         memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0x00);
 
-        return new Ppu(registers, memory.Object, _logger);
+        return new Ppu(registers, memory.Object, _cartridge.Object, _logger);
     }
 
     [Fact]
@@ -486,7 +486,7 @@ public class LoopyRegisterTests : TestBase
         var registers = new PPURegisters { Mask = 0x8 };
         var memory = new Mock<IPPUMemory>();
         memory.Setup(m => m.Read(It.IsAny<ushort>())).Returns(0x00);
-        var ppu = new Ppu(registers, memory.Object, _logger);
+        var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
         ppu.Read(0x2002); // reset the shared latch
         ppu.Write(0x2005, 0xFA); // fine X = 2, coarse X = 31

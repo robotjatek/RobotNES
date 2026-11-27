@@ -593,7 +593,7 @@ public class SpriteEvaluatorTests : TestBase
         SetUpSprites(memory, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]); // ten of them share the scanline
         SetUpSpritePattern(memory);
 
-        var ppu = new Ppu(registers, memory.Object, _logger);
+        var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
         ppu.Run(CyclesPerScanline * 2); // the evaluation of scanline 1 overflows
 
@@ -618,7 +618,7 @@ public class SpriteEvaluatorTests : TestBase
         SetUpSprites(memory, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]); // ten of them share the scanline
         SetUpSpritePattern(memory);
 
-        var ppu = new Ppu(registers, memory.Object, _logger);
+        var ppu = new Ppu(registers, memory.Object, _cartridge.Object, _logger);
 
         ppu.Run(CyclesPerScanline * 2); // the evaluation of scanline 1 overflows
         

@@ -49,6 +49,7 @@ namespace NESCore.Mappers
                         ? new SlicedRom(1, new byte[8 * 1024], false)
                         : new SlicedRom(1, chrRoms);
                     var prg = new SlicedRom(8, prgRoms);
+                    // TODO: separate types for chr and prg so that i cannot swap them up accidentally, like i did here
                     return new Mmc3(prg, chr, logger, header);
                 }
                 case 7:

@@ -1,3 +1,4 @@
+using NESCore.Cartridge;
 using Serilog;
 
 namespace NESCore.PPU
@@ -12,6 +13,7 @@ namespace NESCore.PPU
         private readonly ILogger _logger;
         private readonly IPPURegisters _registers;
         private readonly IPPUMemory _ppuMemory;
+        private readonly ICartridge _cartridge;
         private readonly LoopyRegisters _loopyRegisters = new();
         private readonly SpriteEvaluator _spriteEvaluator;
         private readonly BackgroundEvaluator _backgroundEvaluator;
@@ -47,18 +49,19 @@ namespace NESCore.PPU
             new(0xFC, 0xFC, 0xFC), new(0xA4, 0xE4, 0xFC), new(0xB8, 0xB8, 0xF8), new(0xD8, 0xB8, 0xF8),
             new(0xF8, 0xB8, 0xF8), new(0xF8, 0xA4, 0xC0), new(0xF0, 0xD0, 0xB0), new(0xFC, 0xE4, 0xA0),
             new(0xE4, 0xF4, 0xB0), new(0xB4, 0xFA, 0xB4), new(0xB4, 0xF4, 0xD8), new(0x00, 0xFA, 0xFA),
-            new(0xCC, 0xCC, 0xCC), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00)
+            new(0xA4, 0xE4, 0xFC), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00), new(0x00, 0x00, 0x00)
         ];
 
         private readonly byte[] _frameBuffer = new byte[256 * 240 * 3];
 
         public event VBlankEventHandler? VBlank;
 
-        public Ppu(IPPURegisters registers, IPPUMemory ppuMemory, ILogger logger)
+        public Ppu(IPPURegisters registers, IPPUMemory ppuMemory, ICartridge cartridge, ILogger logger)
         {
             _logger = logger;
             _registers = registers;
             _ppuMemory = ppuMemory;
+            _cartridge = cartridge;
             _backgroundEvaluator = new BackgroundEvaluator(_loopyRegisters, _ppuMemory, _registers);
             _spriteEvaluator = new SpriteEvaluator(registers, ppuMemory);
             Array.Fill(_frameBuffer, (byte)0);
@@ -261,6 +264,11 @@ namespace NESCore.PPU
                 {
                     // Reset horizontal scroll (coarse X and NT horizontal bit)
                     _loopyRegisters.ResetHorizontalScroll();
+                }
+                else if (renderingEnabled && _scanlineCycles == 260)
+                {
+                    // TODO: this is a temporary hack. To be removed
+                    _cartridge.Mapper.OnScanline();
                 }
 
                 // Pre-render line specific actions

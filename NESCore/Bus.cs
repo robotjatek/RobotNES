@@ -10,7 +10,7 @@ namespace NESCore
     {
         public event OamDmaEventHandler? OamDmaEvent;
         public uint Cycles { get; private set; }
-        public bool Irq => _apu.IrqFlag;
+        public bool Irq => _apu.IrqFlag ||  _cartridge.Mapper.IrqPending;
 
         private readonly ICartridge _cartridge;
         private readonly IMemory _memory;

@@ -107,6 +107,17 @@ namespace NESCore.PPU
                 address &= 0x2FFF;
             }
             
+            /*
+                  Vert              Horz
+                  --------------    --------------
+                  [ NTA ][ NTB ]    [ NTA ][ NTA ]
+                  [ NTA ][ NTB ]    [ NTB ][ NTB ]
+                       1ScA              1ScB
+                  --------------    --------------
+                  [ NTA ][ NTA ]    [ NTB ][ NTB ]
+                  [ NTA ][ NTA ]    [ NTB ][ NTB ]
+             */
+            
             switch (cartridge.Mapper.GetMirroring())
             {
                 case IMapper.MirroringMode.FourScreen:

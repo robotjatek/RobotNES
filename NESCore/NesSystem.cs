@@ -38,7 +38,7 @@ namespace NESCore
 
             IMemory memory = new Memory();
             var ppuRegisters = new PPURegisters();
-            _ppu = new Ppu(ppuRegisters, new PpuMemory(cartridge, ppuRegisters, _logger), _logger);
+            _ppu = new Ppu(ppuRegisters, new PpuMemory(cartridge, ppuRegisters, _logger), cartridge, _logger);
             _bus = new Bus(cartridge, memory, _ppu, _controller1, controller2, Apu, _logger);
 
             //TODO: Move this CPU creation block to a factory
